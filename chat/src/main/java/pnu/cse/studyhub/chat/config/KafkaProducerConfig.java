@@ -1,4 +1,4 @@
-package pnu.cse.storyhub.chat.config;
+package pnu.cse.studyhub.chat.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,8 +8,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import pnu.cse.storyhub.chat.dto.MessageDto;
-import pnu.cse.storyhub.chat.model.Message;
+import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class KafkaProducerConfig {
     private String valueSerializer;
 
     @Bean
-    public ProducerFactory<String, MessageDto> producerFactory(){
+    public ProducerFactory<String, String> producerFactory(){
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
@@ -36,7 +35,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, MessageDto> kafkaTemplate() {
+    public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
