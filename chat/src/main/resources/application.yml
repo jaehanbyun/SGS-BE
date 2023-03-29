@@ -5,15 +5,20 @@ server:
 spring:
   application:
     name: chat-service
+  data:
+    mongodb:
+      uri: mongodb+srv://studyhub_admin:pnucse@studyhub.iyncwyz.mongodb.net/studyhub?retryWrites=true&w=majority
   kafka:
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
       group-id: pnu-cse
     topic : studyhub
     pub-topic-name: send
@@ -43,3 +48,7 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
+
+logging:
+  level:
+    pnu.cse.studyhub: DEBUG
