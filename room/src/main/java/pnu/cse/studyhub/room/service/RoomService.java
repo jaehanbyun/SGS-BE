@@ -19,6 +19,9 @@ public class RoomService {
     public Long create(Boolean roomType, String name, String userId, Integer maxUser, RoomChannel channel){
         // TODO : user 권한 check
 
+        // TODO : 요청한 userId가 속한 Private 스터디 그룹이 5개일 때 , Private 스터디 그룹 생성 불가능
+
+
         // roomType에 따라 repository 분리 후 save (request의 channel 유무로 나누는 것도 가능할듯..??)
         if(roomType){
             Long roomId = roomRepository.save(OpenRoomEntity.create(name, channel, maxUser));

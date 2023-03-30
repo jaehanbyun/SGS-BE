@@ -11,6 +11,10 @@ public class Response<T> {
     private String message;
     private T data;
 
+    public static <T> Response<T> error(String message, T data){
+        return new Response<>("FAIL", message , data );
+    }
+
     public static Response<Void> success(){
         return new Response<Void>("SUCCESS", "성공!!",null);
     }
@@ -26,6 +30,6 @@ public class Response<T> {
 //        "result": "SUCCESS",
 //        "message": "Create Room Successfully",
 //        "data": {
-//          "roomId": //일단 Long
+//          "roomId":
 //        }
 //      }
