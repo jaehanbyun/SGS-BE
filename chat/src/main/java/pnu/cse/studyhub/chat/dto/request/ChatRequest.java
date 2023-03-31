@@ -4,7 +4,6 @@ import lombok.Data;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Data
 public class ChatRequest {
