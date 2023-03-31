@@ -7,7 +7,7 @@ spring:
     name: chat-service
   data:
     mongodb:
-      uri: mongodb+srv://studyhub_admin:pnucse@studyhub.iyncwyz.mongodb.net/studyhub?retryWrites=true&w=majority
+      uri: mongodb+srv://${STUDYHUB_DB_USER}:${STUDYHUB_DB_PWD}@studyhub.iyncwyz.mongodb.net/studyhub?retryWrites=true&w=majority
   kafka:
     producer:
       bootstrap-servers: localhost:9092
