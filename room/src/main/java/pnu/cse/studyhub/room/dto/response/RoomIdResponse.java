@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class RoomCreateResponse {
+public class RoomIdResponse {
 
     private Long roomId;
 
-    public static RoomCreateResponse fromRoomId(Long roomId){
-        return new RoomCreateResponse(roomId);
+    public static RoomIdResponse fromRoomId(Long roomId){
+        return new RoomIdResponse(roomId);
     }
 
 }
