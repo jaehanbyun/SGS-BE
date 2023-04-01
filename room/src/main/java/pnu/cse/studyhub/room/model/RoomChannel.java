@@ -5,5 +5,6 @@ public enum RoomChannel {
     ELEMENTARY_SCHOOL,
     MIDDLE_SCHOOL,
     HIGH_SCHOOL,
-    UNIVERSITY
+    UNIVERSITY,
+    BUSINESS
 }
