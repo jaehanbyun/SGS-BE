@@ -30,8 +30,9 @@ public class OpenUserRoomEntity {
     private OpenRoomEntity openRoomEntity;
 
     private boolean roomOwner;
+    // 일단 3번의 경고로
     private Integer alert;
-    private Integer kick_out;
+    private Boolean kick_out;
 
     // 최초 입장 시간
     private Timestamp createdAt;
@@ -39,10 +40,10 @@ public class OpenUserRoomEntity {
     @PrePersist
     void createdAt(){
         this.createdAt = Timestamp.from(Instant.now());
+        this.accessedAt = Timestamp.from(Instant.now());
     }
 
-    // TODO : 가장 최근 접근 시간
-    //private Timestamp accessedAt;
+    private Timestamp accessedAt;
 
     public static OpenUserRoomEntity create(String userId,Long roomId,Boolean roomOwner){
         OpenUserRoomEntity userRoom = new OpenUserRoomEntity();
@@ -50,7 +51,7 @@ public class OpenUserRoomEntity {
         userRoom.setRoomId(roomId);
         userRoom.setRoomOwner(roomOwner);
         userRoom.setAlert(0);
-        userRoom.setKick_out(0);
+        userRoom.setKick_out(false);
 
         return userRoom;
     }
