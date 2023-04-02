@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -18,5 +19,5 @@ public class Chat {
     private String senderId;
     private String messageType;
     private String content;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 }
