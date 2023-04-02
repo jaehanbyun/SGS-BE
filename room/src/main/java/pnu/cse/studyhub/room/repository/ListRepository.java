@@ -19,4 +19,5 @@ public interface ListRepository extends JpaRepository<OpenRoomEntity, Long> {
             @Param("lastRoomId") Long lastRoomId, @Param("Keyword") String keyword, @Param("Channel") RoomChannel channel, PageRequest pageRequest);
 
 
+
 }
