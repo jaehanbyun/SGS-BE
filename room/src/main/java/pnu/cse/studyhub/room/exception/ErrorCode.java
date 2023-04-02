@@ -12,11 +12,11 @@ public enum ErrorCode {
 
     EXCEPTION_TEST(HttpStatus.UNAUTHORIZED,"Room-002", "exception test"),
     NO_CONTENT(HttpStatus.NO_CONTENT,"Room-001","Study room does not exist"),
+    ROOM_NOT_FOUND(HttpStatus.NOT_FOUND,"Room-003","Study room not founded"),
 
 
 
-
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Room-001", "Internal server error");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Room-000", "Internal server error");
 
 
 

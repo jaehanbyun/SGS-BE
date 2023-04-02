@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pnu.cse.studyhub.room.dto.request.OpenRoomListRequest;
 import pnu.cse.studyhub.room.dto.request.RoomCreateRequest;
+import pnu.cse.studyhub.room.dto.request.RoomModifyRequest;
 import pnu.cse.studyhub.room.dto.response.Response;
 import pnu.cse.studyhub.room.dto.response.RoomIdResponse;
 import pnu.cse.studyhub.room.dto.response.RoomListResponse;
@@ -23,13 +24,41 @@ public class RoomController {
 
     private final RoomService roomService;
 
-    // 스터디방 생성
-    @PostMapping
-    public Response<RoomIdResponse> create(@RequestBody RoomCreateRequest request){
+    // 스터디방 수정
+    @PutMapping("/{roomType}/{roomId}")
+    public Response<RoomIdResponse> modify(
+            @PathVariable Long roomId,
+            @PathVariable Boolean roomType,
+            @RequestBody RoomModifyRequest request){
 
+        // TODO : JWT로부터 userID등 user 정보 받을 예정
+        String userId = "donu";
+
+        Long Id = roomService.modify(roomType, roomId, userId, request.getRoomName(),request.getMaxUser(), request.getRoomChannel());
+
+        return Response.success("Modify Study Room Successfully",RoomIdResponse.fromRoomId(Id));
+
+
+    }
+
+
+    // 스터디방 삭제
+    @DeleteMapping("/{roomType}/{roomId}")
+    public Response<RoomIdResponse> delete(@PathVariable Long roomId, @PathVariable Boolean roomType){
         // TODO : 이후에 JWT로부터 userId등 user 정보 받을 예정
         String userId = "donu";
 
+        Long Id = roomService.delete(roomType, roomId, userId);
+        return Response.success("Delete Study Room Successfully",RoomIdResponse.fromRoomId(Id));
+    }
+
+
+    // 스터디방 생성
+    @PostMapping
+    public Response<RoomIdResponse> create(@RequestBody RoomCreateRequest request){
+        // TODO : 이후에 JWT로부터 userId등 user 정보 받을 예정
+
+        String userId = "donu";
 //        if(userId.equals("donu")){
 //            throw new ApplicationException(ErrorCode.EXCEPTION_TEST,String.format("exception test : %s user not founded", userId));
 //        }
