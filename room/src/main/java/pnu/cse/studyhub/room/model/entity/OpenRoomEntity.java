@@ -67,10 +67,10 @@ public class OpenRoomEntity {
 
 
     // 연관 메소드 : 이후에 입장할때 userRoom 만들고 addUserRoom으로 OpenRoomEntity랑 연결해줄때 사용
-//    public void addUserRoom(OpenUserRoomEntity userRoom){
-//        openUserRoomEntities.add(userRoom);
-//        userRoom.setOpenRoomEntity(this);
-//    }
+    public void addUserRoom(OpenUserRoomEntity userRoom){
+        openUserRoomEntities.add(userRoom);
+        userRoom.setOpenRoomEntity(this);
+    }
 
 
 }
