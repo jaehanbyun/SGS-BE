@@ -1,41 +1,34 @@
 package pnu.cse.studyhub.chat.exception;
 
 
-import pnu.cse.studyhub.chat.dto.response.ErrorResponse;
+import org.springframework.http.HttpStatus;
+import pnu.cse.studyhub.chat.dto.ErrorData;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public enum ErrorCode {
-    INVALID_TOKEN(401, "AUTH-001", "토큰이 유효하지 않은 경우"),
-    EXPIRED_TOKEN(401, "AUTH-002", "토큰이 만료된 경우"),
-    MISSING_TOKEN(401, "AUTH-003", "토큰을 전달하지 않은 경우"),
-    INCORRECT_TOKEN(401, "AUTH-004", "허용된 토큰이 아닌 경우"),
-    NOT_ACCESS_TOKEN(400, "AUTH-005", "액세스 토큰이 아닌 경우"),
-    NOT_EXISTED_REFRESH_TOKEN(404, "AUTH-006", "저장된 리프레쉬 토큰이 없는 경우"),
-    UNAUTHORIZED(401, "AUTH-007", "인증에 실패한 경우"),
-    WITHDRAWAL_USER(403, "AUTH-008", "탈퇴한 회원이 요청한 경우"),
-    PASSWORD_NOT_CHANGED(400, "AUTH-009", "새 비밀번호로 바꿀 수 없는 경우"),
-    INCORRECT_PASSWORD(401, "AUTH-010", "비밀번호가 일치하지 않는 경우"),
-    INCORRECT_VERIFICATION_CODE(401, "AUTH-011", "이메일 인증 코드가 틀린 경우"),
-    USER_NOT_FOUND(404, "USER-001", "해당 유저가 존재하지 않는 경우"),
-    DUPLICATION_USER(409,"USER-002","해당 유저가 이미 존재하는 경우"); //409 confilct
+    CHAT_NOT_FOUND(HttpStatus.NOT_FOUND,"CHAT-001", "채팅이 존재하지 않는 경우");
 
-    private final int status;
+    private final HttpStatus status;
     private final String code;
     private final String description;
 
-    ErrorCode(int status, String code, String description) {
+    ErrorCode(HttpStatus status, String code, String description) {
         this.status = status;
         this.code = code;
         this.description = description;
     }
-    public ErrorResponse toErrorResponseDto(String msg) {
-        return ErrorResponse
+
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public ErrorData toErrorData() {
+        return ErrorData
                 .builder()
-                .status(this.status)
                 .errorCode(this.code)
-                .timestamp(LocalDate.now())
-                .message(msg)
+                .timestamp(LocalDateTime.now())
+                .message(description)
                 .build();
     }
 }

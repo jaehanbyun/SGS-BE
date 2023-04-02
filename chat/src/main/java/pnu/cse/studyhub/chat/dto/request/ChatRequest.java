@@ -3,7 +3,7 @@ package pnu.cse.studyhub.chat.dto.request;
 import lombok.Data;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,7 +17,7 @@ public class ChatRequest {
         Chat chat = new Chat();
         chat.setRoomId(this.roomId);
         chat.setContent(this.content);
-        chat.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        chat.setCreatedAt(LocalDateTime.now());
         chat.setSenderId(this.senderId);
         chat.setMessageType(this.messageType);
         return chat;
