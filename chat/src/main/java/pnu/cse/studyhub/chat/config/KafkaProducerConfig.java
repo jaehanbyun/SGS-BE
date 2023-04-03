@@ -8,7 +8,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.util.HashMap;
 import java.util.Map;

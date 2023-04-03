@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor // same as autowired
