@@ -2,10 +2,7 @@ package pnu.cse.studyhub.room.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import pnu.cse.studyhub.room.dto.request.NoticeRequest;
-import pnu.cse.studyhub.room.dto.request.RoomCreateRequest;
-import pnu.cse.studyhub.room.dto.request.RoomInRequest;
-import pnu.cse.studyhub.room.dto.request.RoomModifyRequest;
+import pnu.cse.studyhub.room.dto.request.*;
 import pnu.cse.studyhub.room.dto.response.*;
 
 import pnu.cse.studyhub.room.model.RoomChannel;
@@ -106,10 +103,43 @@ public class RoomController {
         String notice = roomService.notice(request.getRoomType(), request.getRoomId(), userId, request.getRoomNotice());
 
         return Response.success("Set Notice Successfully", new NoticeResponse(request.getRoomId(),notice));
+    }
 
+    // 경고 기능
+    @PatchMapping("/alert")
+    public Response<AlertResponse> alert(@RequestBody TargetRequest request){
+        // TODO : JWT로부터 userID등 user 정보 받을 예정
+        String userId = "donu";
+
+        AlertResponse alert = roomService.alert(request.getRoomType(), request.getRoomId(), userId, request.getTargetId());
+
+        return Response.success("Alert the user of the room Successfully",alert);
     }
 
 
+    // 추방 기능
+    // TODO : 근데 kickout을 올려줬긴했는데 추방은 어떻게 되는거지...?? 흠...
+    @PatchMapping("/kickout")
+    public Response<RoomTargetResponse> kickOut(@RequestBody TargetRequest request){
+        // TODO : JWT로부터 userID등 user 정보 받을 예정
+        String userId = "donu";
+
+        RoomTargetResponse kickOut = roomService.kickout(request.getRoomType(), request.getRoomId(), userId, request.getTargetId());
+
+        return Response.success("Kick out the user of the room Successfully",kickOut);
+    }
+
+
+    @PatchMapping("/delegate")
+    public Response<RoomTargetResponse> delegate(@RequestBody TargetRequest request){
+        // TODO : JWT로부터 userID등 user 정보 받을 예정
+        String userId = "donu";
+
+        RoomTargetResponse delegate = roomService.delegate(request.getRoomType(), request.getRoomId(), userId, request.getTargetId());
+
+        return Response.success("Delegate the chief of room Successfully",delegate);
+
+    }
 
 
 }

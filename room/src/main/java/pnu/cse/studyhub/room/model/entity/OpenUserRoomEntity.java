@@ -56,5 +56,24 @@ public class OpenUserRoomEntity {
         return userRoom;
     }
 
+    // 경고
+    public void addAlert()
+    {
+        this.setAlert(this.getAlert()+1);
+        if(this.getAlert() == 3) this.kickOut();
+    }
+
+    // 퇴장
+    public void kickOut(){
+        this.setKick_out(true);
+    }
+
+    //위임
+    public void delegate(OpenUserRoomEntity target){
+        this.setRoomOwner(false);
+        target.setRoomOwner(true);
+    }
+
+
 
 }
