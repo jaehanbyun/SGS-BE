@@ -14,8 +14,8 @@ public enum ErrorCode {
     NO_CONTENT(HttpStatus.NO_CONTENT,"Room-001","Study room does not exist"),
     ROOM_NOT_FOUND(HttpStatus.NOT_FOUND,"Room-003","Study room not founded"),
     User_NOT_FOUND(HttpStatus.NOT_FOUND,"Room-004","User not founded"),
-
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED,"Room-005","Permission is invalid"),
+    MAX_USER(HttpStatus.CONFLICT,"Room-006","The room is full of users."),
 
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Room-000", "Internal server error");

@@ -72,5 +72,9 @@ public class OpenRoomEntity {
         userRoom.setOpenRoomEntity(this);
     }
 
+    public void addUser(){
+        this.setCurUser(this.getCurUser()+1);
+    }
+
 
 }
