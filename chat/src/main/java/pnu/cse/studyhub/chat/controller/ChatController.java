@@ -26,6 +26,7 @@ import pnu.cse.studyhub.chat.repository.entity.Chat;
 import pnu.cse.studyhub.chat.service.ChatService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Tag(name = "chat", description = "채팅 API")
 @RestController
@@ -74,8 +75,19 @@ public class ChatController {
 
     @GetMapping("/history/{roomId}")
     public ResponseEntity<SuccessResponse> getChatListInRoom(@PathVariable("roomId") String roomId) {
-        ArrayList<Chat> chatList= chatService.getChatsInRoom(roomId);
+        List<Chat> chatList= chatService.getChatsInRoom(roomId);
         SuccessResponse response = new SuccessResponse("SUCCESS", "get chats in room successfully", chatList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+    @GetMapping("/history")
+    public ResponseEntity<SuccessResponse> getChatListInRoomWithPaging(
+            @RequestParam("roomId") String roomId,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size)
+    {
+        List<Chat> chatList= chatService.getChatsInRoomWithPaging(roomId,page,size);
+        SuccessResponse response = new SuccessResponse("SUCCESS", "get chats in room with paging successfully", chatList);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
