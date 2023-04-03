@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import pnu.cse.studyhub.room.dto.response.DetailResponse;
 import pnu.cse.studyhub.room.dto.response.RoomListResponse;
 import pnu.cse.studyhub.room.exception.ApplicationException;
 import pnu.cse.studyhub.room.exception.ErrorCode;
@@ -34,10 +35,62 @@ public class RoomService {
     private final UserRoomRepository userRoomRepository;
 
     @Transactional
+    public DetailResponse info(Long roomId){
+        // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
+        OpenRoom openRoom = OpenRoom.fromEntity(checkRoomId(roomId));
+
+        // 방장 이름
+        String roomOwnerId= userRoomRepository.findRoomOwnerByRoomId(roomId).getUserId();
+
+        // TODO : 더보기에 출력해줄 내용들 추가
+
+        return new DetailResponse(openRoom.getRoomId(), openRoom.getRoomName(),openRoom.getChannel(), openRoom.getRoomNotice()
+                ,roomOwnerId, openRoom.getCurUser(), openRoom.getMaxUser(), openRoom.getCreatedAt());
+
+    }
+
+    @Transactional
+    public List<RoomListResponse> roomList(Long lastRoomId, int size , String keyword, RoomChannel channel){
+
+        PageRequest pageRequest = PageRequest.of(0,size);
+
+        List<OpenRoomEntity> entityList = listRepository.findByRoomIdLessThanAndRoomNameContainingAndChannelOrderByRoomIdDesc(
+                lastRoomId,keyword,channel, pageRequest).getContent();
+
+        if(entityList.isEmpty()){
+            throw new ApplicationException(ErrorCode.NO_CONTENT,"");
+        }
+
+        List<RoomListResponse> responseList = new ArrayList<>();
+        for(OpenRoomEntity roomEntity: entityList){
+            responseList.add(RoomListResponse.fromEntity(roomEntity));
+        }
+
+        return responseList;
+    }
+
+    // 공지사항 설정
+    @Transactional
+    public String notice(boolean roomType, Long roomId, String userId,String roomNotice){
+        // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
+        OpenRoomEntity openRoom = checkRoomId(roomId);
+
+        // 해당 유저가 방장인지 확인 (권한 확인)
+        checkRoomOwner(roomId,userId);
+
+        // 공지 사항 설정 (JPA 변경 감지)
+        if(roomType){
+            openRoom.setRoomNotice(roomNotice);
+            return openRoom.getRoomNotice();
+        }
+
+        return "스터디 그룹";
+    }
+
+    @Transactional
     public void out(String userId, Long roomId){
         // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-        OpenRoomEntity openRoomEntity = listRepository.findById(roomId).orElseThrow(()->
-                new ApplicationException(ErrorCode.ROOM_NOT_FOUND,String.format("%d not founded", roomId)));
+        OpenRoomEntity openRoomEntity = checkRoomId(roomId);
 
         // userRoom에 해당방에 user 있는지 체크
         OpenUserRoomEntity openUserRoomEntity = userRoomRepository.findById(new UserRoomId(userId, roomId)).orElseThrow(() ->
@@ -52,38 +105,12 @@ public class RoomService {
 
     }
 
-
-//    @Transactional
-//    public Long delete(Boolean roomType,Long roomId, String userId){
-//        if(roomType){
-//            // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-//            OpenRoomEntity openRoomEntity = listRepository.findById(roomId).orElseThrow(()->
-//                    new ApplicationException(ErrorCode.ROOM_NOT_FOUND,String.format("%s not founded", roomId)));
-//
-//            // TODO : 해당 roomId의 roomOwner가 userId인지 확인 (권한 없으면 Exception 던짐)
-////            if(!userRoomRepository.findById(new UserRoomId(userId, roomId)).get().isRoomOwner()){
-////                throw new ApplicationException(ErrorCode.INVALID_PERMISSION,String.format("%s User is not %d's RoomOwner",userId,roomId));
-////            }
-//
-//            // 해당 room 삭제
-//            listRepository.delete(openRoomEntity);
-//
-//            return roomId;
-//
-//        } // TODO : 스터디 그룹 삭제 (roomType : false)
-//
-//        return 0L;
-//    }
-
-
-
     // 일반 user의 공개방 입장
     @Transactional
     public void in(Long roomId, String userId){
 
         // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-        OpenRoomEntity openRoomEntity = listRepository.findById(roomId).orElseThrow(()->
-                new ApplicationException(ErrorCode.ROOM_NOT_FOUND,String.format("%s not founded", roomId)));
+        OpenRoomEntity openRoomEntity = checkRoomId(roomId);
 
         // 해당방에 이전에 들어온적 있는 유저인지 check
         Optional<OpenUserRoomEntity> userRoom = userRoomRepository.findById(new UserRoomId(userId, roomId));
@@ -109,13 +136,10 @@ public class RoomService {
     public Long modify(Boolean roomType, Long roomId, String userId,String roomName ,Integer maxUser, RoomChannel roomChannel){
         if(roomType){
             // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-            OpenRoomEntity openRoomEntity = listRepository.findById(roomId).orElseThrow(()->
-                    new ApplicationException(ErrorCode.ROOM_NOT_FOUND,String.format("%s not founded", roomId)));
+            OpenRoomEntity openRoomEntity = checkRoomId(roomId);
 
             // 해당 roomId의 roomOwner가 userId인지 확인 (권한 없으면 Exception 던짐)
-            if(!userRoomRepository.findById(new UserRoomId(userId, roomId)).get().isRoomOwner()){
-                throw new ApplicationException(ErrorCode.INVALID_PERMISSION,String.format("%s User is not %d's RoomOwner",userId,roomId));
-            }
+            checkRoomOwner(roomId, userId);
 
             // 해당 룸 수정
             openRoomEntity.setRoomName(roomName);
@@ -123,6 +147,7 @@ public class RoomService {
             openRoomEntity.setChannel(roomChannel);
 
             // TODO : 내용이 동일할 경우 굳이 넣을 필요 없을듯??
+
 
             return OpenRoom.fromEntity(listRepository.saveAndFlush(openRoomEntity)).getRoomId();
 
@@ -157,26 +182,43 @@ public class RoomService {
         return 0L;
     }
 
-    @Transactional
-    public List<RoomListResponse> roomList(Long lastRoomId, int size , String keyword, RoomChannel channel){
 
-        PageRequest pageRequest = PageRequest.of(0,size);
+    // 공개방용 roomId 확인
+    private OpenRoomEntity checkRoomId(Long roomId) {
+        OpenRoomEntity openRoomEntity = listRepository.findById(roomId).orElseThrow(()->
+                new ApplicationException(ErrorCode.ROOM_NOT_FOUND,String.format("%d Room is not founded", roomId)));
+        return openRoomEntity;
+    }
 
-        List<OpenRoomEntity> entityList = listRepository.findByRoomIdLessThanAndRoomNameContainingAndChannelOrderByRoomIdDesc(
-                lastRoomId,keyword,channel, pageRequest).getContent();
-
-        if(entityList.isEmpty()){
-            throw new ApplicationException(ErrorCode.NO_CONTENT,"");
+    // 공개방용 roomOwner 확인
+    private void checkRoomOwner(Long roomId, String userId) {
+        if(!userRoomRepository.findById(new UserRoomId(userId, roomId)).get().isRoomOwner()){
+            throw new ApplicationException(ErrorCode.INVALID_PERMISSION,String.format("%s User is not %d's RoomOwner", userId, roomId));
         }
-
-        List<RoomListResponse> responseList = new ArrayList<>();
-        for(OpenRoomEntity roomEntity: entityList){
-            responseList.add(RoomListResponse.fromEntity(roomEntity));
-        }
-
-        return responseList;
     }
 
 
-
 }
+
+
+//    @Transactional
+//    public Long delete(Boolean roomType,Long roomId, String userId){
+//        if(roomType){
+//            // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
+//            OpenRoomEntity openRoomEntity = listRepository.findById(roomId).orElseThrow(()->
+//                    new ApplicationException(ErrorCode.ROOM_NOT_FOUND,String.format("%s not founded", roomId)));
+//
+//            // TODO : 해당 roomId의 roomOwner가 userId인지 확인 (권한 없으면 Exception 던짐)
+////            if(!userRoomRepository.findById(new UserRoomId(userId, roomId)).get().isRoomOwner()){
+////                throw new ApplicationException(ErrorCode.INVALID_PERMISSION,String.format("%s User is not %d's RoomOwner",userId,roomId));
+////            }
+//
+//            // 해당 room 삭제
+//            listRepository.delete(openRoomEntity);
+//
+//            return roomId;
+//
+//        } // TODO : 스터디 그룹 삭제 (roomType : false)
+//
+//        return 0L;
+//    }
