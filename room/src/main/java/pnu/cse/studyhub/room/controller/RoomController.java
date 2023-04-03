@@ -2,12 +2,11 @@ package pnu.cse.studyhub.room.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import pnu.cse.studyhub.room.dto.request.NoticeRequest;
 import pnu.cse.studyhub.room.dto.request.RoomCreateRequest;
 import pnu.cse.studyhub.room.dto.request.RoomInRequest;
 import pnu.cse.studyhub.room.dto.request.RoomModifyRequest;
-import pnu.cse.studyhub.room.dto.response.Response;
-import pnu.cse.studyhub.room.dto.response.RoomIdResponse;
-import pnu.cse.studyhub.room.dto.response.RoomListResponse;
+import pnu.cse.studyhub.room.dto.response.*;
 
 import pnu.cse.studyhub.room.model.RoomChannel;
 import pnu.cse.studyhub.room.service.RoomService;
@@ -63,6 +62,18 @@ public class RoomController {
                 roomService.roomList(lastRoomId, 20, title, channel ));
     }
 
+    // 공개 스터디방 상세 정보 조회
+    @GetMapping("/{roomId}")
+    public Response<DetailResponse> roomInfo(@PathVariable Long roomId){
+
+        DetailResponse info = roomService.info(roomId);
+
+        return Response.success("Query info of the room Successfully",info);
+
+
+    }
+
+
     // 공개 스터디방 입장 TODO : 입장시에 response로 해당 방의 정보를 다 줘야하나...??
     @PostMapping("/in")
     public Response<Void> in(@RequestBody RoomInRequest request){
@@ -83,10 +94,20 @@ public class RoomController {
 
         roomService.out(userId, roomId);
 
-        return Response.success();
+        return Response.success("Leave Room Successfully");
     }
 
+    // 공지사항 설정
+    @PatchMapping
+    public Response<NoticeResponse> notice(@RequestBody NoticeRequest request){
+        // TODO : JWT로부터 userID등 user 정보 받을 예정
+        String userId = "donu";
 
+        String notice = roomService.notice(request.getRoomType(), request.getRoomId(), userId, request.getRoomNotice());
+
+        return Response.success("Set Notice Successfully", new NoticeResponse(request.getRoomId(),notice));
+
+    }
 
 
 
