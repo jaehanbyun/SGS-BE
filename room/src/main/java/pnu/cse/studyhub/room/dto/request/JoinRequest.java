@@ -2,15 +2,18 @@ package pnu.cse.studyhub.room.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
 
 @Getter
 @AllArgsConstructor
-public class NoticeRequest {
+@NoArgsConstructor
+public class JoinRequest {
     private String userId;
 
-    private Boolean roomType;
-    private long roomId;
-    private String roomNotice;
-
+    private UUID roomCode;
 
 }
+

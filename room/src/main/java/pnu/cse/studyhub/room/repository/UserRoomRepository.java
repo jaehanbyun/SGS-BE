@@ -15,9 +15,6 @@ public interface UserRoomRepository extends JpaRepository<OpenUserRoomEntity, Us
     @Query("select o from OpenUserRoomEntity o where o.roomId = :roomId And o.roomOwner = true")
     OpenUserRoomEntity findRoomOwnerByRoomId(@Param("roomId") Long roomId);
 
-
-
 }
 
-
-
+//    String roomOwnerId= userRoomRepository.findRoomOwnerByRoomId(roomId).getUserId();

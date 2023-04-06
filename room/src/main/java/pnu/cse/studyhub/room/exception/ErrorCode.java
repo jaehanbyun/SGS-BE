@@ -16,6 +16,8 @@ public enum ErrorCode {
     User_NOT_FOUND(HttpStatus.NOT_FOUND,"Room-004","User not founded"),
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED,"Room-005","Permission is invalid"),
     MAX_USER(HttpStatus.CONFLICT,"Room-006","The room is full of users."),
+    SAME_DATA(HttpStatus.CONFLICT,"Room-007","This information is the same as the current room information."),
+    INCORRECT_ROOMCODE(HttpStatus.UNAUTHORIZED,"Room-008","This password is incorrect"),
 
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Room-000", "Internal server error");
