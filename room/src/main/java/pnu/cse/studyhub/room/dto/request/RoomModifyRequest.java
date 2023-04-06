@@ -8,6 +8,8 @@ import pnu.cse.studyhub.room.model.RoomChannel;
 @Getter
 @AllArgsConstructor
 public class RoomModifyRequest {
+    private String userId;
+
     private boolean roomType;
     private Long roomId;
 

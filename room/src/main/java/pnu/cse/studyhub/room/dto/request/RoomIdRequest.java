@@ -1,6 +1,5 @@
 package pnu.cse.studyhub.room.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomInRequest {
+public class RoomIdRequest {
+    private String userId;
 
     private Long roomId;
 

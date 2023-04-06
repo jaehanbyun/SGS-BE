@@ -12,11 +12,11 @@ import java.time.Instant;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
-@Table(name="open_user_room")
+@Table(name="private_user_room")
 @Getter
 @Setter
 @IdClass(UserRoomId.class)
-public class OpenUserRoomEntity {
+public class PrivateUserRoomEntity {
 
     @Id
     private String userId;
@@ -27,16 +27,19 @@ public class OpenUserRoomEntity {
     @MapsId("roomId")
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name="roomId")
-    private OpenRoomEntity openRoomEntity;
+    private PrivateRoomEntity privateRoomEntity;
 
     private boolean roomOwner;
-    // 일단 3번의 경고로
+    private boolean isMember;
+
     private Integer alert;
     private Boolean kick_out;
 
-    // 최초 입장 시간
     private Timestamp createdAt;
     private Timestamp accessedAt;
+
+    // private Boolean inRoom을 만들어야하나...
+    // userRoom에 남아 있는 이유는
 
     @PrePersist
     void createdAt(){
@@ -44,18 +47,20 @@ public class OpenUserRoomEntity {
         this.accessedAt = Timestamp.from(Instant.now());
     }
 
-    public static OpenUserRoomEntity create(String userId,Long roomId,Boolean roomOwner){
-        OpenUserRoomEntity userRoom = new OpenUserRoomEntity();
+
+
+    public static PrivateUserRoomEntity create(String userId, Long roomId,Boolean roomOwner){
+        PrivateUserRoomEntity userRoom = new PrivateUserRoomEntity();
         userRoom.setUserId(userId);
         userRoom.setRoomId(roomId);
         userRoom.setRoomOwner(roomOwner);
         userRoom.setAlert(0);
         userRoom.setKick_out(false);
+        userRoom.setMember(true);
 
         return userRoom;
     }
 
-    // 경고
     public void addAlert()
     {
         this.setAlert(this.getAlert()+1);
@@ -68,11 +73,10 @@ public class OpenUserRoomEntity {
     }
 
     //위임
-    public void delegate(OpenUserRoomEntity target){
+    public void delegate(PrivateUserRoomEntity target){
         this.setRoomOwner(false);
         target.setRoomOwner(true);
     }
-
 
 
 }

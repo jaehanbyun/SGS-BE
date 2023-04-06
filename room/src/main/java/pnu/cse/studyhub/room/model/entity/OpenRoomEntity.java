@@ -15,6 +15,11 @@ import java.util.List;
 @Table(name="open_study_room")
 @Getter
 @Setter
+@SequenceGenerator(
+        name = "SEQ_GENERATOR",
+        sequenceName = "MY_SEQ",
+        allocationSize = 1
+)
 public class OpenRoomEntity {
 
 /*
@@ -22,8 +27,11 @@ public class OpenRoomEntity {
                 생길수 있으니 custom generator를 만들 예정
  */
 
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long roomId;
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GENERATOR")
     private Long roomId;
 
     @OneToMany(mappedBy="openRoomEntity", cascade = CascadeType.ALL)

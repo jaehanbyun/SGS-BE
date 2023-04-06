@@ -5,12 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class NoticeRequest {
+public class TestUser {
     private String userId;
-
-    private Boolean roomType;
-    private long roomId;
-    private String roomNotice;
-
-
+    private String dd;
 }
