@@ -27,6 +27,13 @@ public class GlobalControllerAdvice {
                     .body(Response.error(message,data));
         }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> applicationHandler(RuntimeException e){
+        log.error("Error occurs {}", e.toString());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Response.error("Internal Server Error",ErrorCode.INTERNAL_SERVER_ERROR.name()));
+
+    }
 
 
 }

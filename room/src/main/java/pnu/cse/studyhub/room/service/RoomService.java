@@ -2,26 +2,21 @@ package pnu.cse.studyhub.room.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import pnu.cse.studyhub.room.dto.response.AlertResponse;
-import pnu.cse.studyhub.room.dto.response.DetailResponse;
-import pnu.cse.studyhub.room.dto.response.RoomListResponse;
-import pnu.cse.studyhub.room.dto.response.RoomTargetResponse;
+import pnu.cse.studyhub.room.dto.response.*;
 import pnu.cse.studyhub.room.exception.ApplicationException;
 import pnu.cse.studyhub.room.exception.ErrorCode;
 import pnu.cse.studyhub.room.model.OpenRoom;
-import pnu.cse.studyhub.room.model.PrivateStudyGroup;
 import pnu.cse.studyhub.room.model.RoomChannel;
 import pnu.cse.studyhub.room.model.UserRoomId;
 import pnu.cse.studyhub.room.model.entity.OpenRoomEntity;
 import pnu.cse.studyhub.room.model.entity.OpenUserRoomEntity;
 import pnu.cse.studyhub.room.model.entity.PrivateRoomEntity;
 import pnu.cse.studyhub.room.model.entity.PrivateUserRoomEntity;
-import pnu.cse.studyhub.room.repository.ListRepository;
+import pnu.cse.studyhub.room.repository.OpenRoomRepository;
 import pnu.cse.studyhub.room.repository.PrivateRoomRepository;
 import pnu.cse.studyhub.room.repository.PrivateUserRoomRepository;
 import pnu.cse.studyhub.room.repository.UserRoomRepository;
@@ -37,16 +32,41 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RoomService {
 
-    private final PrivateRoomRepository privateRoomRepository;
-    private final ListRepository listRepository;
+    private final OpenRoomRepository openRoomRepository;
     private final UserRoomRepository userRoomRepository;
     private final PrivateUserRoomRepository privateUserRoomRepository;
+    private final PrivateRoomRepository privateRoomRepository;
+
+
+    //private study group 조회
+    @Transactional
+    public List<StudyGroupListResponse> studyGroupList(String userId){
+        // 해당 userId의 is_member의 모든 roomname이랑 roomId 출력
+        List<PrivateUserRoomEntity> userRoom = privateUserRoomRepository.findIsMemberByUserId(userId);
+
+        if(userRoom.isEmpty()){
+            throw new ApplicationException(ErrorCode.NO_CONTENT,"");
+        }
+
+        List<StudyGroupListResponse> responseList = new ArrayList<>();
+
+
+        for(PrivateUserRoomEntity roomEntity : userRoom){
+            responseList.add(new StudyGroupListResponse(roomEntity.getRoomId(), roomEntity.getPrivateRoomEntity().getRoomName()));
+        }
+
+        return responseList;
+
+    }
+
 
     // private study group 입장
     @Transactional
     public void privateIn(Long roomId, String userId){
+        // roomId 체크
         checkPrivateRoomId(roomId);
 
+        // 해당 방에 user있는지 체크 있어도 ismember이지 체크
         PrivateUserRoomEntity userRoom = privateUserRoomRepository.findById(new UserRoomId(userId, roomId)).orElseThrow(() ->
                 new ApplicationException(ErrorCode.User_NOT_FOUND,
                         String.format("%s User is not founded in %d study group", userId, roomId)));
@@ -206,7 +226,7 @@ public class RoomService {
 
         PageRequest pageRequest = PageRequest.of(0,size);
 
-        List<OpenRoomEntity> entityList = listRepository.findByRoomIdLessThanAndRoomNameContainingAndChannelOrderByRoomIdDesc(
+        List<OpenRoomEntity> entityList = openRoomRepository.findByRoomIdLessThanAndRoomNameContainingAndChannelOrderByRoomIdDesc(
                 lastRoomId,keyword,channel, pageRequest).getContent();
 
         if(entityList.isEmpty()){
@@ -330,7 +350,7 @@ public class RoomService {
             openRoomEntity.setMaxUser(maxUser);
             openRoomEntity.setChannel(roomChannel);
 
-            return listRepository.saveAndFlush(openRoomEntity).getRoomId();
+            return openRoomRepository.saveAndFlush(openRoomEntity).getRoomId();
 
         }else{
             PrivateRoomEntity privateRoomEntity = checkPrivateRoomId(roomId);
@@ -352,7 +372,7 @@ public class RoomService {
     public Long create(Boolean roomType, String roomName, String userId, Integer maxUser, RoomChannel channel){
         if(roomType){ // 공개방 생성
 
-            OpenRoomEntity saveRoom = listRepository.save(OpenRoomEntity.create(roomName, channel, maxUser));
+            OpenRoomEntity saveRoom = openRoomRepository.save(OpenRoomEntity.create(roomName, channel, maxUser));
 
             OpenUserRoomEntity newUserRoom = userRoomRepository.save(
                     OpenUserRoomEntity.create(userId, saveRoom.getRoomId(), true));
@@ -415,7 +435,7 @@ public class RoomService {
 
     // 공개방용 roomId 확인
     private OpenRoomEntity checkRoomId(Long roomId) {
-        OpenRoomEntity openRoomEntity = listRepository.findById(roomId).orElseThrow(()->
+        OpenRoomEntity openRoomEntity = openRoomRepository.findById(roomId).orElseThrow(()->
                 new ApplicationException(ErrorCode.ROOM_NOT_FOUND,String.format("%d open Room is not founded", roomId)));
         return openRoomEntity;
     }
