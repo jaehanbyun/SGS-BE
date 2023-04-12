@@ -1,7 +1,7 @@
 spring.jpa:
   database: mysql
   hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
-  hibernate.ddl-auto: create
+  hibernate.ddl-auto: update
   hibernate.format_sql: true
   hibernate.show-sql: true
 

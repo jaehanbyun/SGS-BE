@@ -12,13 +12,18 @@ import pnu.cse.studyhub.room.service.RoomService;
 import java.util.List;
 import java.util.UUID;
 
+
 @RestController
 @RequestMapping("/room/group")
 @RequiredArgsConstructor
 public class RoomController {
 
     private final RoomService roomService;
-    // TODO : 나머지는 상태관리 서버랑 통신이후에 개발해야할듯..??
+    /*
+        TODO : 나머지는 상태관리 서버랑 통신이후에 개발해야할듯..??
+                JWT에서 userId 꺼내기 개발
+     */
+    
 
     // 스터디방 생성
     @PostMapping
@@ -63,7 +68,7 @@ public class RoomController {
 
         // size에 따라 가져오는 방의 갯수가 달라짐
         return Response.success("room list successfully",
-                roomService.roomList(lastRoomId, 20, title, channel ));
+                roomService.roomList(lastRoomId, 10, title, channel ));
     }
 
     // 공개 스터디방 상세 정보 조회
@@ -148,6 +153,15 @@ public class RoomController {
 
     }
 
+    // private 스터디 그룹 조회
+    @GetMapping("/private")
+    public Response<List<StudyGroupListResponse>> studyGroupList(){
+        // TODO : JWT로부터 userID등 user 정보 받을 예정
+        String userId = "donud";
+
+        return Response.success("study group list successfully",roomService.studyGroupList(userId));
+    }
+
     // Private 스터디 그룹 가입
     // roomId랑 room_code
     // TODO : roomCode에 UUID말고 다른 값이 들어왔을 때 Exception..?
@@ -186,7 +200,7 @@ public class RoomController {
     // 일단은 저장되어 있는 UUID 불러오는 방식
     // 이후에 새로운 거 generator
     //
-    @GetMapping("/private")
+    @PatchMapping("/private")
     public Response<RoomCodeResponse> generateCode(@RequestBody RoomIdRequest request){
         // TODO : JWT로부터 userID등 user 정보 받을 예정
         String userId = request.getUserId();

@@ -10,7 +10,7 @@ import pnu.cse.studyhub.room.model.RoomChannel;
 import pnu.cse.studyhub.room.model.entity.OpenRoomEntity;
 
 @Repository
-public interface ListRepository extends JpaRepository<OpenRoomEntity, Long> {
+public interface OpenRoomRepository extends JpaRepository<OpenRoomEntity, Long> {
 
     // 무한 스크롤 처리
     @Query(value = "SELECT o FROM OpenRoomEntity o WHERE o.roomId < :lastRoomId AND (:Keyword IS NULL OR o.roomName LIKE %:Keyword%) " +
