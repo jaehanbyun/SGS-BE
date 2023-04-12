@@ -1,4 +1,4 @@
-package pnu.cse.studyhub.room.exception;
+package pnu.cse.studyhub.room.service.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

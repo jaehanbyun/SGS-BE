@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import pnu.cse.studyhub.room.dto.response.*;
-import pnu.cse.studyhub.room.exception.ApplicationException;
-import pnu.cse.studyhub.room.exception.ErrorCode;
+import pnu.cse.studyhub.room.service.exception.ApplicationException;
+import pnu.cse.studyhub.room.service.exception.ErrorCode;
 import pnu.cse.studyhub.room.model.OpenRoom;
 import pnu.cse.studyhub.room.model.RoomChannel;
 import pnu.cse.studyhub.room.model.UserRoomId;

@@ -1,4 +1,4 @@
-package pnu.cse.studyhub.room.exception;
+package pnu.cse.studyhub.room.service.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
