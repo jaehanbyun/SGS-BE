@@ -1,2 +1,14 @@
 property :
   ignoreNullWsContainer : true
+#Redis Cache
+spring:
+  redis:
+    host: 172.18.0.2
+    port: 6379
+
+kurento:
+  client:
+    server:
+      ws_uri: ws://172.17.0.2:8888/kurento
+      ice_servers:
+        - urls: stun:172.17.0.3:3478
