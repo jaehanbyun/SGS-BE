@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+    redis_container:
+        image: redis
+        ports:
+            - "6379:6379"
+        networks:
+            - my-network
+
+    spring-boot-app:
+        build: .
+        ports:
+            - "8080:8080"
+        networks:
+            - my-network
+        depends_on:
+            - kurento-server
+            - coturn
+
+    kurento-server:
+        image: kurento/kurento-media-server:latest
+        networks:
+            - my-network
+
+    coturn:
+        image: instrumentisto/coturn:latest
+        environment:
+            - TURN_SECRET="MySecurePassword"
+        ports:
+            - "3478:3478"
+            - "3478:3478/udp"
+            - "5349:5349"
+            - "5349:5349/udp"
+        networks:
+            - my-network
+
+networks:
+    my-network:
