@@ -5,19 +5,39 @@ server:
 spring:
   application:
     name: chat-service
+  data:
+    mongodb:
+      uri: mongodb+srv://${STUDYHUB_DB_USER}:${STUDYHUB_DB_PWD}@studyhub.iyncwyz.mongodb.net/studyhub?retryWrites=true&w=majority
   kafka:
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
       group-id: pnu-cse
     topic : studyhub
     pub-topic-name: send
     sub-topic-name: receive
+
+springdoc:
+  packages-to-scan: pnu.cse.studyhub
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    path: chat-ui.html # Swagger UI 경로 => localhost:8031/chat-ui.html
+    tags-sorter: alpha # alpha : 알파벳 순 태그 정렬, method: HTTP method 순 정렬
+    operations-sorter: alpha # alpha : 알파벳 순 태그 정렬, method: HTTP method 순 정렬
+  api-docs:
+    path: /api-docs/json
+    groups:
+      enabled: true
+    cache:
+      disabled: true
 
 eureka:
   instance:
@@ -28,3 +48,7 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
+
+logging:
+  level:
+    pnu.cse.studyhub: DEBUG

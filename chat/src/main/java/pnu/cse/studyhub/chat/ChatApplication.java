@@ -1,4 +1,4 @@
-package pnu.cse.storyhub.chat;
+package pnu.cse.studyhub.chat;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package pnu.cse.storyhub.chat.config;
+package pnu.cse.studyhub.chat.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
