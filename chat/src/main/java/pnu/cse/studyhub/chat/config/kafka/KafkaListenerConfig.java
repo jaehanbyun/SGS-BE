@@ -1,6 +1,5 @@
-package pnu.cse.storyhub.chat.config;
+package pnu.cse.studyhub.chat.config.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,12 +10,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-import pnu.cse.storyhub.chat.dto.MessageDto;
-import pnu.cse.storyhub.chat.model.Message;
+import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @EnableKafka
 @Configuration
@@ -35,21 +32,21 @@ public class KafkaListenerConfig {
     private String groupId;
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, MessageDto> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MessageDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
 
     @Bean
-    public ConsumerFactory<String, MessageDto> consumerFactory(){
-        JsonDeserializer<MessageDto> deserializer = new JsonDeserializer<>(MessageDto.class);
+    public ConsumerFactory<String, String> consumerFactory(){
+        JsonDeserializer<Chat> deserializer = new JsonDeserializer<>(Chat.class);
         deserializer.setRemoveTypeHeaders(false);
         deserializer.addTrustedPackages("*");
         deserializer.setUseTypeMapperForKey(true);
 
         return new DefaultKafkaConsumerFactory<>(
-                consumerConfigurations(), new StringDeserializer(), new JsonDeserializer<>(MessageDto.class)
+                consumerConfigurations(), new StringDeserializer(), new StringDeserializer()
         );
     }
 
