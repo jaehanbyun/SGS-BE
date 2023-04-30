@@ -18,14 +18,14 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
-import pnu.cse.studyhub.chat.config.KafkaProducer;
+import pnu.cse.studyhub.chat.service.KafkaProducer;
 import pnu.cse.studyhub.chat.dto.request.ChatRequest;
 import pnu.cse.studyhub.chat.dto.response.FailedResponse;
 import pnu.cse.studyhub.chat.dto.response.SuccessResponse;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 import pnu.cse.studyhub.chat.service.ChatService;
-
 import java.util.ArrayList;
+
 import java.util.List;
 
 @Tag(name = "chat", description = "채팅 API")

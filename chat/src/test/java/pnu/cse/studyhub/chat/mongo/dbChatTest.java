@@ -46,7 +46,8 @@ public class dbChatTest {
         ChatRepository chatRepository = new ChatRepositoryImpl(mongoTemplate);
         Chat tempChat = chatRequest.toEntity();
         savedChat = chatRepository.save(tempChat);
-        log.info("채팅 저장 : " + savedChat);
+//        log.info("채팅 저장 : " + savedChat);
+
     }
 
     @Test
@@ -55,8 +56,8 @@ public class dbChatTest {
     void findChatByRoomId() {
         ChatRepository chatRepository = new ChatRepositoryImpl(mongoTemplate);
         List<Chat> dbChat = chatRepository.findByRoomId(savedChat.getRoomId());
+//        log.info("채팅 리스트 : " + dbChat);
 
-        log.info("채팅 리스트 : " + dbChat);
         Assertions.assertEquals(savedChat.get_id(),dbChat.get(0).get_id());
 //        chatRepository.deleteAll(dbChat);
     }
@@ -67,7 +68,8 @@ public class dbChatTest {
         ChatRepository chatRepository = new ChatRepositoryImpl(mongoTemplate);
         Page<Chat> dbChat = chatRepository.findByRoomIdWithPagingAndFiltering(savedChat.getRoomId(), 1,1);
         List<Chat> chatList = dbChat.getContent();
-        log.info("채팅 리스트 : " + dbChat);
+//        log.info("채팅 리스트 : " + dbChat);
+
         Assertions.assertEquals(savedChat.get_id(),chatList.get(0).get_id());
         chatRepository.deleteAll(chatList);
     }
