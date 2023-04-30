@@ -1,4 +1,4 @@
-package pnu.cse.storyhub.chat.config;
+package pnu.cse.studyhub.chat.config.kafka;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -8,7 +8,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @EnableWebSocketMessageBroker
 @Configuration
-public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
+public class WebSocketMessageBrokerConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -22,7 +22,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 메세지를 보낼 때, 관련 경로를 설정
-        // 클라이언트가 메세지를 보낼 때, 경로 앞에 "/queue" 가 붙어 있으면 Broker로 보냄
+        // 클라이언트가 메세지를 보낼 때, 경로 앞에 "/queue" 가 붙어topi 있으면 Broker로 보냄
         registry.setApplicationDestinationPrefixes("/kafka");
         // 메세지를 받을 때, 관련 경로를 설정
         //

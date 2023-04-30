@@ -28,3 +28,13 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
+tcp:
+  server:
+    host: localhost
+    port: 8099
+    connection:
+      poolSize: 30
+
+logging:
+  level:
+    pnu.cse.studyhub: DEBUG
