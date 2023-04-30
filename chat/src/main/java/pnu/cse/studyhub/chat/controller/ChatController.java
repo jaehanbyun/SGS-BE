@@ -24,6 +24,7 @@ import pnu.cse.studyhub.chat.dto.response.FailedResponse;
 import pnu.cse.studyhub.chat.dto.response.SuccessResponse;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 import pnu.cse.studyhub.chat.service.ChatService;
+import java.util.ArrayList;
 
 import java.util.List;
 
