@@ -8,9 +8,9 @@ spring.jpa:
 
 spring.datasource:
   driver-class-name : com.mysql.cj.jdbc.Driver
-  url : jdbc:mysql://localhost:3306/room_server?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-  username : root
-  password : 1234
+  url : jdbc:mysql://sql.freedb.tech:3306/freedb_study_room
+  username : freedb_roomServer
+  password : qXZd8F#%KdXsSM3
 
 logging:
   level:
