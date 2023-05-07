@@ -50,6 +50,7 @@ public class UserSession implements Closeable {
 
             @Override
             public void onEvent(IceCandidateFoundEvent event) {
+                log.info("ICE Candidate Message 전송 ----->");
                 JsonObject response = iceCandidate(userId, JsonUtils.toJsonObject(event.getCandidate()));
                 try {
                     // 여러 개의 스레드에서 동시에 session 객체에 접근하는 것을 막음
@@ -127,11 +128,13 @@ public class UserSession implements Closeable {
      */
 
     public void receiveVideoFrom(UserSession sender, String sdpOffer) throws IOException {
+        log.info("receiveVideoFrom------>");
         // 해당 sender의 WebRtcEndpoint를 가져와 SDP offer를 처리해서 sdpAnser를 만듬
         final String ipSdpAnswer = this.getEndpointForUser(sender).processOffer(sdpOffer);
         final JsonObject scParams = receiveVideoAnswer(sender.getUserId(), ipSdpAnswer);
         this.sendMessage(scParams);
         this.getEndpointForUser(sender).gatherCandidates();
+        log.info("<------receiveVideoFrom");
     }
 
     /*
@@ -156,6 +159,7 @@ public class UserSession implements Closeable {
                 // 새로운 WebRtcEndpoint 객체를 만들고 ICE Candidate를 발견할 때마다 처리
                 @Override
                 public void onEvent(IceCandidateFoundEvent event) {
+                    log.info("ICE Candidate Message 전송 ----->");
                     JsonObject response = iceCandidate(sender.getUserId(), JsonUtils.toJsonObject(event.getCandidate()));
                     try {
                         synchronized (session) {

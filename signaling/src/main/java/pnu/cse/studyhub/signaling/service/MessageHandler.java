@@ -55,6 +55,7 @@ public class MessageHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
+        // TODO : 소켓 연결되었을 때 메시지나 log남기기
     }
 
     // 메시지를 브로드캐스트 함
@@ -84,12 +85,14 @@ public class MessageHandler extends TextWebSocketHandler {
             switch (jsonMessage.get(ID).getAsString()) {
                 // 방 접속
                 case "joinRoom":
+                    log.info("방접속");
                     JoinRequest joinRequest = mapper.readValue(message.getPayload(), JoinRequest.class);
                     join(joinRequest, session);
                     break;
 
                 // SDP 정보 전송
-                case "receiveVideo":
+                case "receiveVideoFrom":
+                    log.info("SDP 정보 전송");
                     // json -> java 객체
                     ReceiveVideoRequest request
                             = mapper.readValue(message.getPayload(), ReceiveVideoRequest.class);
@@ -105,6 +108,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
                 // ICE Candidate 정보 전송
                 case "onIceCandidate":
+                    log.info("ICE Candidate 정보 받음");
                     CandidateRequest candidateRequest
                             = mapper.readValue(message.getPayload(), CandidateRequest.class);
                     CandidateRequest.Candidate candidate = candidateRequest.getCandidate();
@@ -154,7 +158,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-
+        // TODO : 연결 종료시 로그 - logger.info("[ws] Session has been closed with status [{} {}]", status, session);
         UserSession user = userRegistry.removeBySession(session);
         if (Objects.isNull(user)) return;
         Room room = roomManager.getRoom(user.getRoomId());
@@ -231,8 +235,8 @@ public class MessageHandler extends TextWebSocketHandler {
             //log.info("[redis] save key : {}, value : {}", SERVER + IP, roomId);
             // redis에 roomId를 key로 하고 userId를 집어 넣음 (해당 room에 있는 user들)
             // Server+IP를 key로 하고 roomId를 집어 넣음
-            SetOperations<Long, String> setOperations = redisTemplate.opsForSet();
-            setOperations.add(roomId, userId);
+            SetOperations<String, String> setOperations = redisTemplate.opsForSet();
+            setOperations.add(roomId.toString(), userId);
             // IP에 대해 room id를 가지고 있음 (시그널링 서버 여러개 일때)
             //setOperations.add(SERVER + IP, roomId);
         } catch (Exception e) {

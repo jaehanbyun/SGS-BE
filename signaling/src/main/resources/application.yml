@@ -3,12 +3,14 @@ property :
 #Redis Cache
 spring:
   redis:
-    host: 172.18.0.2
+    host: 0.0.0.0
     port: 6379
 
-kurento:
-  client:
-    server:
-      ws_uri: ws://172.17.0.2:8888/kurento
-      ice_servers:
-        - urls: stun:172.17.0.3:3478
+server:
+  ssl:
+    enabled : true
+    key-store: src/main/resources/donu-keystore.jks
+    key-store-password: test1234
+    key-store-type: PKCS12
+    key-alias: donu-keystore
+  port: 8443
