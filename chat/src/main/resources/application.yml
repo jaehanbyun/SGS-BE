@@ -38,6 +38,17 @@ springdoc:
       enabled: true
     cache:
       disabled: true
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: pnu-studyhub
+    credentials:
+      accessKey: ${STUDYHUB_S3_ACCESS_KEY}
+      secretKey: ${STUDYHUB_S3_SECRET_KEY}
+    stack:
+      auto: false
 
 eureka:
   instance:
