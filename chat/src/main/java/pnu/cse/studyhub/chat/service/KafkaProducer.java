@@ -8,22 +8,27 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
+import java.io.IOException;
+
 @Service
 @RequiredArgsConstructor // same as autowired
 @Slf4j
 public class KafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final S3Uploader s3Uploader;
 
     public void send(String topic, Chat chat) {
-        log.info("topic : " + topic);
-        log.info("topic : " + chat.getContent());
+        log.info("producer_topic : " + topic);
+        log.info("producer_content : " + chat.getContent());
+        String type = chat.getMessageType();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            String stringChat = objectMapper.writeValueAsString(chat);
-            log.info(stringChat);
-            kafkaTemplate.send(topic, stringChat);
-        } catch (JsonProcessingException e) {
+            String content = objectMapper.writeValueAsString(chat);
+            kafkaTemplate.send(topic, content);
+        } catch (JsonProcessingException e) { //json 파싱 실패
             e.printStackTrace();
+        } catch (IOException e) { // 파일 변환 실패
+            throw new RuntimeException(e);
         }
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
+import pnu.cse.studyhub.chat.dto.request.ChatFileRequest;
 import pnu.cse.studyhub.chat.service.KafkaProducer;
 import pnu.cse.studyhub.chat.dto.request.ChatRequest;
 import pnu.cse.studyhub.chat.dto.response.FailedResponse;
@@ -53,9 +54,21 @@ public class ChatController {
             @Parameter(name = "messageType", description = "채팅 타입", example = "TEXT"),
             @Parameter(name = "content", description = "채팅 내용", example = "chat test"),
     })
-    @PostMapping("/send")
+    @PostMapping(value = "/send", consumes = "application/json")
     public ResponseEntity<SuccessResponse> sendMessage(@RequestBody ChatRequest chat) {
         Chat savedChat = chatService.saveChat(chat);
+        log.info("Produce message : " + savedChat.toString());
+        try {
+            kafkaProducer.send(TOPIC,savedChat);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        SuccessResponse response = new SuccessResponse("SUCCESS", "send chat successfully", savedChat);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    @PostMapping(value = "/send", consumes = "multipart/form-data")
+    public ResponseEntity<SuccessResponse> sendFileMessage(ChatFileRequest chat) {
+        Chat savedChat = chatService.saveFileChat(chat);
         log.info("Produce message : " + savedChat.toString());
         try {
             kafkaProducer.send(TOPIC,savedChat);
