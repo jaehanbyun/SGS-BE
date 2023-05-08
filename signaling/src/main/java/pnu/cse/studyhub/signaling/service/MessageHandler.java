@@ -54,8 +54,7 @@ public class MessageHandler extends TextWebSocketHandler {
     // websocket 연결되면 WebSocketSession 추가
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        sessions.add(session);
-        // TODO : 소켓 연결되었을 때 메시지나 log남기기
+        log.info("user establish websocket connection  : {}", session);
     }
 
     // 메시지를 브로드캐스트 함
@@ -158,7 +157,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        // TODO : 연결 종료시 로그 - logger.info("[ws] Session has been closed with status [{} {}]", status, session);
+        log.info("[ws] Session has been closed with status [{} {}]", status, session);
         UserSession user = userRegistry.removeBySession(session);
         if (Objects.isNull(user)) return;
         Room room = roomManager.getRoom(user.getRoomId());
@@ -168,7 +167,7 @@ public class MessageHandler extends TextWebSocketHandler {
         SetOperations<Long, String> setOperations = redisTemplate.opsForSet();
         try {
             log.info("[redis] remove key : {}, value : {}", room.getRoomId(), user.getUserId());
-            setOperations.remove(room.getRoomId(), user.getUserId());
+            //setOperations.remove(room.getRoomId(), user.getUserId());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -178,7 +177,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
             try {
                 log.info("[redis] remove key : {}", room.getRoomId());
-                redisTemplate.delete(room.getRoomId());
+                //redisTemplate.delete(room.getRoomId());
                 redisTemplate.delete(room.getRoomId()+PIPELINE);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -197,7 +196,7 @@ public class MessageHandler extends TextWebSocketHandler {
 //            }
         }
 
-        // TODO : 상태관리 서버로 접속 정보 전송
+        // TODO : 상태관리 서버로 접속 정보 전송 (아마도 채팅서버에서?)
     }
 
 
@@ -214,6 +213,7 @@ public class MessageHandler extends TextWebSocketHandler {
         Room room = roomManager.getRoom(roomId);
 
         // 해당 room에 join한다고 request를 보낸 user에 대한 내용을 집어 넣음
+        // TODO : room.join에 대해 redis를 사용하는 생성자를 하나 쓰자
         final UserSession newUser = room.join(userId, session, video, audio);
         // TODO : 최대 접속 인원 초과 시 입장 제한을 어디서 해줘야하지 (누가 동시에 하면..?)
         if (Objects.isNull(newUser)) return;
@@ -221,10 +221,13 @@ public class MessageHandler extends TextWebSocketHandler {
 
 
         try {
-            log.info("[redis] save key : {}, value : {}", roomId+"d", room.getPipeLineId());
-            // 레디스에 roomId+Pipeline, room.getPiptelineid를 저장
+            log.info("[redis] save key : {}, value : {}", roomId, room.getPipeLineId());
+            // 레디스에 roomId+Pipeline를 키로, room.getPipelineid를 저장
             // room마다 MediaPipeline의 Id 값은 수정되지 않는 값이라 캐시에 두면 좋은 성능을 볼 수 있음
-            ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+            // TODO : 유저가 새로운 방 입장할 때 redis에서 pipelineId 가져오기
+            //          여기서 redis를 쓰는 의미가 있나? redis 저장하고 어디서 써야하지
+            //          스터디 그룹에 대한 MediaPipeline은 DB에 저장하고 redis를 사용하는 방식 ㅇㄸ?
+            ValueOperations<String, String> valueOperations = redisTemplate.opsForValue(); // String 타입
             valueOperations.set(roomId + PIPELINE, room.getPipeLineId(), TIME, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace();
@@ -234,11 +237,10 @@ public class MessageHandler extends TextWebSocketHandler {
             log.info("[redis] save key : {}, value : {}", roomId, userId);
             //log.info("[redis] save key : {}, value : {}", SERVER + IP, roomId);
             // redis에 roomId를 key로 하고 userId를 집어 넣음 (해당 room에 있는 user들)
-            // Server+IP를 key로 하고 roomId를 집어 넣음
-            SetOperations<String, String> setOperations = redisTemplate.opsForSet();
+            
+            SetOperations<String, String> setOperations = redisTemplate.opsForSet(); // set 타입
             setOperations.add(roomId.toString(), userId);
-            // IP에 대해 room id를 가지고 있음 (시그널링 서버 여러개 일때)
-            //setOperations.add(SERVER + IP, roomId);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
