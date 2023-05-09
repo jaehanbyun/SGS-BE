@@ -51,7 +51,8 @@ public class Room implements Closeable {
     }
 
     public UserSession join(String userId, WebSocketSession session, boolean video, boolean audio) throws IOException {
-        // TODO : 여기서 redis 사용하자
+        // TODO : 여기서 redis 사용하자 ??
+
         final UserSession participant = new UserSession(userId,this.roomId, session, this.pipeline, video, audio);
 
         // 최대 접속 인원 초과 시 입장 제한

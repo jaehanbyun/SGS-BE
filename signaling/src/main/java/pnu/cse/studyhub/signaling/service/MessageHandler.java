@@ -16,6 +16,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import pnu.cse.studyhub.signaling.config.tcp.TCPMessageService;
 import pnu.cse.studyhub.signaling.dao.request.*;
 import pnu.cse.studyhub.signaling.util.Room;
 import pnu.cse.studyhub.signaling.util.RoomManager;
@@ -23,6 +24,7 @@ import pnu.cse.studyhub.signaling.util.UserRegistry;
 import pnu.cse.studyhub.signaling.util.UserSession;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -48,8 +50,7 @@ public class MessageHandler extends TextWebSocketHandler {
     // redis 저장 유효기간을 하루로 설정
     private static final long TIME = 24 * 60 * 60 * 1000L;
 
-    // WebSocketSession 객체의 목록
-    List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
+    private final TCPMessageService tcpMessageService;
 
     // websocket 연결되면 WebSocketSession 추가
     @Override
@@ -155,10 +156,22 @@ public class MessageHandler extends TextWebSocketHandler {
         }
     }
 
+    // websocket 연결 끊길때
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("[ws] Session has been closed with status [{} {}]", status, session);
         UserSession user = userRegistry.removeBySession(session);
+        if(user.getTimer()){ // 만약 타이머가 On 상태이면
+            user.setTimer(false);
+            String tcpMessage = TCPTimerRequest.builder()
+                    .type("TIMER_OFF")
+                    .userId(user.getUserId())
+                    .time(LocalDateTime.now().toString())
+                    .build().toString();
+
+            tcpMessageService.sendMessage(tcpMessage);
+            log.info("[tcp to state] {}'s timer stopped.",user.getUserId());
+        }
         if (Objects.isNull(user)) return;
         Room room = roomManager.getRoom(user.getRoomId());
         room.leave(user);
@@ -196,7 +209,7 @@ public class MessageHandler extends TextWebSocketHandler {
 //            }
         }
 
-        // TODO : 상태관리 서버로 접속 정보 전송 (아마도 채팅서버에서?)
+
     }
 
 
@@ -215,7 +228,7 @@ public class MessageHandler extends TextWebSocketHandler {
         // 해당 room에 join한다고 request를 보낸 user에 대한 내용을 집어 넣음
         // TODO : room.join에 대해 redis를 사용하는 생성자를 하나 쓰자
         final UserSession newUser = room.join(userId, session, video, audio);
-        // TODO : 최대 접속 인원 초과 시 입장 제한을 어디서 해줘야하지 (누가 동시에 하면..?)
+
         if (Objects.isNull(newUser)) return;
         userRegistry.register(newUser);
 
@@ -263,7 +276,32 @@ public class MessageHandler extends TextWebSocketHandler {
     }
 
     private void updateTimer(TimerRequest request, UserSession user) throws IOException {
-        // TODO
-    }
+        String tcpMessage;
 
+        if (request.isTimer()) { // Timer Start 누를 때
+            user.setTimer(true);
+            tcpMessage = TCPTimerRequest.builder()
+                    .type("TIMER_ON")
+                    .userId(request.getUserId())
+                    .time(LocalDateTime.now().toString())
+                    .build().toString();
+
+            log.info("[tcp to state] {}'s timer has started.",user.getUserId());
+
+        }else{ // Timer Stop 누를 때
+            user.setTimer(false);
+            tcpMessage = TCPTimerRequest.builder()
+                    .type("TIMER_OFF")
+                    .userId(request.getUserId())
+                    //.session(session.getId())
+                    .time(LocalDateTime.now().toString())
+                    .build().toString();
+
+            log.info("[tcp to state] {}'s timer stopped.",user.getUserId());
+        }
+
+        tcpMessageService.sendMessage(tcpMessage);
+
+
+    }
 }
