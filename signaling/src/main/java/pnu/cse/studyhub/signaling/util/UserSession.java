@@ -23,10 +23,10 @@ public class UserSession implements Closeable {
     private final WebSocketSession session;
     private final MediaPipeline pipeline;
 
+    private final Long roomId;
     private boolean video;
     private boolean audio;
-
-    private final Long roomId;
+    private boolean timer;
 
     // 현재 나의 webRtcEndPoint 객체니깐 밖으로 내보낸다는 의미
     private final WebRtcEndpoint outgoingMedia;
@@ -42,12 +42,11 @@ public class UserSession implements Closeable {
         this.roomId = roomId;
         this.video = video;
         this.audio = audio;
+        this.timer = false;
         this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).build();
-
         this.outgoingMedia.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
             // iceCandidateFounder 이벤트 리스너 등록
             // 이벤트가 발생했을 때 다른 유저들에게 새로운 iceCandidate 후보를 알림
-
             @Override
             public void onEvent(IceCandidateFoundEvent event) {
                 log.info("ICE Candidate Message 전송 ----->");
@@ -64,6 +63,8 @@ public class UserSession implements Closeable {
         });
     }
 
+
+
     public String getUserId() {
         return userId;
     }
@@ -74,14 +75,6 @@ public class UserSession implements Closeable {
 
     public MediaPipeline getPipeline() {
         return pipeline;
-    }
-
-    public boolean isVideo() {
-        return video;
-    }
-
-    public boolean isAudio() {
-        return audio;
     }
 
     public Long getRoomId() {
@@ -102,7 +95,8 @@ public class UserSession implements Closeable {
     public void setAudio(boolean audio) {
         this.audio = audio;
     }
-
+    public boolean getTimer() {return this.timer;}
+    public void setTimer(boolean timer) { this.timer = timer; }
     /*
          - SDP : 미디어 스트림 전송에 필요한 많은 정보 포함
                 WebRTC 통신을 위해서는 먼저 SDP를 교환해야 함 (브라우저 끼리는 Offer/Answer 모델)

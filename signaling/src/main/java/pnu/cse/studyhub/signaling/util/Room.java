@@ -26,18 +26,11 @@ import static pnu.cse.studyhub.signaling.util.Message.*;
 @Slf4j
 public class Room implements Closeable {
 
-    /*
-        TODO : 여기서도 type을 가져야 할 필요가 있을까?? 흠...
-                그냥 roomId를 String으로 바꿔주고
-                이름을 Type+roomId ex open_1 이런식으로 저장해주면 될라나..?
-     */
     private final Long roomId;
 
     private final MediaPipeline pipeline;
 
     private final ConcurrentMap<String, UserSession> participants = new ConcurrentHashMap<>();
-
-    //private static final int ROOM_LIMIT = 25;
 
     public Room(Long roomId, MediaPipeline pipeline) {
         this.roomId = roomId;
@@ -58,6 +51,8 @@ public class Room implements Closeable {
     }
 
     public UserSession join(String userId, WebSocketSession session, boolean video, boolean audio) throws IOException {
+        // TODO : 여기서 redis 사용하자 ??
+
         final UserSession participant = new UserSession(userId,this.roomId, session, this.pipeline, video, audio);
 
         // 최대 접속 인원 초과 시 입장 제한
