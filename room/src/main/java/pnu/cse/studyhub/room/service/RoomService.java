@@ -276,7 +276,7 @@ public class RoomService {
 //        if(openUserRoomEntity.isRoomOwner()){
 //            listRepository.delete(openRoomEntity);
 //        }
-//        // TODO : roomOwner가 아닐경우 일반 유저
+//        // TODO : roomOwner가 아닐경우 해당 방의 인원 감소
 //
 //    }
 
