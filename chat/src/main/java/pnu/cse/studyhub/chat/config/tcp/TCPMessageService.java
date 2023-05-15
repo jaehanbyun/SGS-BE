@@ -14,7 +14,6 @@ public class TCPMessageService {
 
 
     public void sendMessage(String message) {
-        String timestamp = LocalDateTime.now().toString();
         log.info("Sending message: {}", message);
         String response = tcpClientGateway.send(message);
         log.info("Received response: {}", response);
