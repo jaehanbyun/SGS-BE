@@ -2,6 +2,7 @@ package pnu.cse.studyhub.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -21,7 +22,7 @@ public class KafkaProducer {
         log.info("producer_topic : " + topic);
         log.info("producer_content : " + chat.getContent());
         String type = chat.getMessageType();
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try {
             String content = objectMapper.writeValueAsString(chat);
             kafkaTemplate.send(topic, content);
