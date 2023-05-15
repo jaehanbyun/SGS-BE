@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class ChatFileRequest {
-    private String roomId;
+    private Long roomId;
     private String senderId;
     private String messageType;
     private MultipartFile content;

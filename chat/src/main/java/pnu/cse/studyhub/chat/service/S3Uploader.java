@@ -34,7 +34,7 @@ public class S3Uploader {
 //        putS3(image,fileName);
         return "";
     }
-    public String base64FileOrVideoUpload(String base64,String roomId) throws IOException {
+    public String base64FileOrVideoUpload(String base64,Long roomId) throws IOException {
         byte[] fileData = Base64.decodeBase64(base64);
         String fileName = getCurrentTimeAsString() + "/" + roomId;
         File file = new File(fileName);
@@ -47,7 +47,7 @@ public class S3Uploader {
     }
 
     // MultipartFile을 전달받아 File로 전환한 후 S3에 업로드
-    public String multipartFileUpload(MultipartFile multipartFile, String roomId) throws IOException {
+    public String multipartFileUpload(MultipartFile multipartFile, Long roomId) throws IOException {
         String fileName = getCurrentTimeAsString() + "/" + multipartFile.getName();
         File uploadFile = convert(multipartFile)
                 .orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File로 전환이 실패했습니다."));
