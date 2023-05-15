@@ -18,7 +18,6 @@ ext {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-integration'
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.integration:spring-integration-ip'
