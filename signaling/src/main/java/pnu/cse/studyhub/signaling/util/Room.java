@@ -15,6 +15,8 @@ import pnu.cse.studyhub.signaling.dao.response.ParticipantResponse;
 import javax.annotation.PreDestroy;
 import java.io.Closeable;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -50,20 +52,14 @@ public class Room implements Closeable {
         this.close();
     }
 
-    public UserSession join(String userId, WebSocketSession session, boolean video, boolean audio) throws IOException {
+    public UserSession join(String userId, WebSocketSession session, boolean video, boolean audio, LocalTime studyTime) throws IOException {
         // TODO : 여기서 redis 사용하자 ??
 
-        final UserSession participant = new UserSession(userId,this.roomId, session, this.pipeline, video, audio);
-
-        // 최대 접속 인원 초과 시 입장 제한
-//        if (this.participants.size() > ROOM_LIMIT) {
-//            final JsonObject limitJoinAnswerMsg = limitJoinAnswer(this.roomId);
-//            participant.sendMessage(limitJoinAnswerMsg);
-//            return null;
-//        }
+        final UserSession participant = new UserSession(userId,this.roomId, session, this.pipeline, video, audio,studyTime);
 
         joinRoom(participant);
         participants.put(participant.getUserId(), participant);
+
         sendParticipantNames(participant);
         return participant;
     }
@@ -78,10 +74,11 @@ public class Room implements Closeable {
     }
 
     // room에 새 참가자를 추가하고 방에 있는 다른 모든 참가자에게 새 참가자의 도착을 알리는 것
+    // TODO 코드 다시
     private Collection<String> joinRoom(UserSession newUser) throws IOException {
 
         ParticipantResponse participantResponse = new ParticipantResponse(
-                newUser.getUserId(), newUser.getVideo(), newUser.getAudio());
+                newUser.getUserId(), newUser.getVideo(), newUser.getAudio(), false, newUser.getStudyTime(),null);
 
         final JsonElement participant = JsonUtils.toJsonObject(participantResponse);
 
@@ -120,13 +117,14 @@ public class Room implements Closeable {
         }
     }
 
+    // 새로운 유저 방 접속시 기존 유저들에 대한 정보를 새로운 유저한테 전달
     public void sendParticipantNames(UserSession user) throws IOException {
 
         final JsonArray participantsArray = new JsonArray();
         for (final UserSession participant : participants.values()) {
             if (!participant.equals(user)) {
                 ParticipantResponse participantResponse = new ParticipantResponse(
-                        participant.getUserId(), participant.getVideo(), participant.getAudio());
+                        participant.getUserId(), participant.getVideo(), participant.getAudio(),participant.getTimer(),participant.getStudyTime(),participant.getOnTime());
                 final JsonElement participantInfo = JsonUtils.toJsonObject(participantResponse);
                 participantsArray.add(participantInfo);
             }
@@ -155,6 +153,8 @@ public class Room implements Closeable {
             participant.sendMessage(updateAudioStateJson);
         }
     }
+
+
 
     // Room이 close 될때 모든 userSession을 close
     // 해당 participants 도 clear하고

@@ -10,6 +10,8 @@ import org.kurento.jsonrpc.JsonUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -28,13 +30,20 @@ public class UserSession implements Closeable {
     private boolean audio;
     private boolean timer;
 
+    // TODO : 나중에 수정 될수도
+
+    private LocalTime studyTime;
+    private LocalTime onTime;
+
+    /////
+
     // 현재 나의 webRtcEndPoint 객체니깐 밖으로 내보낸다는 의미
     private final WebRtcEndpoint outgoingMedia;
 
     // 나와 연결되어야 할 다른 사람의 webRtcEndPoint 객체들이라 map 형태로 저장
     private final ConcurrentMap<String, WebRtcEndpoint> incomingMedia = new ConcurrentHashMap<>();
 
-    public UserSession(String userId, Long roomId, WebSocketSession session, MediaPipeline pipeline, boolean video, boolean audio) {
+    public UserSession(String userId, Long roomId, WebSocketSession session, MediaPipeline pipeline, boolean video, boolean audio, LocalTime studyTime) {
 
         this.userId = userId;
         this.session = session;
@@ -42,7 +51,12 @@ public class UserSession implements Closeable {
         this.roomId = roomId;
         this.video = video;
         this.audio = audio;
+
+        // Timer 관련
         this.timer = false;
+        this.studyTime = studyTime;
+        this.onTime = null;
+
         this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).build();
         this.outgoingMedia.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
             // iceCandidateFounder 이벤트 리스너 등록
@@ -97,6 +111,14 @@ public class UserSession implements Closeable {
     }
     public boolean getTimer() {return this.timer;}
     public void setTimer(boolean timer) { this.timer = timer; }
+
+    public LocalTime getStudyTime() {return studyTime;}
+
+    public void setStudyTime(LocalTime studyTime) {this.studyTime = studyTime;}
+
+    public LocalTime getOnTime() {return onTime;}
+
+    public void setOnTime(LocalTime onTime) {this.onTime = onTime;}
     /*
          - SDP : 미디어 스트림 전송에 필요한 많은 정보 포함
                 WebRTC 통신을 위해서는 먼저 SDP를 교환해야 함 (브라우저 끼리는 Offer/Answer 모델)

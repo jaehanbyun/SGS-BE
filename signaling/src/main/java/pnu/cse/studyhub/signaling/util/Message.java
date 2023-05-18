@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 
 public class Message {
 
-    // Res-1 : 새로운 유저 방접속 시 기존 유저들에 대한 정보(userId, video, audio)를 새로운 유저에게 전달
+    // Res-1 : 새로운 유저 방접속 시 기존 유저들에 대한 정보(userId, video, audio, timer, studyTime, onTime)를 새로운 유저에게 전달
     public static JsonObject existingParticipants(JsonArray participantsArray) {
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id", "existingParticipants");
@@ -14,7 +14,7 @@ public class Message {
         return jsonObject;
     }
 
-    // Res-2 : 새로운 유저 방접속 시 기존 유저들에게 새로운 유저에 대한 정보(userId, video, audio) 전달
+    // Res-2 : 새로운 유저 방접속 시 기존 유저들에게 새로운 유저에 대한 정보(userId, video, audio, timer=false, studyTime, onTime = null) 전달
     public static JsonObject newParticipantArrived(JsonElement participantInfo) {
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id", "newParticipantArrived");
@@ -65,14 +65,6 @@ public class Message {
         jsonObject.addProperty("audio", audio);
         return jsonObject;
     }
-
-    // Res-8 방 최대 접속 인원 초과 시 참가 제한 응답
-//    public static JsonObject limitJoinAnswer(String roomId) {
-//        final JsonObject jsonObject = new JsonObject();
-//        jsonObject.addProperty("id","limitJoinAnswer");
-//        jsonObject.addProperty("roomId", roomId);
-//        return jsonObject;
-//    }
 
 
 }

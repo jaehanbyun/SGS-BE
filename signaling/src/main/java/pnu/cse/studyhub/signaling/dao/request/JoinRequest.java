@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class JoinRequest {
     private String id;
+    // TODO : token 처리 어떻게 ?
     private String token;
     private String userId;
     private long roomId;

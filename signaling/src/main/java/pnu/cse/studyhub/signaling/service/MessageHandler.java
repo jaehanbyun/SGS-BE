@@ -24,7 +24,9 @@ import pnu.cse.studyhub.signaling.util.UserRegistry;
 import pnu.cse.studyhub.signaling.util.UserSession;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -58,15 +60,6 @@ public class MessageHandler extends TextWebSocketHandler {
         log.info("user establish websocket connection  : {}", session);
     }
 
-    // 메시지를 브로드캐스트 함
-//    @Override
-//    public void handleTextMessage(WebSocketSession session, TextMessage message){
-//        for (WebSocketSession webSocketSession : sessions) {
-//            if (webSocketSession.isOpen() && !session.getId().equals(webSocketSession.getId())) {
-//                webSocketSession.sendMessage(message);
-//            }
-//        }
-//    }
 
     // 해당 webSocketsession으로 메시지 보내기
     @Override
@@ -138,6 +131,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
                 // 타이머 설정 변경
                 case "timerState":
+                    // id, userid, timerState / user : userSession type
                     TimerRequest timerRequest = mapper.readValue(message.getPayload(), TimerRequest.class);
                     updateTimer(timerRequest, user);
                     break;
@@ -147,7 +141,6 @@ public class MessageHandler extends TextWebSocketHandler {
                     leave(user);
                     break;
 
-
                 default:
                     break;
             }
@@ -156,11 +149,13 @@ public class MessageHandler extends TextWebSocketHandler {
         }
     }
 
+    // TODO : 여기 수정 필수 !!
     // websocket 연결 끊길때
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("[ws] Session has been closed with status [{} {}]", status, session);
         UserSession user = userRegistry.removeBySession(session);
+
         if(user.getTimer()){ // 만약 타이머가 On 상태이면
             user.setTimer(false);
             String tcpMessage = TCPTimerRequest.builder()
@@ -176,87 +171,45 @@ public class MessageHandler extends TextWebSocketHandler {
         Room room = roomManager.getRoom(user.getRoomId());
         room.leave(user);
 
-        // redis에서 유저 삭제
-        SetOperations<Long, String> setOperations = redisTemplate.opsForSet();
-        try {
-            log.info("[redis] remove key : {}, value : {}", room.getRoomId(), user.getUserId());
-            //setOperations.remove(room.getRoomId(), user.getUserId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         if (room.getParticipants().isEmpty()) {
             roomManager.removeRoom(room);
-
-            try {
-                log.info("[redis] remove key : {}", room.getRoomId());
-                //redisTemplate.delete(room.getRoomId());
-                redisTemplate.delete(room.getRoomId()+PIPELINE);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
             // kurento media pipeline 삭제
             kurento.getServerManager().getPipelines().stream()
                     .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
                     .findAny().ifPresent(pipeline -> pipeline.release());
-
-//            try {
-//                log.info("[redis] remove key : {}, value : {}", SERVER + IP, room.getRoomId());
-//                setOperations.remove(SERVER + IP, room.getRoomId());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
         }
-
-
     }
 
 
     private void join(JoinRequest request, WebSocketSession session) throws IOException {
-        // TODO : 토큰
 
         final String userId = request.getUserId();
         final Long roomId = request.getRoomId();
         final boolean video = request.isVideo();
         final boolean audio = request.isAudio();
 
-        // roomManager에서 roomId를 매개변수로 room을 받아옴
-        // 해당 room에 있는 멤버들에 대한 sdp, ice candidate 관련 정보 필요
+        // TODO : 여기서 User 생성해줄 때 TCP 서버에 해당 userId의 공부시간 요청해야할듯?
+        //          그렇게 되면 응답 올때까지 기다려야 하나..? redis로 시그널링 서버에서 관리?
+        //          비동기로 처리..? 일단 redis로 하자
+
+        ValueOperations<String, LocalTime> userTime = redisTemplate.opsForValue();
+        LocalTime studyTime;
+
+        if(redisTemplate.hasKey(userId)){
+            studyTime = userTime.get(userId);
+        }else{
+            studyTime = LocalTime.of(0,0,0);
+        }
+
         Room room = roomManager.getRoom(roomId);
 
-        // 해당 room에 join한다고 request를 보낸 user에 대한 내용을 집어 넣음
-        // TODO : room.join에 대해 redis를 사용하는 생성자를 하나 쓰자
-        final UserSession newUser = room.join(userId, session, video, audio);
+        final UserSession newUser = room.join(userId, session, video, audio,studyTime);
 
         if (Objects.isNull(newUser)) return;
         userRegistry.register(newUser);
 
-
-        try {
-            log.info("[redis] save key : {}, value : {}", roomId, room.getPipeLineId());
-            // 레디스에 roomId+Pipeline를 키로, room.getPipelineid를 저장
-            // room마다 MediaPipeline의 Id 값은 수정되지 않는 값이라 캐시에 두면 좋은 성능을 볼 수 있음
-            // TODO : 유저가 새로운 방 입장할 때 redis에서 pipelineId 가져오기
-            //          여기서 redis를 쓰는 의미가 있나? redis 저장하고 어디서 써야하지
-            //          스터디 그룹에 대한 MediaPipeline은 DB에 저장하고 redis를 사용하는 방식 ㅇㄸ?
-            ValueOperations<String, String> valueOperations = redisTemplate.opsForValue(); // String 타입
-            valueOperations.set(roomId + PIPELINE, room.getPipeLineId(), TIME, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            log.info("[redis] save key : {}, value : {}", roomId, userId);
-            //log.info("[redis] save key : {}, value : {}", SERVER + IP, roomId);
-            // redis에 roomId를 key로 하고 userId를 집어 넣음 (해당 room에 있는 user들)
-            
-            SetOperations<String, String> setOperations = redisTemplate.opsForSet(); // set 타입
-            setOperations.add(roomId.toString(), userId);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void leave(UserSession user) throws IOException {
@@ -278,7 +231,7 @@ public class MessageHandler extends TextWebSocketHandler {
     private void updateTimer(TimerRequest request, UserSession user) throws IOException {
         String tcpMessage;
 
-        if (request.isTimer()) { // Timer Start 누를 때
+        if (request.isTimerState()) { // Timer Start 누를 때
             user.setTimer(true);
             tcpMessage = TCPTimerRequest.builder()
                     .type("TIMER_ON")
