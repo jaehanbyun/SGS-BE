@@ -119,6 +119,17 @@ public class UserSession implements Closeable {
     public LocalTime getOnTime() {return onTime;}
 
     public void setOnTime(LocalTime onTime) {this.onTime = onTime;}
+    public void countStudyTime(LocalTime offTime, LocalTime onTime){
+        onTime.minusHours(offTime.getHour());
+        onTime.minusMinutes(offTime.getMinute());
+        onTime.minusSeconds(offTime.getSecond());
+
+        this.studyTime.minusHours(onTime.getHour());
+        this.studyTime.minusMinutes(onTime.getMinute());
+        this.studyTime.minusSeconds(onTime.getSecond());
+    }
+
+
     /*
          - SDP : 미디어 스트림 전송에 필요한 많은 정보 포함
                 WebRTC 통신을 위해서는 먼저 SDP를 교환해야 함 (브라우저 끼리는 Offer/Answer 모델)

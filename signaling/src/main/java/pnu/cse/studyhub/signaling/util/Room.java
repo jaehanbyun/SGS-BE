@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.kurento.client.Continuation;
 import org.kurento.client.MediaPipeline;
 import org.kurento.jsonrpc.JsonUtils;
+import org.springframework.cglib.core.Local;
 import org.springframework.web.socket.WebSocketSession;
 import pnu.cse.studyhub.signaling.dao.request.AudioRequest;
+import pnu.cse.studyhub.signaling.dao.request.TimerRequest;
 import pnu.cse.studyhub.signaling.dao.request.VideoRequest;
 import pnu.cse.studyhub.signaling.dao.response.ParticipantResponse;
 
@@ -78,7 +80,7 @@ public class Room implements Closeable {
     private Collection<String> joinRoom(UserSession newUser) throws IOException {
 
         ParticipantResponse participantResponse = new ParticipantResponse(
-                newUser.getUserId(), newUser.getVideo(), newUser.getAudio(), false, newUser.getStudyTime(),null);
+                newUser.getUserId(), newUser.getVideo(), newUser.getAudio(), newUser.getTimer(), newUser.getStudyTime(),null);
 
         final JsonElement participant = JsonUtils.toJsonObject(participantResponse);
 
@@ -154,6 +156,58 @@ public class Room implements Closeable {
         }
     }
 
+    /*
+        젤 처음 들어오면 각 유저의 (userId, videoState, audioState, 공부시간, 타이머상태, 타이머 누른 시간)을 받을거임.
+            Off 유저 : (공부시간) 화면에 출력
+            On 유저 : (공부시간) + (현재시각) - (On 누른 시각)를 화면에 출력
+
+        유저가 Timer 버튼을 누르면 TimerRequest(id, userId, timerState, time)가 서버로 날라옴
+             Off -> On 누른 유저 : TimerRequest(id, userId, timerState:True, time(On 누른 시간))
+             On -> Off 누른 유저 : TimerRequest(id, userId, timerState:False, time(Off 누른 시간))
+
+        해당 UserSession의 변수에 값을 바꿔주고 (set)
+            Off -> On 누른 유저 : timer, studyTime, onTime 변수 입력 // studyTime 동기화 문제 없나?
+                                timer = True , studyTime = 그대로 , onTime = TimerRequest.time
+            On -> Off 누른 유저 : timer, studyTime, onTime 변수 입력
+                                timer = False, studyTime = studyTime + TimerRequest.time(Off 누른 시각) - onTime(On 눌렀던 시각)
+                                그리고 redis에 userId Key로 studyTime 저장하기 (제일 처음 유저 생성될 때 불러오기 위해서)
+
+        해당 방에 있는 모든유저(본인 포함)에게 timerStateAnswer을 보내줌
+            만약 Timer On 요청이면 timeStateAnswer(id, userId, timer, time)을 보내주고
+            만약 Timer Off 요청이면 timeStateAnswer(id, userId, timer, studyTime) 보내주기
+
+        유저는 timeStateAnswer를 받아서 출력
+        
+        <화면 출력>    
+        Off -> On 누른 유저 : (공부시간) + (현재시각) - (timerStateAnswer.time)를 화면에 출력
+        On -> Off 누른 유저 : (timerStateAnswer.studyTime) 화면에 출력
+
+
+        웹 소켓 끊겼을 때 (브라우저 종료)
+            변수 기반으로 redis에 userId Key로 studyTime만 저장하면 될 듯
+     */
+
+    public void updateTimer(TimerRequest request) throws IOException {
+
+        final UserSession user = participants.get(request.getUserId());
+        user.setTimer(request.isTimerState());
+        if(!user.getTimer()){ // On -> Off 누른 유저
+            user.countStudyTime(request.getTime(),user.getOnTime());
+        }
+        user.setOnTime(request.getTime());
+
+        final JsonObject updateTimerStateJson;
+
+        if(!user.getTimer()){ // Off -> On 유저
+            updateTimerStateJson = timerStateAnswer(request.getUserId(), request.isTimerState(),user.getOnTime());
+        }else{ // On -> Off 유저
+            updateTimerStateJson = timerStateAnswer(request.getUserId(), request.isTimerState(),user.getStudyTime());
+        }
+
+        for (final UserSession participant: participants.values()) { // TODO : 본인도 포함할지 말지..?
+            participant.sendMessage(updateTimerStateJson);
+        }
+    }
 
 
     // Room이 close 될때 모든 userSession을 close

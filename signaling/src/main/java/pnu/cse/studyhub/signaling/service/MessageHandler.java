@@ -149,24 +149,24 @@ public class MessageHandler extends TextWebSocketHandler {
         }
     }
 
-    // TODO : 여기 수정 필수 !!
+
     // websocket 연결 끊길때
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("[ws] Session has been closed with status [{} {}]", status, session);
-        UserSession user = userRegistry.removeBySession(session);
+        //final UserSession user = userRegistry.getBySession(session);
+        final UserSession user = userRegistry.removeBySession(session);
 
-        if(user.getTimer()){ // 만약 타이머가 On 상태이면
+        if(user.getTimer()){ // user가 On 상태일때
             user.setTimer(false);
-            String tcpMessage = TCPTimerRequest.builder()
-                    .type("TIMER_OFF")
-                    .userId(user.getUserId())
-                    .time(LocalDateTime.now().toString())
-                    .build().toString();
-
-            tcpMessageService.sendMessage(tcpMessage);
-            log.info("[tcp to state] {}'s timer stopped.",user.getUserId());
+            ValueOperations<String, LocalTime> userTime = redisTemplate.opsForValue();
+            user.countStudyTime(LocalTime.now(),user.getOnTime());
+            userTime.set(user.getUserId(), user.getStudyTime());
         }
+
+        //userRegistry에서만 삭제 userSession 자체가 사라지진 않음..?
+        //userRegistry에 존재하지 않는 userSession은 어떻게 되나?
+
         if (Objects.isNull(user)) return;
         Room room = roomManager.getRoom(user.getRoomId());
         room.leave(user);
@@ -180,6 +180,7 @@ public class MessageHandler extends TextWebSocketHandler {
                     .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
                     .findAny().ifPresent(pipeline -> pipeline.release());
         }
+
     }
 
 
@@ -229,32 +230,12 @@ public class MessageHandler extends TextWebSocketHandler {
     }
 
     private void updateTimer(TimerRequest request, UserSession user) throws IOException {
-        String tcpMessage;
+        final Room room = roomManager.getRoom(user.getRoomId());
+        room.updateTimer(request);
 
-        if (request.isTimerState()) { // Timer Start 누를 때
-            user.setTimer(true);
-            tcpMessage = TCPTimerRequest.builder()
-                    .type("TIMER_ON")
-                    .userId(request.getUserId())
-                    .time(LocalDateTime.now().toString())
-                    .build().toString();
-
-            log.info("[tcp to state] {}'s timer has started.",user.getUserId());
-
-        }else{ // Timer Stop 누를 때
-            user.setTimer(false);
-            tcpMessage = TCPTimerRequest.builder()
-                    .type("TIMER_OFF")
-                    .userId(request.getUserId())
-                    //.session(session.getId())
-                    .time(LocalDateTime.now().toString())
-                    .build().toString();
-
-            log.info("[tcp to state] {}'s timer stopped.",user.getUserId());
+        if(!request.isTimerState()) {
+            ValueOperations<String, LocalTime> userTime = redisTemplate.opsForValue();
+            userTime.set(user.getUserId(), user.getStudyTime());
         }
-
-        tcpMessageService.sendMessage(tcpMessage);
-
-
     }
 }
