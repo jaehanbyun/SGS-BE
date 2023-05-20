@@ -159,9 +159,9 @@ public class MessageHandler extends TextWebSocketHandler {
 
         if(user.getTimer()){ // user가 On 상태일때
             user.setTimer(false);
-            ValueOperations<String, LocalTime> userTime = redisTemplate.opsForValue();
+            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
             user.countStudyTime(LocalTime.now(),user.getOnTime());
-            userTime.set(user.getUserId(), user.getStudyTime());
+            userTime.set(user.getUserId(), user.getStudyTime().toString());
         }
 
         //userRegistry에서만 삭제 userSession 자체가 사라지진 않음..?
@@ -184,6 +184,30 @@ public class MessageHandler extends TextWebSocketHandler {
     }
 
 
+    private void leave(UserSession user) throws IOException {
+
+        if(user.getTimer()){ // 타이머가 on이라면
+            user.setTimer(false);
+            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
+            user.countStudyTime(LocalTime.now(),user.getOnTime());
+            userTime.set(user.getUserId(), user.getStudyTime().toString());
+        }
+
+        final Room room = roomManager.getRoom(user.getRoomId());
+        // room 매니저로 룸을 가져 온 후에 room에서 해당 user를 없앰
+        //room.leave(user);
+        room.removeParticipant(user.getUserId());
+
+        if (room.getParticipants().isEmpty()) {
+            roomManager.removeRoom(room);
+
+            // kurento media pipeline 삭제
+            kurento.getServerManager().getPipelines().stream()
+                    .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
+                    .findAny().ifPresent(pipeline -> pipeline.release());
+        }
+    }
+
     private void join(JoinRequest request, WebSocketSession session) throws IOException {
 
         final String userId = request.getUserId();
@@ -191,17 +215,16 @@ public class MessageHandler extends TextWebSocketHandler {
         final boolean video = request.isVideo();
         final boolean audio = request.isAudio();
 
-        // TODO : 여기서 User 생성해줄 때 TCP 서버에 해당 userId의 공부시간 요청해야할듯?
-        //          그렇게 되면 응답 올때까지 기다려야 하나..? redis로 시그널링 서버에서 관리?
-        //          비동기로 처리..? 일단 redis로 하자
-
-        ValueOperations<String, LocalTime> userTime = redisTemplate.opsForValue();
+        ValueOperations<String, String> userTime = redisTemplate.opsForValue();
         LocalTime studyTime;
 
         if(redisTemplate.hasKey(userId)){
-            studyTime = userTime.get(userId);
+            //studyTime = userTime.get(userId);
+            studyTime = LocalTime.of(Integer.parseInt(userTime.get(userId).substring(0,2)),Integer.parseInt(userTime.get(userId).substring(3,5)),0);
         }else{
             studyTime = LocalTime.of(0,0,0);
+            userTime.set(userId,studyTime.toString());
+            // 왜 00:00 이 저장되는거지?
         }
 
         Room room = roomManager.getRoom(roomId);
@@ -211,12 +234,6 @@ public class MessageHandler extends TextWebSocketHandler {
         if (Objects.isNull(newUser)) return;
         userRegistry.register(newUser);
 
-    }
-
-    private void leave(UserSession user) throws IOException {
-        final Room room = roomManager.getRoom(user.getRoomId());
-        // room 매니저로 룸을 가져 온 후에 room에서 해당 user를 없앰
-        room.leave(user);
     }
 
     private void updateVideo(VideoRequest request, UserSession user) throws IOException {

@@ -210,8 +210,19 @@ public class UserSession implements Closeable {
     }
 
     public void cancelVideoFrom(final String senderName) {
+        System.out.println("=============>>>>>>");
+        System.out.println(this.userId + "'s incomingMedia : "+incomingMedia.toString());
+        if(incomingMedia.containsKey(senderName)){
+            System.out.println("노에러!!");
+        }else{
+            // 안에 없으면
+            System.out.println("에러!!");
+        }
         final WebRtcEndpoint incoming = incomingMedia.remove(senderName);
+        System.out.println(this.userId + "'s incomingMedia : "+incomingMedia.toString());
+        System.out.println("<<<<<<=============");
 
+        // TODO : 그냥 브라우저 종료는 에러 x , leave room 했을때
         incoming.release(new Continuation<Void>() {
             @Override
             public void onSuccess(Void result) throws Exception { }

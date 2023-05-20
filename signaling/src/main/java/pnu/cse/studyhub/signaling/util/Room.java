@@ -99,13 +99,16 @@ public class Room implements Closeable {
 
     // 특정 유저가 방에서 나갔을 때, 그 유저가 떠난 사실을 해당 방에 참여하고 있는 모든 유저들에게 알림
 
-    private void removeParticipant(String userId) throws IOException {
+    public void removeParticipant(String userId) throws IOException {
+        // 해당 방의 참가자들(participants) 중에 방을 나간 userId를 삭제하고
         participants.remove(userId);
 
         final List<String> unnotifiedParticipants = new ArrayList<>();
         final JsonObject participantLeftJson = participantLeft(userId);
+        // 남아 있는 참가자들한테 해당 userId가 나간사실을 알림
         for (final UserSession participant : participants.values()) {
             try {
+                // 남아 있는 참가자의 incomingMedia에서 userId를 없애줘야함
                 participant.cancelVideoFrom(userId);
                 participant.sendMessage(participantLeftJson);
             } catch (final IOException e) {
