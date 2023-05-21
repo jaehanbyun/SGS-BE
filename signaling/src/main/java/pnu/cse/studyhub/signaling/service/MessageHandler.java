@@ -154,7 +154,6 @@ public class MessageHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("[ws] Session has been closed with status [{} {}]", status, session);
-        //final UserSession user = userRegistry.getBySession(session);
         final UserSession user = userRegistry.removeBySession(session);
 
         if(user.getTimer()){ // user가 On 상태일때
@@ -164,18 +163,17 @@ public class MessageHandler extends TextWebSocketHandler {
             userTime.set(user.getUserId(), user.getStudyTime().toString());
         }
 
-        //userRegistry에서만 삭제 userSession 자체가 사라지진 않음..?
-        //userRegistry에 존재하지 않는 userSession은 어떻게 되나?
+        // TODO : TCP 서버랑 연결하고 주석풀기
+        //userStudyTimeToTCP(user);
 
         if (Objects.isNull(user)) return;
         Room room = roomManager.getRoom(user.getRoomId());
+        // 여기서 userSession이 close 됨
         room.leave(user);
-
 
         if (room.getParticipants().isEmpty()) {
             roomManager.removeRoom(room);
 
-            // kurento media pipeline 삭제
             kurento.getServerManager().getPipelines().stream()
                     .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
                     .findAny().ifPresent(pipeline -> pipeline.release());
@@ -183,7 +181,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
     }
 
-
+    // TODO : leave가 굳이 있을 필요가 없는듯? (그냥 버튼 나가기하면 웹소켓 끊어주기..?)
     private void leave(UserSession user) throws IOException {
 
         if(user.getTimer()){ // 타이머가 on이라면
@@ -192,6 +190,9 @@ public class MessageHandler extends TextWebSocketHandler {
             user.countStudyTime(LocalTime.now(),user.getOnTime());
             userTime.set(user.getUserId(), user.getStudyTime().toString());
         }
+
+        // TODO : TCP 서버랑 연결하고 주석풀기
+        //userStudyTimeToTCP(user);
 
         final Room room = roomManager.getRoom(user.getRoomId());
         // room 매니저로 룸을 가져 온 후에 room에서 해당 user를 없앰
@@ -255,4 +256,18 @@ public class MessageHandler extends TextWebSocketHandler {
             userTime.set(user.getUserId(), user.getStudyTime());
         }
     }
+
+    private void userStudyTimeToTCP(UserSession user) {
+        String tcpMessage;
+        // TCP 서버로 userId랑 studyTime 보내줌
+        tcpMessage = TCPTimerRequest.builder()
+                .type("USER_TIME")
+                .userId(user.getUserId())
+                .studyTime(user.getStudyTime().toString())
+                .build().toString();
+
+        tcpMessageService.sendMessage(tcpMessage);
+        log.info("[tcp to state] {} user's studyTime : {}",user.getUserId(),user.getStudyTime().toString());
+    }
+
 }

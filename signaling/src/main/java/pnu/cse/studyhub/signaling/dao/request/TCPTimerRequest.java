@@ -16,8 +16,8 @@ public class TCPTimerRequest {
     private String type;
     @JsonProperty("user_id")
     private String userId;
-    @JsonProperty("time")
-    private String time;
+    @JsonProperty("study_time")
+    private String studyTime;
 
     @Override
     public String toString(){
