@@ -1,0 +1,42 @@
+server:
+  port: 8000
+
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allow-credentials: true
+            allowedHeaders: '*'
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+      routes:
+        - id: auth-service
+          uri: http://${EC2_IP}:8011
+          predicates:
+            - Path=/auth/**
+        - id: chat-service
+          uri: http://${EC2_IP}:8031
+          predicates:
+            - Path=/chat/**
+          filters:
+            - AuthorizationHeaderFilter
+        - id: room-service
+          uri: http:/${EC2_IP}/:8082
+          predicates:
+            - Path=/room/**
+          filters:
+            - AuthorizationHeaderFilter
+
+token:
+  access_expired_time: 3600000
+  secret_key: user_token
+  refresh_expired_time: 3600000
