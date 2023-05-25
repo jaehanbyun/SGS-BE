@@ -51,7 +51,7 @@ public class SignService {
 
     @Transactional
     public ResponseCodeDto signUp(AccountDto dto) {
-        UserAccount exist = accountRepository.findByUserid(dto.getUserid());
+        UserAccount exist = accountRepository.findByUserid(dto.getId());
 
         if (exist != null)
             throw new CustomException(CustomExceptionStatus.DUPLICATED_USERID, "이미 존재하는 아이디입니다.");

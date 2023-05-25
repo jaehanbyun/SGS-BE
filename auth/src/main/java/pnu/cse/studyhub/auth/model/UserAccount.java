@@ -31,7 +31,7 @@ public class UserAccount {
     public static UserAccount createAccount(AccountDto dto) {
 
         return UserAccount.builder()
-                .userid(dto.getUserid())
+                .userid(dto.getId())
                 .email(dto.getEmail())
                 .password(dto.getPassword())
                 .build();
