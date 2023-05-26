@@ -69,15 +69,15 @@ public class Message {
     }
 
     // Res-8 : 타이머 상태 변경에 대한 응답
-    public static JsonObject timerStateAnswer(String userId, boolean timer, LocalTime time) {
+    public static JsonObject timerStateAnswer(String userId, boolean timer, String time) {
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id","timerStateAnswer");
         jsonObject.addProperty("userId", userId);
         jsonObject.addProperty("timerState", timer);
         if(timer){ // on 이면 현재시간도 추가
-            jsonObject.addProperty("time", time.toString());
+            jsonObject.addProperty("onTime", time);
         }else{
-            jsonObject.addProperty("studyTime", time.toString());
+            jsonObject.addProperty("studyTime", time);
         }
 
         return jsonObject;

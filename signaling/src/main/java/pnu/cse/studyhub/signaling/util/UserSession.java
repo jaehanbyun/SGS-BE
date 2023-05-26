@@ -12,6 +12,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -63,7 +64,6 @@ public class UserSession implements Closeable {
             // 이벤트가 발생했을 때 다른 유저들에게 새로운 iceCandidate 후보를 알림
             @Override
             public void onEvent(IceCandidateFoundEvent event) {
-                log.info("ICE Candidate Message 전송 ----->");
                 JsonObject response = iceCandidate(userId, JsonUtils.toJsonObject(event.getCandidate()));
                 try {
                     // 여러 개의 스레드에서 동시에 session 객체에 접근하는 것을 막음
@@ -186,7 +186,6 @@ public class UserSession implements Closeable {
                 // 새로운 WebRtcEndpoint 객체를 만들고 ICE Candidate를 발견할 때마다 처리
                 @Override
                 public void onEvent(IceCandidateFoundEvent event) {
-                    log.info("ICE Candidate Message 전송 ----->");
                     JsonObject response = iceCandidate(sender.getUserId(), JsonUtils.toJsonObject(event.getCandidate()));
                     try {
                         synchronized (session) {
@@ -267,6 +266,31 @@ public class UserSession implements Closeable {
                 webRtc.addIceCandidate(candidate);
             }
         }
+    }
+
+    // userSession 객체가 user.getStudyTime().toString() 이렇게해서 자기의 studyTime을 String으로 바꿈
+    // 메소드 하나 만들어주자 (초까지 출력)
+    // 00:00:00 이런식으로 String 출력하기 (StringBuffer)
+    public String studyTimeToString(){
+
+        DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss");
+        String formattedTime = this.studyTime.format(formatter);
+
+        return formattedTime;
+    }
+
+    public String onTimeToString(){
+
+        if(this.onTime != null){
+            DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss");
+            String formattedTime = this.onTime.format(formatter);
+
+            return formattedTime;
+        }
+        else{ // null이면
+            return "";
+        }
+
     }
 
     @Override

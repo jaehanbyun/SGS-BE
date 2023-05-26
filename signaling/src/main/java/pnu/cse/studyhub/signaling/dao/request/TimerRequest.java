@@ -15,5 +15,5 @@ public class TimerRequest{
     private String id;
     private String userId;
     private boolean timerState;
-    private LocalTime time;
+    private String time;
 }

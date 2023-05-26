@@ -30,6 +30,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -49,7 +50,6 @@ public class MessageHandler extends TextWebSocketHandler {
     private final ObjectMapper mapper;
     public static final String PIPELINE = "-pipeline";
 
-    // redis 저장 유효기간을 하루로 설정
     private static final long TIME = 24 * 60 * 60 * 1000L;
 
     private final TCPMessageService tcpMessageService;
@@ -65,6 +65,7 @@ public class MessageHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {// 해당 session으로부터 message가 날라옴
         try {
+
 
             final JsonObject jsonMessage = gson.fromJson(message.getPayload(), JsonObject.class);
             final UserSession user = userRegistry.getBySession(session);
@@ -101,7 +102,6 @@ public class MessageHandler extends TextWebSocketHandler {
 
                 // ICE Candidate 정보 전송
                 case "onIceCandidate":
-                    log.info("ICE Candidate 정보 받음");
                     CandidateRequest candidateRequest
                             = mapper.readValue(message.getPayload(), CandidateRequest.class);
                     CandidateRequest.Candidate candidate = candidateRequest.getCandidate();
@@ -136,11 +136,10 @@ public class MessageHandler extends TextWebSocketHandler {
                     updateTimer(timerRequest, user);
                     break;
 
-                // 방 나가기
-                case "leaveRoom":
-                    leave(user);
-                    break;
-
+                // 방 나가기 : 그냥 방나가면 웹소켓 끊어주면 됨
+//                case "leaveRoom":
+//                    leave(user);
+//                    break;
                 default:
                     break;
             }
@@ -160,7 +159,7 @@ public class MessageHandler extends TextWebSocketHandler {
             user.setTimer(false);
             ValueOperations<String, String> userTime = redisTemplate.opsForValue();
             user.countStudyTime(LocalTime.now(),user.getOnTime());
-            userTime.set(user.getUserId(), user.getStudyTime().toString());
+            userTime.set(user.getUserId(), user.studyTimeToString());
         }
 
         // TODO : TCP 서버랑 연결하고 주석풀기
@@ -168,7 +167,6 @@ public class MessageHandler extends TextWebSocketHandler {
 
         if (Objects.isNull(user)) return;
         Room room = roomManager.getRoom(user.getRoomId());
-        // 여기서 userSession이 close 됨
         room.leave(user);
 
         if (room.getParticipants().isEmpty()) {
@@ -181,33 +179,30 @@ public class MessageHandler extends TextWebSocketHandler {
 
     }
 
-    // TODO : leave가 굳이 있을 필요가 없는듯? (그냥 버튼 나가기하면 웹소켓 끊어주기..?)
-    private void leave(UserSession user) throws IOException {
-
-        if(user.getTimer()){ // 타이머가 on이라면
-            user.setTimer(false);
-            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
-            user.countStudyTime(LocalTime.now(),user.getOnTime());
-            userTime.set(user.getUserId(), user.getStudyTime().toString());
-        }
-
-        // TODO : TCP 서버랑 연결하고 주석풀기
-        //userStudyTimeToTCP(user);
-
-        final Room room = roomManager.getRoom(user.getRoomId());
-        // room 매니저로 룸을 가져 온 후에 room에서 해당 user를 없앰
-        //room.leave(user);
-        room.removeParticipant(user.getUserId());
-
-        if (room.getParticipants().isEmpty()) {
-            roomManager.removeRoom(room);
-
-            // kurento media pipeline 삭제
-            kurento.getServerManager().getPipelines().stream()
-                    .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
-                    .findAny().ifPresent(pipeline -> pipeline.release());
-        }
-    }
+//    private void leave(UserSession user) throws IOException {
+//
+//        if(user.getTimer()){ // 타이머가 on이라면
+//            user.setTimer(false);
+//            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
+//            user.countStudyTime(LocalTime.now(),user.getOnTime());
+//            userTime.set(user.getUserId(), user.studyTimeToString());
+//        }
+//
+//        //userStudyTimeToTCP(user);
+//
+//        final Room room = roomManager.getRoom(user.getRoomId());
+//        room.leave(user);
+//
+//
+//        if (room.getParticipants().isEmpty()) {
+//            roomManager.removeRoom(room);
+//
+//            // kurento media pipeline 삭제
+//            kurento.getServerManager().getPipelines().stream()
+//                    .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
+//                    .findAny().ifPresent(pipeline -> pipeline.release());
+//        }
+//    }
 
     private void join(JoinRequest request, WebSocketSession session) throws IOException {
 
@@ -220,16 +215,21 @@ public class MessageHandler extends TextWebSocketHandler {
         LocalTime studyTime;
 
         if(redisTemplate.hasKey(userId)){
-            //studyTime = userTime.get(userId);
-            studyTime = LocalTime.of(Integer.parseInt(userTime.get(userId).substring(0,2)),Integer.parseInt(userTime.get(userId).substring(3,5)),0);
+            String ut = userTime.get(userId);
+            studyTime = LocalTime.of(Integer.parseInt(ut.substring(0,2)),Integer.parseInt(ut.substring(3,5)),Integer.parseInt(ut.substring(6,8)));
         }else{
             studyTime = LocalTime.of(0,0,0);
+
+            // TODO : 나중에 없애주기 (Test 용)
             userTime.set(userId,studyTime.toString());
-            // 왜 00:00 이 저장되는거지?
         }
 
-        Room room = roomManager.getRoom(roomId);
+        // TODO : 상태관리서버로 요청 보내고 답장오면 객체 만들어지는 방식
+        //String studyTime2 = userStudyTimeFromTCP(userId);
 
+
+
+        Room room = roomManager.getRoom(roomId);
         final UserSession newUser = room.join(userId, session, video, audio,studyTime);
 
         if (Objects.isNull(newUser)) return;
@@ -252,8 +252,8 @@ public class MessageHandler extends TextWebSocketHandler {
         room.updateTimer(request);
 
         if(!request.isTimerState()) {
-            ValueOperations<String, LocalTime> userTime = redisTemplate.opsForValue();
-            userTime.set(user.getUserId(), user.getStudyTime());
+            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
+            userTime.set(user.getUserId(), user.studyTimeToString());
         }
     }
 
@@ -261,13 +261,26 @@ public class MessageHandler extends TextWebSocketHandler {
         String tcpMessage;
         // TCP 서버로 userId랑 studyTime 보내줌
         tcpMessage = TCPTimerRequest.builder()
-                .type("USER_TIME")
+                .type("STUDY_TIME_TO_TCP")
                 .userId(user.getUserId())
-                .studyTime(user.getStudyTime().toString())
+                .studyTime(user.studyTimeToString())
                 .build().toString();
 
         tcpMessageService.sendMessage(tcpMessage);
-        log.info("[tcp to state] {} user's studyTime : {}",user.getUserId(),user.getStudyTime().toString());
+        log.info("[tcp to state] {} user's studyTime : {}",user.getUserId(),user.studyTimeToString());
+    }
+
+    private String userStudyTimeFromTCP(String userId) {
+        String tcpMessage;
+        // TCP 서버로 userId랑 studyTime 보내줌
+        tcpMessage = TCPTimerRequest.builder()
+                .type("STUDY_TIME_FROM_TCP")
+                .userId(userId)
+                .build().toString();
+
+        log.info("[tcp from state] request {} user's studyTime",userId);
+        return tcpMessageService.sendMessage(tcpMessage);
+
     }
 
 }

@@ -80,7 +80,7 @@ public class Room implements Closeable {
     private Collection<String> joinRoom(UserSession newUser) throws IOException {
 
         ParticipantResponse participantResponse = new ParticipantResponse(
-                newUser.getUserId(), newUser.getVideo(), newUser.getAudio(), newUser.getTimer(), newUser.getStudyTime(),null);
+                newUser.getUserId(), newUser.getVideo(), newUser.getAudio(), newUser.getTimer(), newUser.studyTimeToString(),null);
 
         final JsonElement participant = JsonUtils.toJsonObject(participantResponse);
 
@@ -129,7 +129,7 @@ public class Room implements Closeable {
         for (final UserSession participant : participants.values()) {
             if (!participant.equals(user)) {
                 ParticipantResponse participantResponse = new ParticipantResponse(
-                        participant.getUserId(), participant.getVideo(), participant.getAudio(),participant.getTimer(),participant.getStudyTime(),participant.getOnTime());
+                        participant.getUserId(), participant.getVideo(), participant.getAudio(),participant.getTimer(),participant.studyTimeToString(), participant.onTimeToString());
                 final JsonElement participantInfo = JsonUtils.toJsonObject(participantResponse);
                 participantsArray.add(participantInfo);
             }
@@ -190,21 +190,23 @@ public class Room implements Closeable {
             변수 기반으로 redis에 userId Key로 studyTime만 저장하면 될 듯
      */
 
+    // 여기서 request.getTime이 hh:mm:ss 형식의 String
     public void updateTimer(TimerRequest request) throws IOException {
 
         final UserSession user = participants.get(request.getUserId());
         user.setTimer(request.isTimerState());
         if(!user.getTimer()){ // On -> Off 누른 유저
-            user.countStudyTime(request.getTime(),user.getOnTime());
+            user.countStudyTime(LocalTime.parse(request.getTime()),user.getOnTime());
         }
-        user.setOnTime(request.getTime());
+        // TODO : on일때 onTime, off일때 "" ?? 고민해보자
+        user.setOnTime(LocalTime.parse(request.getTime()));
 
         final JsonObject updateTimerStateJson;
 
         if(!user.getTimer()){ // Off -> On 유저
-            updateTimerStateJson = timerStateAnswer(request.getUserId(), request.isTimerState(),user.getOnTime());
+            updateTimerStateJson = timerStateAnswer(user.getUserId(), user.getTimer(),user.onTimeToString());
         }else{ // On -> Off 유저
-            updateTimerStateJson = timerStateAnswer(request.getUserId(), request.isTimerState(),user.getStudyTime());
+            updateTimerStateJson = timerStateAnswer(user.getUserId(), user.getTimer(), user.studyTimeToString());
         }
 
         for (final UserSession participant: participants.values()) { // TODO : 본인도 포함할지 말지..?

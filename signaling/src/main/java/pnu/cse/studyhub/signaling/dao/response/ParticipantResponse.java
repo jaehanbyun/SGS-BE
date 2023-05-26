@@ -18,6 +18,6 @@ public class ParticipantResponse {
     private boolean video;
     private boolean audio;
     private boolean timer;
-    private LocalTime studyTime;
-    private LocalTime onTime;
+    private String studyTime;
+    private String onTime;
 }
