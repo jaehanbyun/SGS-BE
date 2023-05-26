@@ -37,7 +37,7 @@ public class UserRegistry {
     public UserSession removeBySession(WebSocketSession session) {
         final UserSession user = getBySession(session);
         // 웹소켓 연결만 하고 방에 입장하지 않고 종료하지 않는 경우 발생하는 예외 처리
-        if (!Objects.isNull(user)) {
+        if (!Objects.isNull(user)) { // 존재하면
             usersByUserId.remove(user.getUserId());
             usersBySessionId.remove(session.getId());
             return user;

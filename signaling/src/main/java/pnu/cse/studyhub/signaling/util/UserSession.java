@@ -10,6 +10,9 @@ import org.kurento.jsonrpc.JsonUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -28,13 +31,20 @@ public class UserSession implements Closeable {
     private boolean audio;
     private boolean timer;
 
+    // TODO : 나중에 수정 될수도
+
+    private LocalTime studyTime;
+    private LocalTime onTime;
+
+    /////
+
     // 현재 나의 webRtcEndPoint 객체니깐 밖으로 내보낸다는 의미
     private final WebRtcEndpoint outgoingMedia;
 
     // 나와 연결되어야 할 다른 사람의 webRtcEndPoint 객체들이라 map 형태로 저장
     private final ConcurrentMap<String, WebRtcEndpoint> incomingMedia = new ConcurrentHashMap<>();
 
-    public UserSession(String userId, Long roomId, WebSocketSession session, MediaPipeline pipeline, boolean video, boolean audio) {
+    public UserSession(String userId, Long roomId, WebSocketSession session, MediaPipeline pipeline, boolean video, boolean audio, LocalTime studyTime) {
 
         this.userId = userId;
         this.session = session;
@@ -42,14 +52,18 @@ public class UserSession implements Closeable {
         this.roomId = roomId;
         this.video = video;
         this.audio = audio;
+
+        // Timer 관련
         this.timer = false;
+        this.studyTime = studyTime;
+        this.onTime = null;
+
         this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).build();
         this.outgoingMedia.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
             // iceCandidateFounder 이벤트 리스너 등록
             // 이벤트가 발생했을 때 다른 유저들에게 새로운 iceCandidate 후보를 알림
             @Override
             public void onEvent(IceCandidateFoundEvent event) {
-                log.info("ICE Candidate Message 전송 ----->");
                 JsonObject response = iceCandidate(userId, JsonUtils.toJsonObject(event.getCandidate()));
                 try {
                     // 여러 개의 스레드에서 동시에 session 객체에 접근하는 것을 막음
@@ -97,6 +111,25 @@ public class UserSession implements Closeable {
     }
     public boolean getTimer() {return this.timer;}
     public void setTimer(boolean timer) { this.timer = timer; }
+
+    public LocalTime getStudyTime() {return studyTime;}
+
+    public void setStudyTime(LocalTime studyTime) {this.studyTime = studyTime;}
+
+    public LocalTime getOnTime() {return onTime;}
+
+    public void setOnTime(LocalTime onTime) {this.onTime = onTime;}
+    public void countStudyTime(LocalTime offTime, LocalTime onTime){
+        onTime.minusHours(offTime.getHour());
+        onTime.minusMinutes(offTime.getMinute());
+        onTime.minusSeconds(offTime.getSecond());
+
+        this.studyTime.minusHours(onTime.getHour());
+        this.studyTime.minusMinutes(onTime.getMinute());
+        this.studyTime.minusSeconds(onTime.getSecond());
+    }
+
+
     /*
          - SDP : 미디어 스트림 전송에 필요한 많은 정보 포함
                 WebRTC 통신을 위해서는 먼저 SDP를 교환해야 함 (브라우저 끼리는 Offer/Answer 모델)
@@ -153,7 +186,6 @@ public class UserSession implements Closeable {
                 // 새로운 WebRtcEndpoint 객체를 만들고 ICE Candidate를 발견할 때마다 처리
                 @Override
                 public void onEvent(IceCandidateFoundEvent event) {
-                    log.info("ICE Candidate Message 전송 ----->");
                     JsonObject response = iceCandidate(sender.getUserId(), JsonUtils.toJsonObject(event.getCandidate()));
                     try {
                         synchronized (session) {
@@ -177,8 +209,19 @@ public class UserSession implements Closeable {
     }
 
     public void cancelVideoFrom(final String senderName) {
+        System.out.println("=============>>>>>>");
+        System.out.println(this.userId + "'s incomingMedia : "+incomingMedia.toString());
+        if(incomingMedia.containsKey(senderName)){
+            System.out.println("노에러!!");
+        }else{
+            // 안에 없으면
+            System.out.println("에러!!");
+        }
         final WebRtcEndpoint incoming = incomingMedia.remove(senderName);
+        System.out.println(this.userId + "'s incomingMedia : "+incomingMedia.toString());
+        System.out.println("<<<<<<=============");
 
+        // TODO : 그냥 브라우저 종료는 에러 x , leave room 했을때
         incoming.release(new Continuation<Void>() {
             @Override
             public void onSuccess(Void result) throws Exception { }
@@ -223,6 +266,31 @@ public class UserSession implements Closeable {
                 webRtc.addIceCandidate(candidate);
             }
         }
+    }
+
+    // userSession 객체가 user.getStudyTime().toString() 이렇게해서 자기의 studyTime을 String으로 바꿈
+    // 메소드 하나 만들어주자 (초까지 출력)
+    // 00:00:00 이런식으로 String 출력하기 (StringBuffer)
+    public String studyTimeToString(){
+
+        DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss");
+        String formattedTime = this.studyTime.format(formatter);
+
+        return formattedTime;
+    }
+
+    public String onTimeToString(){
+
+        if(this.onTime != null){
+            DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss");
+            String formattedTime = this.onTime.format(formatter);
+
+            return formattedTime;
+        }
+        else{ // null이면
+            return "";
+        }
+
     }
 
     @Override

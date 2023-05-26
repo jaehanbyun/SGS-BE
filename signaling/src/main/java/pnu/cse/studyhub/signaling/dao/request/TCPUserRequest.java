@@ -7,17 +7,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TCPTimerRequest {
-    // TODO : TCP
+public class TCPUserRequest {
+
     @JsonProperty("type")
     private String type;
     @JsonProperty("user_id")
     private String userId;
-    @JsonProperty("study_time")
-    private String studyTime;
 
     @Override
     public String toString(){
