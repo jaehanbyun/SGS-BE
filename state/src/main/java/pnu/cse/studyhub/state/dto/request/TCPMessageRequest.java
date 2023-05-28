@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
         visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = TCPChatRequest.class, name = "chat"),
-        @JsonSubTypes.Type(value = TCPSignalingRequest.class, name = "room")
+        @JsonSubTypes.Type(value = TCPSignalingRequest.class, name = "signaling")
 })
 public abstract class TCPMessageRequest{
     private String server;
