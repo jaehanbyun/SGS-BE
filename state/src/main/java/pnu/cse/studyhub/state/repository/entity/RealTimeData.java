@@ -16,8 +16,9 @@ public class RealTimeData {
     private String userId;
     private Long roomId;
     private String sessionId;
-    // 현재시각 - 타이머 시작 시간
-    private LocalDateTime studyStartTime;
-    // 이전까지 기록된 총 공부 시간
-    private Duration recordTime;
+    private String studyTime;
+//    // 현재시각 - 타이머 시작 시간
+//    private LocalDateTime studyStartTime;
+//    // 이전까지 기록된 총 공부 시간
+//    private Duration recordTime;
 }
