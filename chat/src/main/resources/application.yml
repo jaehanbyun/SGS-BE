@@ -17,7 +17,7 @@ spring:
     consumer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringDeSerializer
 #      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
       group-id: pnu-cse
     topic : studyhub
