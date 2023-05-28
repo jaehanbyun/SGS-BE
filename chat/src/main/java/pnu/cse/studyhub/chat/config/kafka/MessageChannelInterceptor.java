@@ -52,7 +52,7 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
 //                        .userId(userId)
                         .userId("test1")
                         .server("chat")
-                        .roomId(accessor.getDestination().substring(7)) // 슬래쉬 ( '/' ) 삭제
+                        .roomId(accessor.getDestination().substring(7)) // 슬래쉬 ( '/topic/' ) 삭제
                         .session(sessionId)
                         .build();
                 log.warn("test + " + subscribeRequest.toString());
@@ -63,7 +63,7 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
 //                        .userId(userId)
                         .server("chat")
                         .userId("test1")
-                        .roomId(accessor.getDestination().substring(7)) // 슬래쉬 ( '/' ) 삭제
+                        .roomId(accessor.getDestination().substring(7)) // 슬래쉬 ( '/topic/' ) 삭제
                         .session(sessionId)
                         .build();
                 log.info("UserId : " + userId);
