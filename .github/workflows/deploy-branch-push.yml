@@ -12,6 +12,7 @@ permissions:
 env:
   AWS_REGION: 'ap-northeast-2'
   ECR_REGISTRY: '730904690368.dkr.ecr.ap-northeast-2.amazonaws.com'
+  NETWORK_NAME: sgs
 
 jobs:
   deploy:
@@ -84,4 +85,4 @@ jobs:
             fi
               
             docker pull ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
-            docker run -d --name sgs-${{ steps.extract.outputs.branch }} -p ${PORT}:8080 -e SPRING_PROFILES_ACTIVE=dev ${{ steps.build_push_image.outputs.image }}
+            docker run -d --name sgs-${{ steps.extract.outputs.branch }} --network ${{ env.NETWORK_NAME }}-p ${PORT}:8080 -e SPRING_PROFILES_ACTIVE=dev ${{ steps.build_push_image.outputs.image }}
