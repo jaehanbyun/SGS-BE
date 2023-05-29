@@ -53,6 +53,7 @@ jobs:
           AWS_REGION : ${{ env.AWS_REGION }}
       
       - name: Build and Push Docker Image
+        id: build_push_image
         run: |
           docker build -t ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }} .
           docker push ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
@@ -77,9 +78,9 @@ jobs:
               PORT=8091
             fi
             
-            if [ "$(docker ps -qa -f name=sgs-${{ steps.extract.outputs.env }}" ]; then
-              docker rm -f sgs-${{ steps.extract.outputs.env }}
+            if [ "$(docker ps -qa -f name=sgs-${{ steps.extract.outputs.branch }}" ]; then
+              docker rm -f sgs-${{ steps.extract.outputs.branch }}
             fi
               
-            docker pull ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.env }}:${{ steps.image.outputs.version }}
-            docker run -d --name sgs-${{ steps.extract.outputs.env }} -p ${PORT}:8080 -e SPRING_PROFILES_ACTIVE=dev ${{ steps.build_image.outputs.image }}
+            docker pull ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
+            docker run -d --name sgs-${{ steps.extract.outputs.branch }} -p ${PORT}:8080 -e SPRING_PROFILES_ACTIVE=dev ${{ steps.build_push_image.outputs.image }}
