@@ -54,6 +54,9 @@ cloud:
     stack:
       auto: false
 
+token:
+  secret: user_token
+
 tcp:
   server:
     host: localhost
