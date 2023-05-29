@@ -55,6 +55,7 @@ jobs:
       - name: Build and Push Docker Image
         id: build_push_image
         run: |
+          cd ${{ steps.extract.outputs.branch }}
           docker build -t ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }} .
           docker push ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
           echo "::set-output name=image::${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}"
