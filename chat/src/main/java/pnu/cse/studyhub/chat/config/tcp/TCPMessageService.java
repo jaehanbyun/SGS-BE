@@ -1,11 +1,11 @@
 package pnu.cse.studyhub.chat.config.tcp;
 
+import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pnu.cse.studyhub.chat.util.ByteArrayToStringConverter;
 
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 public class TCPMessageService {
     private final TCPClientGateway tcpClientGateway;
     private final ByteArrayToStringConverter converter;
-
 
     public void sendMessage(String message) {
         log.debug("Sending message: {}", message);

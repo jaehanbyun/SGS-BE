@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pnu.cse.studyhub.state.config.TCPClientGateway;
 import pnu.cse.studyhub.state.dto.request.TCPChatRequest;
 import pnu.cse.studyhub.state.dto.request.TCPMessageRequest;
 import pnu.cse.studyhub.state.dto.request.TCPSignalingRequest;
+import pnu.cse.studyhub.state.dto.response.TCPRoomResponse;
 import pnu.cse.studyhub.state.dto.response.TCPSignalingResponse;
 import pnu.cse.studyhub.state.repository.entity.RealTimeData;
 
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 public class MessageService {
 
     private final RedisService redisService;
+    private final TCPClientGateway tcpClientGateway;
 
     public String processMessage(String message) {
         log.info("Received message: {}", message);
@@ -73,15 +76,12 @@ public class MessageService {
                         try {
                             RealTimeData realTimeData =  redisService.getData(signalingRequest.getUserId());
                             if (realTimeData != null) {
-                                TCPSignalingResponse signalingGetResponse = TCPSignalingResponse.builder()
-                                        .userId(realTimeData.getUserId())
-                                        .studyTime(realTimeData.getStudyTime())
-                                        .build();
-                                responseMessage = mapper.writeValueAsString(signalingGetResponse);
+                                responseMessage = sendStudyTimeMessage(realTimeData);
+//                                String roomInResult = sendRoomInOutMessage(realTimeData);
+//                                log.info(roomInResult);
                             } else {
                                 //예외처리
                             }
-
                         }catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -92,11 +92,10 @@ public class MessageService {
                             if (realTimeData != null) {
                                 realTimeData.setStudyTime(signalingRequest.getStudyTime());
                                 RealTimeData signalingSetRealTimeData = redisService.setData(realTimeData);
-                                TCPSignalingResponse signalingSetResponse = TCPSignalingResponse.builder()
-                                        .userId(signalingSetRealTimeData.getUserId())
-                                        .studyTime(signalingSetRealTimeData.getStudyTime())
-                                        .build();
-                                responseMessage = mapper.writeValueAsString(signalingSetResponse);
+                                responseMessage = sendStudyTimeMessage(signalingSetRealTimeData);
+                                String roomOutResult = sendRoomInOutMessage(realTimeData);
+                                log.info("roomOutResult : " + roomOutResult);
+
                             } else {
                                 //예외처리
                             }
@@ -115,5 +114,28 @@ public class MessageService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+    public String sendRoomInOutMessage(RealTimeData rtData) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        TCPRoomResponse tcpRoomResponse = TCPRoomResponse.builder()
+                .server("state")
+                .userId(rtData.getUserId())
+                .roomId(rtData.getRoomId())
+                .build();
+
+        String tcpRoomResponseMessage = mapper.writeValueAsString(tcpRoomResponse);
+        return tcpRoomResponseMessage;
+    }
+    public String sendStudyTimeMessage(RealTimeData rtData) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        TCPSignalingResponse tcpSignalingResponse = TCPSignalingResponse.builder()
+                .userId(rtData.getUserId())
+                .studyTime(rtData.getStudyTime())
+                .build();
+
+        String tcpSignalingResponseMessage = mapper.writeValueAsString(tcpSignalingResponse);
+        return tcpSignalingResponseMessage;
     }
 }
