@@ -1,0 +1,42 @@
+spring:
+  application.name: auth-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://sgs-be-redis-1:3306/spring
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+  redis:
+    host: sgs-be-redis-1
+    port: 6379
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate.ddl-auto: update
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    properties.hibernate:
+      show_sql: true
+      format_sql: true
+      use_sql_comments: true
+  mail:
+    host: smtp.naver.com
+    port: 587
+    username: sgsstudyhub@naver.com
+    password: 2023pnucse!
+    default-encoding: UTF-8
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+logging:
+  level:
+    org.hibernate: DEBUG
+  
+token:
+  secret: ${SECRET_TOKEN}
+  expiration_time: 86400000
