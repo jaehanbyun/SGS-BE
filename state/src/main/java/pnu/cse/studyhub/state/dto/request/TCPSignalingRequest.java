@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@JsonTypeName("signalling")
+@JsonTypeName("signaling")
 public class TCPSignalingRequest extends TCPMessageRequest{
     @JsonProperty("user_id")
     private String userId;
