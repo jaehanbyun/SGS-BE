@@ -11,7 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JoinRequest {
-    private String userId;
 
     private UUID roomCode;
 

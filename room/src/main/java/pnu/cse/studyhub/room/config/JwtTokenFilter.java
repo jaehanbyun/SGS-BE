@@ -3,6 +3,7 @@ package pnu.cse.studyhub.room.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pnu.cse.studyhub.room.util.JwtTokenUtils;
@@ -23,21 +24,21 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException,ServletException {
 
-//        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-//
-//        try {
-//            final String token = header.split(" ")[1].trim();
-//            String userId = JwtTokenUtils.getUserId(token,key);
-//            request.setAttribute("userId", userId);
-//
-//            filterChain.doFilter(request,response);
-//        }catch (RuntimeException e){
-//            log.error("Error occurs while validation. {}", e.toString());
-//            filterChain.doFilter(request,response);
-//        }
+        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        try {
+            final String token = header.split(" ")[1].trim();
+            String userId = JwtTokenUtils.getUserId(token,key);
+            request.setAttribute("userId", userId);
+
+            filterChain.doFilter(request,response);
+        }catch (RuntimeException e){
+            log.error("Error occurs while validation. {}", e.toString());
+            filterChain.doFilter(request,response);
+        }
 
         // TODO : Test용
-        request.setAttribute("userId", "test");
-        filterChain.doFilter(request,response);
+        //request.setAttribute("userId", "test");
+        //filterChain.doFilter(request,response);
     }
 }

@@ -15,14 +15,10 @@ public class JwtTokenUtils {
         return extractClaims(token,key).get("userId",String.class);
     }
 
-
     private static Claims extractClaims(String token, String key){
         return Jwts.parserBuilder().setSigningKey(getKey(key))
                 .build().parseClaimsJws(token).getBody();
     }
-
-
-
 
     private static Key getKey(String key){
         byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
