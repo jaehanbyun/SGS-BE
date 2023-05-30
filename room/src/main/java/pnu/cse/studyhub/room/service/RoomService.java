@@ -73,7 +73,7 @@ public class RoomService {
 
         if(userRoom.isMember()){
             userRoom.setAccessedAt(Timestamp.from(Instant.now()));
-            // TODO : 이때 입장 시켜줘야함 (웹소켓 연결)
+
         }else{
             throw new ApplicationException(ErrorCode.User_NOT_FOUND,
                     String.format("%s User is not founded in %d study group", userId, roomId));
@@ -96,7 +96,7 @@ public class RoomService {
                 new ApplicationException(ErrorCode.ROOM_NOT_FOUND, "This roomCode room does not exist."));
 
         // 만약 스터디 그룹의 현재 인원이 Max면 Exception
-        if(studyGroup.getCurUser() == studyGroup.getMaxUser()){
+        if(studyGroup.getCurUser().equals(studyGroup.getMaxUser())){
             throw new ApplicationException(ErrorCode.MAX_USER,String.format("%d study group is full",studyGroup.getRoomId()));
         }
 
@@ -262,23 +262,6 @@ public class RoomService {
         }
     }
 
-    // TODO : 공개방/스터디그룹 둘다 퇴장 구현
-//    @Transactional
-//    public void out(String userId, Long roomId){
-//        // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-//        OpenRoomEntity openRoomEntity = checkRoomId(roomId);
-//
-//        // userRoom에 해당방에 user 있는지 체크
-//        OpenUserRoomEntity openUserRoomEntity = userRoomRepository.findById(new UserRoomId(userId, roomId)).orElseThrow(() ->
-//                new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s not founded", userId)));
-//
-//        // 해당 userId가 해당 roomId의 roomOwner이면 삭제
-//        if(openUserRoomEntity.isRoomOwner()){
-//            listRepository.delete(openRoomEntity);
-//        }
-//        // TODO : roomOwner가 아닐경우 해당 방의 인원 감소
-//
-//    }
 
     // 탈퇴 시 유저 -1
     @Transactional
@@ -300,11 +283,9 @@ public class RoomService {
         // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
         OpenRoomEntity openRoomEntity = checkRoomId(roomId);
 
-        // TODO : 현재 방 인원 check
-        //      방 입장하면 +1 , 누군가 퇴장해서 웹소켓 끊기면 상태관리 서버로부터 메시지 받아서 -1
 
         // 만약 현재 인원이 Max면 Exception
-        if(openRoomEntity.getCurUser() == openRoomEntity.getMaxUser()){
+        if(openRoomEntity.getCurUser().equals(openRoomEntity.getMaxUser())){
             throw new ApplicationException(ErrorCode.MAX_USER,String.format("%d Room is full",roomId));
         }
         // 인원 증가
@@ -320,7 +301,7 @@ public class RoomService {
                         ErrorCode.INVALID_PERMISSION,String.format("%s User is kicked out of the %d Room",userId,roomId));
             }
             userRoom.get().setAccessedAt(Timestamp.from(Instant.now()));
-            // TODO : 이때 입장 시켜줘야함 (웹소켓 연결)
+
         }else{ // 해당 방 첫 입장 (UserRoomRepository로 테이블에 추가 (일반 user))
             OpenUserRoomEntity newUserRoom = userRoomRepository.save(OpenUserRoomEntity.create(userId, roomId, false));
             openRoomEntity.addUserRoom(newUserRoom);
@@ -331,6 +312,7 @@ public class RoomService {
 
     @Transactional
     public Long modify(Boolean roomType, Long roomId, String userId,String roomName ,Integer maxUser, RoomChannel roomChannel){
+        // TODO : 현재인원보다 작게 변경 x -> Exception
         if(roomType){
             // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
             OpenRoomEntity openRoomEntity = checkRoomId(roomId);
@@ -387,7 +369,7 @@ public class RoomService {
             }
 
             PrivateRoomEntity saveRoom = privateRoomRepository.save(PrivateRoomEntity.create(roomName,maxUser, UUID.randomUUID()));
-
+            System.out.println("code : " + saveRoom.getRoomCode());
             PrivateUserRoomEntity newUserRoom = privateUserRoomRepository.save(
                     PrivateUserRoomEntity.create(userId, saveRoom.getRoomId(),true));
             saveRoom.addUserRoom(newUserRoom);
@@ -448,10 +430,7 @@ public class RoomService {
         if(!owner.get().isRoomOwner()){ // owner가 아니면 Exception
             throw new ApplicationException(ErrorCode.INVALID_PERMISSION,String.format("%s User is not %d Open Study Room's RoomOwner", userId, roomId));
         }
-
         return owner.get();
 
     }
-
-
 }

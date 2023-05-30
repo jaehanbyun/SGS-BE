@@ -20,19 +20,13 @@ import java.util.UUID;
 public class RoomController {
 
     private final RoomService roomService;
-    /*
-        TODO : 나머지는 상태관리 서버랑 통신이후에 개발해야할듯..??
-     */
+
 
     // 스터디방 생성
     @PostMapping
     public Response<RoomIdResponse> create(HttpServletRequest jwt, @RequestBody RoomCreateRequest request){
 
-        System.out.println(jwt.getAttribute("userId"));
-
         String userId = (String) jwt.getAttribute("userId");
-        //String userId = request.getUserId();
-
         Long roomId = roomService.create(request.isRoomType(), request.getRoomName(),
                 userId, request.getMaxUser(), request.getRoomChannel());
 
@@ -63,8 +57,6 @@ public class RoomController {
             ,@RequestParam(required = false) String title
             ,@RequestParam(required = false) RoomChannel channel){
 
-        // TODO : JWT로부터 userID등 user 정보 받을 예정
-
         // size에 따라 가져오는 방의 갯수가 달라짐
         return Response.success("room list successfully",
                 roomService.roomList(lastRoomId, 10, title, channel ));
@@ -73,14 +65,10 @@ public class RoomController {
     // 공개 스터디방 상세 정보 조회
     @GetMapping("/{roomId}")
     public Response<DetailResponse> roomInfo(@PathVariable Long roomId){
-        // TODO : JWT로부터 userID등 user 정보 받을 예정
-
-
 
         DetailResponse info = roomService.info(roomId);
 
         return Response.success("Query info of the room Successfully",info);
-
 
     }
 
@@ -95,18 +83,6 @@ public class RoomController {
 
         return Response.success("Enter Room Successfully");
     }
-
-
-    // 공개 스터디방 나가기 (방장이면 방 삭제)
-//    @DeleteMapping("/out/{roomId}")
-//    public Response<Void> out(@PathVariable Long roomId){
-//        // TODO : JWT로부터 userID등 user 정보 받을 예정
-//        String userId = "donu2";
-//
-//        roomService.out(userId, roomId);
-//
-//        return Response.success("Leave Room Successfully");
-//    }
 
     // 공지사항 설정
     @PatchMapping
@@ -145,8 +121,8 @@ public class RoomController {
 
     @PatchMapping("/delegate")
     public Response<RoomTargetResponse> delegate(HttpServletRequest jwt,@RequestBody TargetRequest request){
-        // TODO : JWT로부터 userID등 user 정보 받을 예정
-        String userId = request.getUserId();
+
+        String userId = (String) jwt.getAttribute("userId");
 
         RoomTargetResponse delegate = roomService.delegate(request.getRoomType(), request.getRoomId(), userId, request.getTargetId());
 
@@ -165,7 +141,7 @@ public class RoomController {
 
     // Private 스터디 그룹 가입
     // roomId랑 room_code
-    // TODO : roomCode에 UUID말고 다른 값이 들어왔을 때 Exception..?
+
     @PostMapping("/private")
     public Response<Void> join(HttpServletRequest jwt,@RequestBody JoinRequest request){
         String userId = (String) jwt.getAttribute("userId");
@@ -177,7 +153,7 @@ public class RoomController {
 
     // private 스터디 그룹 해체/탈퇴
     @DeleteMapping("/private/{roomId}")
-    public Response<Void> withdraw(HttpServletRequest jwt,@PathVariable Long roomId, @RequestBody TestUser request){
+    public Response<Void> withdraw(HttpServletRequest jwt,@PathVariable Long roomId){
         String userId = (String) jwt.getAttribute("userId");
 
         roomService.withdraw(userId, roomId);

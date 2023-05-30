@@ -18,4 +18,8 @@ logging:
     org.hibernate.type: trace
 
 jwt:
-  secret-key: idontknow
+  secret-key: user_token
+
+tcp:
+  server:
+    port: 8089

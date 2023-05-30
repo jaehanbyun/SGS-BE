@@ -8,8 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoomIdRequest {
-    private String userId;
-
     private Long roomId;
-
 }

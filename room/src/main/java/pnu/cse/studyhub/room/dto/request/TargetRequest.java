@@ -6,11 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class TargetRequest {
-    private String userId;
 
     private Boolean roomType;
-
     private long roomId;
-
     private String targetId;
 }

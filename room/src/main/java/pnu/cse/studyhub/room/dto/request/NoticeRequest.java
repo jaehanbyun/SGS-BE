@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class NoticeRequest {
-    private String userId;
 
     private Boolean roomType;
     private long roomId;
