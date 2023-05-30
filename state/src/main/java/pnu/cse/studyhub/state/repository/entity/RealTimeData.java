@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
+import pnu.cse.studyhub.state.dto.UserStudyTime;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 @RedisHash("realTimeData")
 public class RealTimeData {
     @Id
+    @Indexed
     private String userId;
     private Long roomId;
     private String sessionId;
@@ -21,4 +24,10 @@ public class RealTimeData {
 //    private LocalDateTime studyStartTime;
 //    // 이전까지 기록된 총 공부 시간
 //    private Duration recordTime;
+    public UserStudyTime toUserStudyTime() {
+        return UserStudyTime.builder()
+                .userId(this.userId)
+                .studyTime(this.studyTime)
+                .build();
+    }
 }
