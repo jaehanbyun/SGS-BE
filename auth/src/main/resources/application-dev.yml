@@ -2,11 +2,11 @@ spring:
   application.name: auth-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://sgs-be-mysql-1:3306/spring
+    url: jdbc:mysql://mysql:3306/spring
     username: root
     password: password
   redis:
-    host: sgs-be-redis-1
+    host: redis
     port: 6379
   jpa:
     show-sql: true
