@@ -2,7 +2,9 @@ package pnu.cse.studyhub.auth.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pnu.cse.studyhub.auth.dto.AccountDto;
 import pnu.cse.studyhub.auth.dto.ResponseCodeDto;
@@ -34,19 +36,24 @@ public class SignController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseDataDto signIn(@RequestBody @Valid SignInRequestDto request) {
+    public ResponseEntity<ResponseDataDto> signIn(@RequestBody @Valid SignInRequestDto request) {
 
         return responseService.successDataResponse(signService.signIn(request));
     }
 
     @PostMapping("/send-mail")
-    public ResponseCodeDto sendEmail(@RequestParam(value = "email") String email) {
+    public ResponseCodeDto sendEmail(@RequestParam(value = "email") @Valid String email) {
         return responseService.successResponse(signService.sendEmail(email));
     }
 
     @GetMapping("/get-userid")
     public ResponseCodeDto getUserid(@RequestParam(value = "email") String email) {
         return responseService.successResponse(signService.getUserid(email));
+    }
+
+    @PatchMapping("/edit-password")
+    public ResponseCodeDto editPassword(@RequestBody @Valid AccountDto dto) {
+        return responseService.successResponse(signService.editPassword(dto));
     }
 
 }

@@ -36,4 +36,8 @@ public class UserAccount {
                 .password(dto.getPassword())
                 .build();
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
