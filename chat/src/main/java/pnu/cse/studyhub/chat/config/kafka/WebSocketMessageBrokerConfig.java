@@ -16,7 +16,7 @@ public class WebSocketMessageBrokerConfig implements WebSocketMessageBrokerConfi
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // withSockJS - 소켓을 지원하지 않는 브라우저라면, sockJS사용하도록 설정, test 도메인 : https://jxy.me
-        registry.addEndpoint("/chat/connect").setAllowedOrigins("https://jxy.me").withSockJS();
+        registry.addEndpoint("/chat/connect").setAllowedOriginPatterns("*").withSockJS();
     }
 
     @Override
