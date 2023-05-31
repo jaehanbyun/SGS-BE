@@ -1,31 +1,46 @@
 const PARTICIPANT_MAIN_CLASS = 'participant main';
 const PARTICIPANT_CLASS = 'participant';
 
-function Participant(userId, videoStatus, audioStatus) {
+function Participant(userId, videoState, audioState, timerState, studyTime, onTime) {
 	console.log("참여자명 : "+userId)
 
 	this.userId = userId;
-	this.videoStatus = videoStatus;
-	this.audioStatus = audioStatus;
+	this.videoState = videoState;
+	this.audioState = audioState;
+	this.timerState = timerState;
+	this.studyTime = studyTime;
+	this.onTime = onTime;
 
 	var container = document.createElement('div');
 	container.className = isPresentMainParticipant() ? PARTICIPANT_CLASS : PARTICIPANT_MAIN_CLASS;
 	container.id = userId;
-	var span = document.createElement('span');
-	var video = document.createElement('video');
-	var rtcPeer;
-
-	container.appendChild(video);
-	container.appendChild(span);
 	container.onclick = switchContainerClass;
-	document.getElementById('participants').appendChild(container);
 
-	span.appendChild(document.createTextNode(userId));
 
+	var video = document.createElement('video');
+	container.appendChild(video);
 	video.id = 'video-' + userId;
 	video.autoplay = true;
 	video.playsInline = true;
 	video.controls = false;
+
+
+	var span = document.createElement('span');
+	span.appendChild(document.createTextNode(userId));
+	span.appendChild(document.createTextNode("/"));
+	span.appendChild(document.createTextNode(studyTime));
+	span.appendChild(document.createTextNode("/"));
+	span.appendChild(document.createTextNode(videoState));
+	span.appendChild(document.createTextNode("/"));
+	span.appendChild(document.createTextNode(audioState));
+	span.appendChild(document.createTextNode("/"));
+	span.appendChild(document.createTextNode(timerState));
+	container.appendChild(span);
+
+	var rtcPeer;
+
+	document.getElementById('participants').appendChild(container);
+
 
 	this.getElement = function() {
 		return container;
@@ -81,5 +96,6 @@ function Participant(userId, videoStatus, audioStatus) {
 		this.rtcPeer.dispose();
 		container.parentNode.removeChild(container);
 	};
+
 }
 

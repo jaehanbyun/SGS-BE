@@ -18,6 +18,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import pnu.cse.studyhub.signaling.config.tcp.TCPMessageService;
 import pnu.cse.studyhub.signaling.dao.request.*;
+import pnu.cse.studyhub.signaling.dao.response.TCPUserResponse;
 import pnu.cse.studyhub.signaling.util.Room;
 import pnu.cse.studyhub.signaling.util.RoomManager;
 import pnu.cse.studyhub.signaling.util.UserRegistry;
@@ -46,11 +47,11 @@ public class MessageHandler extends TextWebSocketHandler {
 
     private final RoomManager roomManager;
 
-    private final RedisTemplate redisTemplate;
+    //private final RedisTemplate redisTemplate;
     private final ObjectMapper mapper;
-    public static final String PIPELINE = "-pipeline";
+    //public static final String PIPELINE = "-pipeline";
 
-    private static final long TIME = 24 * 60 * 60 * 1000L;
+    //private static final long TIME = 24 * 60 * 60 * 1000L;
 
     private final TCPMessageService tcpMessageService;
 
@@ -140,6 +141,7 @@ public class MessageHandler extends TextWebSocketHandler {
 //                case "leaveRoom":
 //                    leave(user);
 //                    break;
+
                 default:
                     break;
             }
@@ -157,13 +159,12 @@ public class MessageHandler extends TextWebSocketHandler {
 
         if(user.getTimer()){ // user가 On 상태일때
             user.setTimer(false);
-            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
+            //ValueOperations<String, String> userTime = redisTemplate.opsForValue();
             user.countStudyTime(LocalTime.now(),user.getOnTime());
-            userTime.set(user.getUserId(), user.studyTimeToString());
+            //userTime.set(user.getUserId(), user.studyTimeToString());
         }
 
-        // TODO : TCP 서버랑 연결하고 주석풀기
-        //userStudyTimeToTCP(user);
+        userStudyTimeToTCP(user);
 
         if (Objects.isNull(user)) return;
         Room room = roomManager.getRoom(user.getRoomId());
@@ -211,23 +212,22 @@ public class MessageHandler extends TextWebSocketHandler {
         final boolean video = request.isVideo();
         final boolean audio = request.isAudio();
 
-        ValueOperations<String, String> userTime = redisTemplate.opsForValue();
-        LocalTime studyTime;
-
-        if(redisTemplate.hasKey(userId)){
-            String ut = userTime.get(userId);
-            studyTime = LocalTime.of(Integer.parseInt(ut.substring(0,2)),Integer.parseInt(ut.substring(3,5)),Integer.parseInt(ut.substring(6,8)));
-        }else{
-            studyTime = LocalTime.of(0,0,0);
-
-            // TODO : 나중에 없애주기 (Test 용)
-            userTime.set(userId,studyTime.toString());
-        }
-
-        // TODO : 상태관리서버로 요청 보내고 답장오면 객체 만들어지는 방식
-        //String studyTime2 = userStudyTimeFromTCP(userId);
+//        ValueOperations<String, String> userTime = redisTemplate.opsForValue();
+//        LocalTime studyTime;
+//
+//        if(redisTemplate.hasKey(userId)){
+//            String ut = userTime.get(userId);
+//            studyTime = LocalTime.of(Integer.parseInt(ut.substring(0,2)),Integer.parseInt(ut.substring(3,5)),Integer.parseInt(ut.substring(6,8)));
+//        }else{
+//            studyTime = LocalTime.of(0,0,0);
+//            userTime.set(userId,studyTime.toString());
+//        }
 
 
+//        // TODO : 만약 해당 userId의 시간이 없다면??
+//        TCPUserResponse response = mapper.readValue(userStudyTimeFromTCP(userId), TCPUserResponse.class);
+//        LocalTime studyTime =LocalTime.parse(response.getStudyTime());
+        LocalTime studyTime = LocalTime.of(0,0,0);
 
         Room room = roomManager.getRoom(roomId);
         final UserSession newUser = room.join(userId, session, video, audio,studyTime);
@@ -248,19 +248,21 @@ public class MessageHandler extends TextWebSocketHandler {
     }
 
     private void updateTimer(TimerRequest request, UserSession user) throws IOException {
+        log.info("[in {} room] {}'s timer request : timerState - {} , time - {}",user.getRoomId(),user.getUserId(),request.isTimerState(),request.getTime());
         final Room room = roomManager.getRoom(user.getRoomId());
-        room.updateTimer(request);
+        room.updateTimer(request,user);
 
-        if(!request.isTimerState()) {
-            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
-            userTime.set(user.getUserId(), user.studyTimeToString());
-        }
+//        if(!request.isTimerState()) { // on -> off 요청일때 redis 저장
+//            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
+//            userTime.set(user.getUserId(), user.studyTimeToString());
+//        }
     }
 
     private void userStudyTimeToTCP(UserSession user) {
         String tcpMessage;
         // TCP 서버로 userId랑 studyTime 보내줌
         tcpMessage = TCPTimerRequest.builder()
+                .server("signaling")
                 .type("STUDY_TIME_TO_TCP")
                 .userId(user.getUserId())
                 .studyTime(user.studyTimeToString())
@@ -272,8 +274,9 @@ public class MessageHandler extends TextWebSocketHandler {
 
     private String userStudyTimeFromTCP(String userId) {
         String tcpMessage;
-        // TCP 서버로 userId랑 studyTime 보내줌
-        tcpMessage = TCPTimerRequest.builder()
+        // TCP 서버로 userId보내고 userId랑 studyTime을 response로 받음
+        tcpMessage = TCPUserRequest.builder()
+                .server("signaling")
                 .type("STUDY_TIME_FROM_TCP")
                 .userId(userId)
                 .build().toString();

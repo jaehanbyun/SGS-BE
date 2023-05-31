@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TCPUserRequest {
-
+    @JsonProperty("server")
+    private String server;
     @JsonProperty("type")
     private String type;
     @JsonProperty("user_id")
