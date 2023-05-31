@@ -1,3 +1,6 @@
+server:
+  port: 8000
+
 spring:
   cloud:
     gateway:
@@ -6,7 +9,7 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            AllowedOriginPatterns: "http://localhost:*"
+            allowedOrigins: "http://localhost:3000"
             allow-credentials: true
             allowedHeaders: '*'
             allowedMethods:
@@ -24,12 +27,16 @@ spring:
           uri: http://${EC2_IP}:8031
           predicates:
             - Path=/chat/**
+          filters:
+            - AuthorizationHeaderFilter
         - id: room-service
-          uri: http://${EC2_IP}:8081
+          uri: http:/${EC2_IP}/:8082
           predicates:
             - Path=/room/**
+          filters:
+            - AuthorizationHeaderFilter
 
 token:
   access_expired_time: 3600000
-  secret_key: ${SECRET_TOKEN}
+  secret_key: user_token
   refresh_expired_time: 3600000
