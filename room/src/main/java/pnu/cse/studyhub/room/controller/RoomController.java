@@ -59,7 +59,7 @@ public class RoomController {
 
         // size에 따라 가져오는 방의 갯수가 달라짐
         return Response.success("room list successfully",
-                roomService.roomList(lastRoomId, 10, title, channel ));
+                roomService.roomList(lastRoomId, 15, title, channel ));
     }
 
     // 공개 스터디방 상세 정보 조회
