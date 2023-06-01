@@ -223,11 +223,13 @@ public class MessageHandler extends TextWebSocketHandler {
 //            userTime.set(userId,studyTime.toString());
 //        }
 
-
-//        // TODO : 만약 해당 userId의 시간이 없다면??
-//        TCPUserResponse response = mapper.readValue(userStudyTimeFromTCP(userId), TCPUserResponse.class);
-//        LocalTime studyTime =LocalTime.parse(response.getStudyTime());
-        LocalTime studyTime = LocalTime.of(0,0,0);
+        TCPUserResponse response = mapper.readValue(userStudyTimeFromTCP(userId), TCPUserResponse.class);
+        LocalTime studyTime;
+        if(response.getStudyTime() == null){
+            studyTime = LocalTime.of(0,0,0);
+        }else{
+            studyTime = LocalTime.parse(response.getStudyTime());
+        }
 
         Room room = roomManager.getRoom(roomId);
         final UserSession newUser = room.join(userId, session, video, audio,studyTime);
