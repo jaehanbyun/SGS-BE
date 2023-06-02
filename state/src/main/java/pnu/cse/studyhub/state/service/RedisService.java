@@ -1,12 +1,16 @@
 package pnu.cse.studyhub.state.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.connection.DataType;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import pnu.cse.studyhub.state.repository.RedisRepository;
 import pnu.cse.studyhub.state.repository.entity.RealTimeData;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -14,21 +18,12 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class RedisService {
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String,RealTimeData> realTimeDataRedisTemplate;
+    private final RedisTemplate<String,String> sessionRedisTemplate;
+
     private final RedisRepository redisRepository;
 
-//    public void setValues(String id, String session) {
-//        ValueOperations<String, String> values = redisTemplate.opsForValue();
-//        values.set(id, session);
-//    }
-//    public void setValuesWithTTL(String id, String session, long minutes) {
-//        ValueOperations<String, String> values = redisTemplate.opsForValue();
-//        values.set(id, session , Duration.ofMinutes(3));
-//    }
-//    public String getValues(String id) {
-//        ValueOperations<String,String> values = redisTemplate.opsForValue();
-//        return values.get(id);
-//    }
+
     public RealTimeData getData(String userId) {
         RealTimeData realTimeData = redisRepository.findById(userId).orElse(null);
         return realTimeData;
@@ -37,6 +32,8 @@ public class RedisService {
         RealTimeData savedData = redisRepository.save(realTimeData);
         return savedData;
     }
+
+
     public void delData(String userId) {
         redisRepository.deleteById(userId);
     }
@@ -51,7 +48,19 @@ public class RedisService {
     }
 
 
-    public void delValues(String id) {
-        redisTemplate.delete(id);
+    public void delValues(String userId, String sessionId) {
+        realTimeDataRedisTemplate.delete("realTimeData:" + userId);
+        sessionRedisTemplate.delete("sessionIdIndex:" + sessionId);
+    }
+    public String findUserIdBySessionId(String sessionId) {
+        Object userIdObj = sessionRedisTemplate.opsForValue().get("sessionIdIndex:" + sessionId);
+        return userIdObj != null ? (String) userIdObj : null;
+    }
+    public RealTimeData setValue(RealTimeData realTimeData) {
+        HashOperations<String, Object, Object> hashOps = realTimeDataRedisTemplate.opsForHash();
+        hashOps.put("realTimeData:" + realTimeData.getUserId(), "data", realTimeData);
+        sessionRedisTemplate.opsForValue().set("sessionIdIndex:" + realTimeData.getSessionId(), realTimeData.getUserId());
+
+        return realTimeData;
     }
 }
