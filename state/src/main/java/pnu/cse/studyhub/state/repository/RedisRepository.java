@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 @EnableRedisRepositories
 public interface RedisRepository extends CrudRepository<RealTimeData, String> {
+    RealTimeData findBySessionId(String sessionId);
 
 }
