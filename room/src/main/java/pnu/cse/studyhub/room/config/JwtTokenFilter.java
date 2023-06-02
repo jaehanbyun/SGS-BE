@@ -1,5 +1,6 @@
 package pnu.cse.studyhub.room.config;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +25,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException,ServletException {
 
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String header = request.getHeader("AUTHORIZATION");
 
         try {
             final String token = header.split(" ")[1].trim();
-            String userId = JwtTokenUtils.getUserId(token,key);
+
+            String userId = JwtTokenUtils.getUserId(token, key);
+
             request.setAttribute("userId", userId);
 
             filterChain.doFilter(request,response);
@@ -37,8 +40,5 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request,response);
         }
 
-        // TODO : Test용
-        //request.setAttribute("userId", "test");
-        //filterChain.doFilter(request,response);
     }
 }

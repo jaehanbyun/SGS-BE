@@ -5,12 +5,11 @@ spring.jpa:
   hibernate.format_sql: true
   hibernate.show-sql: true
 
-
 spring.datasource:
   driver-class-name : com.mysql.cj.jdbc.Driver
-  url : jdbc:mysql://sql.freedb.tech:3306/freedb_study_room
-  username : freedb_roomServer
-  password : qXZd8F#%KdXsSM3
+  url : jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/room?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+  username : root
+  password : sgs-room
 
 logging:
   level:

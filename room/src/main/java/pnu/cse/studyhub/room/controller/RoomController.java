@@ -26,7 +26,9 @@ public class RoomController {
     @PostMapping
     public Response<RoomIdResponse> create(HttpServletRequest jwt, @RequestBody RoomCreateRequest request){
 
+
         String userId = (String) jwt.getAttribute("userId");
+
         Long roomId = roomService.create(request.isRoomType(), request.getRoomName(),
                 userId, request.getMaxUser(), request.getRoomChannel());
 
