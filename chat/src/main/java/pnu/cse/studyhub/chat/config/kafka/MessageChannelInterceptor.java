@@ -28,7 +28,7 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
 //        String accessToken = authorizationHeader.replace("Bearer ", "");
 //        String userId = jwtTokenProvider.getUserInfo(accessToken);
 
-        if (StompCommand.CONNECT.equals(accessor.getCommand())){
+        if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())){
             //jwt 토큰 필터링
             //토큰 데이터를 통해서 header에 userId를 넣어줌
             String destination = accessor.getDestination();
@@ -47,15 +47,15 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
     @Override
     public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        String sessionId = accessor.getSessionId();
-//        jwt 토큰 검증, gateway에서 검증 되었기 때문에 userId를 쓰기만 하면됨.
         String authorizationHeader = String.valueOf(accessor.getFirstNativeHeader("Authorization"));
-        String accessToken = authorizationHeader.replace("Bearer ", "");
-        String userId = jwtTokenProvider.getUserInfo(accessToken);
-        log.error(authorizationHeader + " : " + accessToken + " : " + userId);
+        String sessionId = accessor.getSessionId();
+        String userId = "";
+//        jwt 토큰 검증, gateway에서 검증 되었기 때문에 userId를 쓰기만 하면됨.
 
+        log.debug(accessor.getCommand().toString());
         switch (accessor.getCommand()){
             case SUBSCRIBE: // room ID에 들어갈 때(소켓 연결이 아니라 채팅방에 들어갈 때 )
+                userId = getUserId(authorizationHeader);
                 TCPSocketSessionRequest subscribeRequest = TCPSocketSessionRequest.builder()
                         .type("SUBSCRIBE")
                         // "Timer ON TIMER OFF 프론트에서 보내는ㅅ거, USER_OUT, USER_IN 프론트에서 받는거
@@ -64,20 +64,37 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
                         .roomId(accessor.getDestination().substring(7)) // 슬래쉬 ( '/topic/' ) 삭제
                         .session(sessionId)
                         .build();
-                log.warn("test + " + subscribeRequest.toString());
+                log.debug(accessor.getCommand() + " : " + subscribeRequest.toString());
                 tcpMessageService.sendMessage(subscribeRequest.toString());
+                break;
             case DISCONNECT: // 채팅방 나갈 때
                 TCPSocketSessionRequest disconnectRequest = TCPSocketSessionRequest.builder()
                         .type("DISCONNECT")
                         .userId(userId)
                         .server("chat")
-                        .roomId(accessor.getDestination().substring(7)) // 슬래쉬 ( '/topic/' ) 삭제
+                        .roomId(null) // 슬래쉬 ( '/topic/' ) 삭제
                         .session(sessionId)
                         .build();
-                log.info("UserId : " + userId);
+                log.debug(accessor.getCommand() + " : " + disconnectRequest.toString());
                 tcpMessageService.sendMessage(disconnectRequest.toString());
-
+                break;
+            case UNSUBSCRIBE:
+                userId = getUserId(authorizationHeader);
+                TCPSocketSessionRequest unsubscribeRequest = TCPSocketSessionRequest.builder()
+                        .type("UNSUBSCRIBE")
+                        .userId(userId)
+                        .server("chat")
+                        .roomId(null) // 슬래쉬 ( '/topic/' ) 삭제
+                        .session(sessionId)
+                        .build();
+                log.debug(accessor.getCommand() + " : " + unsubscribeRequest.toString());
+                tcpMessageService.sendMessage(unsubscribeRequest.toString());
+                break;
         }
         ChannelInterceptor.super.postSend(message, channel, sent);
+    }
+    public String getUserId(String authorizationHeader){
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        return jwtTokenProvider.getUserInfo(accessToken);
     }
 }
