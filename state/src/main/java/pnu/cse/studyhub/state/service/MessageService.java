@@ -48,28 +48,29 @@ public class MessageService {
                             realTimeData.setUserId(chatRequest.getUserId());
                             realTimeData.setRoomId(chatRequest.getRoomId());
                             realTimeData.setSessionId(chatRequest.getSession());
-                            RealTimeData chatSubscribeRealTimeData =  redisService.setData(realTimeData);
+                            RealTimeData chatSubscribeRealTimeData =  redisService.setValue(realTimeData);
                             responseMessage = mapper.writeValueAsString(chatSubscribeRealTimeData);
                         } else {
                             realTimeData.setRoomId(chatRequest.getRoomId());
                             realTimeData.setSessionId(chatRequest.getSession());
-                            RealTimeData chatSubscribeRealTimeData = redisService.setData(realTimeData);
+                            RealTimeData chatSubscribeRealTimeData = redisService.setValue(realTimeData);
                             responseMessage = mapper.writeValueAsString(chatSubscribeRealTimeData);
                         }
-                    } else if (chatRequest.getType().matches("DISCONNECT")) {
-                        RealTimeData realTimeData = redisService.getData(chatRequest.getUserId());
-                        if (realTimeData != null) {
-                            realTimeData.setRoomId(chatRequest.getRoomId());
-                            realTimeData.setSessionId(null);
-                            RealTimeData chatDisconnectRealTimeData = redisService.setData(realTimeData);
-                            responseMessage = mapper.writeValueAsString(chatDisconnectRealTimeData);
+                    } else if (chatRequest.getType().matches("DISCONNECT|UNSUBSCRIBE")) {
+                        String userId = redisService.findUserIdBySessionId(chatRequest.getSession());
+                        redisService.delValues(userId, chatRequest.getSession());
+                        log.debug(userId, chatRequest.getSession());
+
+                        if (userId  != null) {
+                            redisService.delData(userId);
+                            responseMessage = mapper.writeValueAsString(redisService.getData(userId));
                         } else {
                             //예외처리
                         }
 
                     } else {
                         // 에러처리
-                    }
+                    };
                     break;
                 case "signaling":
                     TCPSignalingRequest signalingRequest = (TCPSignalingRequest) response;
@@ -148,7 +149,7 @@ public class MessageService {
                     }
                     break;
             }
-            log.warn("responseMessage : " + responseMessage);
+            log.debug("responseMessage : " + responseMessage);
             return responseMessage;
         } catch (JsonMappingException e) {
             throw new RuntimeException(e);
