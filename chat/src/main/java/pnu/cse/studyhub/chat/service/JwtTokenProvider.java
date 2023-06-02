@@ -15,6 +15,6 @@ public class JwtTokenProvider {
     private String SECRET_KEY;
 
     public String getUserInfo(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().get("id",String.class);
     }
 }
