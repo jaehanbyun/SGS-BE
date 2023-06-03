@@ -1,0 +1,88 @@
+name: 'deploy-branch-push'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'develop/*'
+      
+permissions:
+  contents: read
+  
+env:
+  AWS_REGION: 'ap-northeast-2'
+  ECR_REGISTRY: '730904690368.dkr.ecr.ap-northeast-2.amazonaws.com'
+  NETWORK_NAME: 'sgs'
+
+jobs:
+  deploy:
+    name: 'Build & Deploy'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+        
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Extract Env from Branch
+        id: extract
+        run: |
+          BRANCH=${GITHUB_REF#refs/heads/}
+          SPLITTED_BRANCH=($(echo $BRANCH | tr "/" "\n"))
+          echo "::set-output name=branch::$(echo ${SPLITTED_BRANCH[1]})"
+          
+      - name: Get version
+        id: image
+        run: |
+          VERSION=$(echo ${{ github.sha }} | cut -c1-8)
+          echo VERSION=$VERSION
+          echo "::set-output name=version::$VERSION"
+      
+      - name: Login to Amazon ECR
+        id: login_ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION : ${{ env.AWS_REGION }}
+      
+      - name: Build and Push Docker Image
+        id: build_push_image
+        run: |
+          cd ${{ steps.extract.outputs.branch }}
+          docker build -t ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }} .
+          docker push ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
+          echo "::set-output name=image::${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}"
+      
+      - name: Set up SSH
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.EC2_IP }}
+          username: ec2-user
+          script: |
+            if [ "${{ steps.extract.outputs.branch }}" = "auth" ]; then
+              PORT=8011
+            elif [ "${{ steps.extract.outputs.branch }}" = "chat" ]; then
+              PORT=8031
+            elif [ "${{ steps.extract.outputs.branch }}" = "room" ]; then
+              PORT=8081
+            elif [ "${{ steps.extract.outputs.branch }}" = "signaling" ]; then
+              PORT=8051
+            elif [ "${{ steps.extract.outputs.branch }}" = "state" ]; then
+              PORT=8091
+            fi
+            
+            if [ "$(docker ps -qa -f name=sgs-${{ steps.extract.outputs.branch }})" ]; then
+              docker rm -f sgs-${{ steps.extract.outputs.branch }}
+            fi
+              
+            docker pull ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
+            docker run -d --name sgs-${{ steps.extract.outputs.branch }} --network ${{ env.NETWORK_NAME }} -p ${PORT}:8080 ${{ steps.build_push_image.outputs.image }}
