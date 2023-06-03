@@ -84,5 +84,5 @@ jobs:
               docker rm -f sgs-${{ steps.extract.outputs.branch }}
             fi
               
-            docker pull 730904690368.dkr.ecr.ap-northeast-2.amazonaws.com/sgs-chat:2a8276d6
-            docker run -d --name sgs-chat --network sgs -p ${PORT}:8080 -e ROOM_DB_USER=${{ secrets.ROOM_DB_USER }} -e ROOM_DB_PASSWORD=${{ secrets.ROOM_DB_PASSWORD }} -e SECRET_TOKEN=${{ secrets.SECRET_TOKEN }} ${{ steps.build_push_image.outputs.image }}
+            docker pull ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
+            docker run -d --name sgs-${{ steps.extract.outputs.branch }} --network ${{ env.NETWORK_NAME }} -p ${PORT}:8080 -e ROOM_DB_USER=${{ secrets.ROOM_DB_USER }} -e ROOM_DB_PASSWORD=${{ secrets.ROOM_DB_PASSWORD }} -e SECRET_TOKEN=${{ secrets.SECRET_TOKEN }} ${{ steps.build_push_image.outputs.image }}
