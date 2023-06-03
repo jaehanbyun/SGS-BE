@@ -21,4 +21,4 @@ tcp:
       poolSize : 30
 logging:
   level:
-    pnu.cse.studyhub: INFO
+    pnu.cse.studyhub: DEBUG
