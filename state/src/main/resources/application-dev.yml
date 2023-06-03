@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: state-service
+  redis:
+    host: redis
+    port: 6379
+#  integration:
+#    tcp:
+#      port: ${server.port}
+
+tcp:
+  server:
+    port : 8099
+  room:
+    host : sgs-room
+    port : 8081
+    connection :
+      poolSize : 30
+logging:
+  level:
+    pnu.cse.studyhub: INFO
