@@ -8,8 +8,8 @@ spring.jpa:
 spring.datasource:
   driver-class-name : com.mysql.cj.jdbc.Driver
   url : jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/room?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-  username : root
-  password : sgs-room
+  username : ${ROOM_DB_USER}
+  password : ${ROOM_DB_PASSWORD}
 
 logging:
   level:
@@ -17,7 +17,7 @@ logging:
     org.hibernate.type: trace
 
 jwt:
-  secret-key: user_token
+  secret-key: ${SECRET_TOKEN}
 
 tcp:
   server:
