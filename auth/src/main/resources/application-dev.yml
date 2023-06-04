@@ -6,7 +6,7 @@ spring:
     username: root
     password: password
   redis:
-    host: redis
+    host: redis-auth
     port: 6379
   jpa:
     show-sql: true
