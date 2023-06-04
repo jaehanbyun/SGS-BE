@@ -3,7 +3,7 @@ spring:
     name: state-service
   redis:
     host: redis-state
-    port: 6380
+    port: 6379
 #  integration:
 #    tcp:
 #      port: ${server.port}
