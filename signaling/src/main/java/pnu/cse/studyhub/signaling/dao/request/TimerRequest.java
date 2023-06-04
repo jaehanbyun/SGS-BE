@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class TimerRequest{
     private String id;
-    private String userId;
+    //private String userId;
     private boolean timerState;
     private String time;
 }

@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TCPTimerRequest {
     // TODO : TCP
+    @JsonProperty("server")
+    private String server;
     @JsonProperty("type")
     private String type;
     @JsonProperty("user_id")

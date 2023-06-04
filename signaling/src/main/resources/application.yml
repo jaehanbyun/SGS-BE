@@ -1,10 +1,10 @@
 property :
   ignoreNullWsContainer : true
 #Redis Cache
-spring:
-  redis:
-    host: 0.0.0.0
-    port: 6379
+#spring:
+#  redis:
+#    host: 0.0.0.0
+#    port: 6379
 
 server:
   ssl:
@@ -13,7 +13,7 @@ server:
     key-store-password: test1234
     key-store-type: PKCS12
     key-alias: donu-keystore
-  port: 8443
+  port: 8059
 
 tcp:
   server:

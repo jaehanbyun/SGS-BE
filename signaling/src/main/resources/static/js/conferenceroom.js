@@ -1,25 +1,4 @@
-/*
- * (C) Copyright 2014 Kurento (http://kurento.org/)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
-var ws = new WebSocket('wss://localhost:8443/socket');
-// var ws = new SockJS('wss://localhost:8443/socket', null, {
-// 	transports: ["websocket", "xhr-streaming", "xhr-polling"]
-// });
-
+var ws = new WebSocket('wss://localhost:8059/socket');
 ws.onopen = function () { console.log("connected"); }
 
 var participants = {};
@@ -35,33 +14,38 @@ ws.onmessage = function(message) {
 	console.info('Received message: ' + message.data);
 
 	switch (parsedMessage.id) {
-	case 'existingParticipants':
-		console.info("!!!!!!!!!why existingParticipants");
-		onExistingParticipants(parsedMessage);
-		break;
-	case 'newParticipantArrived':
-		console.info("!!!!!!!!!why new");
-		onNewParticipant(parsedMessage);
-		break;
-	case 'participantLeft':
-		console.info("!!!!!!!!!why left");
-		onParticipantLeft(parsedMessage);
-		break;
-	case 'receiveVideoAnswer':
-		console.info("!!!!!!!!!why receive~");
-		receiveVideoResponse(parsedMessage);
-		break;
-	case 'onIceCandidate':
-		console.info("!!!!!!!!!why addIceCandidate 전");
-		participants[parsedMessage.userId].rtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
-	        console.info("!!!!!!!!!why addIceCandidate 후");
-			if (error) {
-		      console.error("Error adding candidate: " + error);
-			  alert(error);
-		      return;
-	        }
-	    });
-	    break;
+		case 'existingParticipants':
+			onExistingParticipants(parsedMessage);
+			break;
+		case 'newParticipantArrived':
+			onNewParticipant(parsedMessage);
+			break;
+		case 'participantLeft':
+			onParticipantLeft(parsedMessage);
+			break;
+		case 'receiveVideoAnswer':
+			receiveVideoResponse(parsedMessage);
+			break;
+		case 'onIceCandidate':
+			participants[parsedMessage.userId].rtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
+				if (error) {
+				  console.error("Error adding candidate: " + error);
+				  alert(error);
+				  return;
+				}
+			});
+			break;
+
+		case 'videoStateAnswer' :
+			break;
+
+		case 'audioStateAnswer' :
+			break;
+
+		case 'timerStateAnswer' :
+			timerResponse(parsedMessage);
+			break;
+
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -96,6 +80,18 @@ function receiveVideoResponse(result) {
 			alert(error);
 			return console.error (error);}
 	});
+}
+
+function timerResponse(request){
+	// 만약 서버로부터 request를 받으면
+	console.log(request.userId + ' timer : ' + request.timerState+' comeon!');
+	var participant = participants[request.userId];
+	// 해당 유저의 participant 객체의 timerState를 변경시키고 그에 따른 시간을 출력해준다.
+	/*
+
+
+	 */
+
 }
 
 function callResponse(message) {
@@ -144,10 +140,43 @@ function onExistingParticipants(msg) {
 	msg.members.forEach(receiveVideo);
 }
 
-function leaveRoom() {
+function timerStart(){
 	sendMessage({
-		id : 'leaveRoom'
+		id : 'timerState',
+		timerState : true,
+		time : getCurrentTime()
 	});
+}
+
+function timerStop(){
+	sendMessage({
+		id : 'timerState',
+		timerState : false,
+		time : getCurrentTime()
+	});
+
+
+}
+
+function getCurrentTime() {
+	const now = new Date();
+	let hours = now.getHours();
+	let minutes = now.getMinutes();
+	let seconds = now.getSeconds();
+
+	// 시간, 분, 초가 한 자리 숫자일 경우 앞에 0을 추가합니다.
+	hours = hours < 10 ? '0' + hours : hours;
+	minutes = minutes < 10 ? '0' + minutes : minutes;
+	seconds = seconds < 10 ? '0' + seconds : seconds;
+
+	const currentTime = hours + ':' + minutes + ':' + seconds;
+	return currentTime;
+}
+
+function leaveRoom() {
+	// sendMessage({
+	// 	id : 'leaveRoom'
+	// });
 
 	for ( var key in participants) {
 		participants[key].dispose();
@@ -161,10 +190,13 @@ function leaveRoom() {
 
 function receiveVideo(sender) {
 	let userId = sender.userId;
-	let videoStatus = sender.video;
-	let audioStatus = sender.audio;
+	let videoState = sender.video;
+	let audioState = sender.audio;
+	let timerState = sender.timer;
+	let studyTime = sender.studyTime;
+	let onTime = sender.onTime;
 
-	var participant = new Participant(userId, videoStatus, audioStatus);
+	var participant = new Participant(userId, videoState, audioState, timerState, studyTime, onTime);
 	participants[userId] = participant;
 	var video = participant.getVideoElement();
 

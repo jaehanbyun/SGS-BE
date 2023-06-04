@@ -191,25 +191,32 @@ public class Room implements Closeable {
      */
 
     // 여기서 request.getTime이 hh:mm:ss 형식의 String
-    public void updateTimer(TimerRequest request) throws IOException {
-
-        final UserSession user = participants.get(request.getUserId());
-        user.setTimer(request.isTimerState());
-        if(!user.getTimer()){ // On -> Off 누른 유저
-            user.countStudyTime(LocalTime.parse(request.getTime()),user.getOnTime());
-        }
-        // TODO : on일때 onTime, off일때 "" ?? 고민해보자
-        user.setOnTime(LocalTime.parse(request.getTime()));
-
+    // TODO : 자 타이머를 시작한 것부터 차근차근해보자!
+    public void updateTimer(TimerRequest request, UserSession user) throws IOException {
+        //request : timerState, time
+        //final UserSession user = participants.get(request.getUserId());
         final JsonObject updateTimerStateJson;
 
-        if(!user.getTimer()){ // Off -> On 유저
-            updateTimerStateJson = timerStateAnswer(user.getUserId(), user.getTimer(),user.onTimeToString());
-        }else{ // On -> Off 유저
+        user.setTimer(request.isTimerState());
+
+        if(!user.getTimer()){ // 유저가 타이머를 멈추면
+            log.info("user studyTime count before : {} / {}",LocalTime.parse(request.getTime()),user.getOnTime());
+            user.countStudyTime(LocalTime.parse(request.getTime()),user.getOnTime());
+            log.info("{}'s studyTime : {} / timerState : {}",user.getUserId(),user.getStudyTime(),user.getTimer());
+
+        }
+        // 타이머 상태 상관 없나..?
+        user.setOnTime(LocalTime.parse(request.getTime()));
+
+
+
+        if(!user.getTimer()){ // 유저가 타이머를 멈추면
             updateTimerStateJson = timerStateAnswer(user.getUserId(), user.getTimer(), user.studyTimeToString());
+        }else{ // 유저가 타이머를 시작 시키면
+            updateTimerStateJson = timerStateAnswer(user.getUserId(), user.getTimer(),user.onTimeToString());
         }
 
-        for (final UserSession participant: participants.values()) { // TODO : 본인도 포함할지 말지..?
+        for (final UserSession participant: participants.values()) {
             participant.sendMessage(updateTimerStateJson);
         }
     }
