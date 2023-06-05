@@ -1,10 +1,5 @@
 property :
   ignoreNullWsContainer : true
-#Redis Cache
-#spring:
-#  redis:
-#    host: 0.0.0.0
-#    port: 6379
 
 server:
   ssl:
@@ -17,7 +12,7 @@ server:
 
 tcp:
   server:
-    host: 1
-    port: 1
+    host: localhost
+    port: 8099
     connection:
-      poolSize: 1
+      poolSize: 30

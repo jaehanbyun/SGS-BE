@@ -47,12 +47,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
     private final RoomManager roomManager;
 
-    //private final RedisTemplate redisTemplate;
     private final ObjectMapper mapper;
-    //public static final String PIPELINE = "-pipeline";
-
-    //private static final long TIME = 24 * 60 * 60 * 1000L;
-
     private final TCPMessageService tcpMessageService;
 
     // websocket 연결되면 WebSocketSession 추가
@@ -83,6 +78,7 @@ public class MessageHandler extends TextWebSocketHandler {
                     log.info("방접속");
                     JoinRequest joinRequest = mapper.readValue(message.getPayload(), JoinRequest.class);
                     join(joinRequest, session);
+                    // TODO : 방 접속시에 본인에게 본인관련 정보도 보내줘야할듯?
                     break;
 
                 // SDP 정보 전송
@@ -212,18 +208,21 @@ public class MessageHandler extends TextWebSocketHandler {
         final boolean video = request.isVideo();
         final boolean audio = request.isAudio();
 
-//        ValueOperations<String, String> userTime = redisTemplate.opsForValue();
-//        LocalTime studyTime;
-//
-//        if(redisTemplate.hasKey(userId)){
-//            String ut = userTime.get(userId);
-//            studyTime = LocalTime.of(Integer.parseInt(ut.substring(0,2)),Integer.parseInt(ut.substring(3,5)),Integer.parseInt(ut.substring(6,8)));
-//        }else{
-//            studyTime = LocalTime.of(0,0,0);
-//            userTime.set(userId,studyTime.toString());
-//        }
+        // TODO : 테스트 지점
+        //LocalTime studyTime = LocalTime.of(0,0,0);
+        String userStudyTime = userStudyTimeFromTCP(userId);
 
-        TCPUserResponse response = mapper.readValue(userStudyTimeFromTCP(userId), TCPUserResponse.class);
+        String[] arr = userStudyTime.split(",");
+        StringBuilder sb = new StringBuilder();
+        for(String code : arr){
+            int ascii = Integer.parseInt(code.trim());
+            sb.append((char) ascii);
+        }
+
+        String res = sb.toString();
+        System.out.println(res);
+
+        TCPUserResponse response = mapper.readValue(res, TCPUserResponse.class);
         LocalTime studyTime;
         if(response.getStudyTime() == null){
             studyTime = LocalTime.of(0,0,0);
@@ -254,10 +253,6 @@ public class MessageHandler extends TextWebSocketHandler {
         final Room room = roomManager.getRoom(user.getRoomId());
         room.updateTimer(request,user);
 
-//        if(!request.isTimerState()) { // on -> off 요청일때 redis 저장
-//            ValueOperations<String, String> userTime = redisTemplate.opsForValue();
-//            userTime.set(user.getUserId(), user.studyTimeToString());
-//        }
     }
 
     private void userStudyTimeToTCP(UserSession user) {
