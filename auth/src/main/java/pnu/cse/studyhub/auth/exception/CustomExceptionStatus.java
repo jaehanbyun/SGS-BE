@@ -11,17 +11,19 @@ public enum CustomExceptionStatus {
     /**
      *
      */
-    USERID_NOT_FOUND("AUTH-002", "Userid Not Founded"),
-    WRONG_PASSWORD("AUTH-002", "Wrong Password"),
-    DUPLICATED_EMAIL("AUTH-003", "Duplicated Email Address"),
-    EMPTY_EMAIL("AUTH-003", "Empty Email"),
-    INVALID_EMAIL("AUTH-003", "Invalid Email"),
-    DUPLICATED_USERID("AUTH-004", "Duplicated Userid"),
-    ACCOUNT_NOT_FOUND("AUTH-006", "Account Not Found");
+    USERID_NOT_FOUND("Userid Not Founded"),
+    WRONG_PASSWORD("Wrong Password"),
+    DUPLICATED_EMAIL("Duplicated Email Address"),
+    EMPTY_EMAIL("Empty Email"),
+    INVALID_EMAIL("Invalid Email"),
+    DUPLICATED_USERID("Duplicated Userid"),
+    ACCOUNT_NOT_FOUND( "Account Not Found"),
+    EMAIL_NOT_FOUND( "Email Not Found"),
+    INVALID_PARAM( "Invalid Type Parameter"),
+    WRONG_ID("Wrong ID");
 
 
 
-    private String errorCode;
     private String description;
 
 

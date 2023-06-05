@@ -6,10 +6,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pnu.cse.studyhub.auth.dto.AccountDto;
-import pnu.cse.studyhub.auth.dto.ResponseCodeDto;
-import pnu.cse.studyhub.auth.dto.ResponseDataDto;
-import pnu.cse.studyhub.auth.dto.SignInRequestDto;
+import pnu.cse.studyhub.auth.dto.*;
 import pnu.cse.studyhub.auth.service.*;
 
 import javax.validation.Valid;
@@ -42,8 +39,8 @@ public class SignController {
     }
 
     @PostMapping("/send-mail")
-    public ResponseCodeDto sendEmail(@RequestParam(value = "email") @Valid String email) {
-        return responseService.successResponse(signService.sendEmail(email));
+    public ResponseCodeDto sendEmail(@RequestParam(value = "email") @Valid String email, @RequestParam(value = "type") String type) {
+        return responseService.successResponse(signService.sendEmail(email,type));
     }
 
     @GetMapping("/get-userid")
@@ -54,6 +51,16 @@ public class SignController {
     @PatchMapping("/edit-password")
     public ResponseCodeDto editPassword(@RequestBody @Valid AccountDto dto) {
         return responseService.successResponse(signService.editPassword(dto));
+    }
+
+    @GetMapping("/get-profile")
+    public ResponseProfileDto getProfile(@RequestParam(value = "id") String id) {
+        return responseService.successProfileResponse(signService.getProfile(id));
+    }
+
+    @PatchMapping("/modify-profile")
+    public ResponseCodeDto modifyProfile(@RequestBody @Valid ProfileDto dto) {
+        return responseService.successResponse(signService.modifyProfile(dto));
     }
 
 }

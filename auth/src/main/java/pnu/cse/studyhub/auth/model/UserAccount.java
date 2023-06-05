@@ -18,7 +18,6 @@ public class UserAccount {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idx;
 
-
     @Column(nullable = false, unique = true)
     private String userid;
 
@@ -27,6 +26,15 @@ public class UserAccount {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = true)
+    private String name;
+
+    @Column(nullable = true)
+    private String profileImage;
+
+    @Column(nullable = true)
+    private String description;
 
     public static UserAccount createAccount(AccountDto dto) {
 
@@ -39,5 +47,17 @@ public class UserAccount {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void editName(String name) {
+        this.name = name;
+    }
+
+    public void editProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void editDescription(String description) {
+        this.description = description;
     }
 }

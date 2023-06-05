@@ -10,13 +10,15 @@ import java.time.LocalDateTime;
 public class CustomException extends RuntimeException{
     CustomExceptionStatus customExceptionStatus;
     private String message;
+    private String errorCode;
     private LocalDateTime timestamp;
 
 
 
-    public CustomException(CustomExceptionStatus customExceptionStatus,String message){
+    public CustomException(CustomExceptionStatus customExceptionStatus, String errorCode, String message){
         this.customExceptionStatus = customExceptionStatus;
         this.message = message;
+        this.errorCode = errorCode;
         this.timestamp = LocalDateTime.now();
     }
 }

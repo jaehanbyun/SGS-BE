@@ -10,7 +10,7 @@ import org.springframework.http.HttpHeaders;
 @NoArgsConstructor
 public class ResponseDataDto<T> {
 
-    protected String success;
+    protected String result;
     protected String message;
-    protected SignInResponseDto accountInfo;
+    protected SignInResponseDto data;
 }

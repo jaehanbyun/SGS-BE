@@ -7,9 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResponseCodeDto<T> {
+public class ResponseProfileDto {
     protected String result;
     protected String message;
-    protected SuccessCodeDto data;
-
+    protected ProfileDto data;
 }

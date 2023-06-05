@@ -15,25 +15,25 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
-
-//    private final UserDetailsService userDetailsService;
-    private final static String ROLE = "role";
+    private final static String EMAIL = "email";
     private final static String ID = "id";
 
     @Value("${token.secret}")
     private String secretKey;
 
-    // 1시간 * 24 * 100
-    private long tokenTime =  2400 * 60 * 60 * 1000L;
+    // 1시간
+    private long tokenTime =  60 * 60 * 1000L;
 
-    // 2주 * 100
-    private long refreshTime = 100 * 14 * 24 * 60 * 60 * 1000L;
+    // 1시간 * 24
+    private long refreshTime = 24 * 60 * 60 * 1000L;
 
     public String createToken(String email, String userid) {
-        Claims claims = Jwts.claims().setSubject(email);
+        Claims claims = Jwts.claims();
         claims.put(ID,userid);
+        claims.put(EMAIL,email);
         Date now =new Date();
         return Jwts.builder()
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + tokenTime))
@@ -45,6 +45,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(username);
         Date now =new Date();
         return Jwts.builder()
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshTime))
@@ -55,11 +56,6 @@ public class JwtTokenProvider {
     public String getUsername(String token){
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
-
-//    public Authentication getAuthentication(String token){
-//        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUsername(token));
-//        return new UsernamePasswordAuthenticationToken(userDetails,"",userDetails.getAuthorities());
-//    }
 
     public String resolveToken(HttpServletRequest req){
         return req.getHeader("AUTHORIZATION");

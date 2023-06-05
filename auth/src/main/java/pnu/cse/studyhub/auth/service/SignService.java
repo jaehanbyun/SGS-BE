@@ -41,7 +41,7 @@ public class SignService {
         UserAccount exist = accountRepository.findByUserid(userid);
 
         if (exist != null)
-            throw new CustomException(CustomExceptionStatus.DUPLICATED_USERID, "이미 존재하는 아이디입니다.");
+            throw new CustomException(CustomExceptionStatus.DUPLICATED_USERID, "AUTH-004", "이미 존재하는 아이디입니다.");
 
         ResponseCodeDto<Object> response = new ResponseCodeDto<>();
         SuccessCodeDto successCode = new SuccessCodeDto();
@@ -49,9 +49,9 @@ public class SignService {
         successCode.setIsSuccess(true);
         successCode.setCode("1000");
         successCode.setMessage("회원가입 가능한 아이디 입니다.");
-        response.setSuccess("SUCCESS");
+        response.setResult("SUCCESS");
         response.setMessage("Valid Userid");
-        response.setSuccessCode(successCode);
+        response.setData(successCode);
         return response;
     }
 
@@ -60,7 +60,7 @@ public class SignService {
         UserAccount exist = accountRepository.findByUserid(dto.getId());
 
         if (exist != null)
-            throw new CustomException(CustomExceptionStatus.DUPLICATED_USERID, "이미 존재하는 아이디입니다.");
+            throw new CustomException(CustomExceptionStatus.DUPLICATED_USERID, "AUTH-001", "이미 존재하는 아이디입니다.");
 
         ResponseCodeDto<Object> response = new ResponseCodeDto<>();
         SuccessCodeDto successCode = new SuccessCodeDto();
@@ -72,9 +72,9 @@ public class SignService {
         successCode.setIsSuccess(true);
         successCode.setCode("1000");
         successCode.setMessage("회원가입에 성공하였습니다.");
-        response.setSuccess("SUCCESS");
+        response.setResult("SUCCESS");
         response.setMessage("Create Account Successfully");
-        response.setSuccessCode(successCode);
+        response.setData(successCode);
         return response;
     }
 
@@ -83,9 +83,9 @@ public class SignService {
         UserAccount account = accountRepository.findByUserid(request.getId());
 
         if (account == null)
-            throw new CustomException(CustomExceptionStatus.USERID_NOT_FOUND, "존재하지 않는 아이디 입니다.");
+            throw new CustomException(CustomExceptionStatus.USERID_NOT_FOUND, "AUTH-002", "존재하지 않는 아이디 입니다.");
         if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
-            throw new CustomException(CustomExceptionStatus.WRONG_PASSWORD, "잘못된 비밀번호 입니다.");
+            throw new CustomException(CustomExceptionStatus.WRONG_PASSWORD, "AUTH-002", "잘못된 비밀번호 입니다.");
         }
 
         String refreshToken = jwtTokenProvider.CreateRefreshToken(account.getUserid());
@@ -100,14 +100,14 @@ public class SignService {
         ResponseDataDto<Object> response = new ResponseDataDto<>();
         HttpHeaders headers = new HttpHeaders();
         headers.set("refreshToken", cookie.toString());
-        response.setSuccess("SUCCESS");
+        response.setResult("SUCCESS");
         response.setMessage("SignIn Successfully");
         SignInResponseDto res = SignInResponseDto.builder()
                 .id(account.getUserid())
                 .email(account.getEmail())
                 .accessToken(jwtTokenProvider.createToken(account.getEmail(),account.getUserid()))
                 .build();
-        response.setAccountInfo(res);
+        response.setData(res);
 
 
 
@@ -115,20 +115,25 @@ public class SignService {
     }
 
     @Transactional
-    public ResponseCodeDto sendEmail(@Email String email) {
+    public ResponseCodeDto sendEmail(@Email String email, String type) {
+        if (email == null) {
+            throw new CustomException(CustomExceptionStatus.EMPTY_EMAIL, "AUTH-003", "이메일이 입력되지 않았습니다.");
+        }
+        if (!type.equals("sign") && !type.equals("edit")) {
+            throw new CustomException(CustomExceptionStatus.INVALID_PARAM, "AUTH-003", "올바르지 않은 인자입니다..");
+        }
         UserAccount exist = accountRepository.findByEmail(email);
 
-        if (exist != null) {
-            throw new CustomException(CustomExceptionStatus.DUPLICATED_EMAIL, "이미 등록된 이메일 입니다.");
+        if (exist != null && type.equals("sign")) {
+            throw new CustomException(CustomExceptionStatus.DUPLICATED_EMAIL, "AUTH-003", "이미 등록된 이메일 입니다.");
         }
-
-        if (email == null) {
-            throw new CustomException(CustomExceptionStatus.EMPTY_EMAIL, "이메일이 입력되지 않았습니다.");
+        else if (exist == null && type.equals("edit")) {
+            throw new CustomException(CustomExceptionStatus.EMAIL_NOT_FOUND, "AUTH-003", "등록되지 않은 이메일 입니다.");
         }
 
         String regexPattern = "^(.+)@(\\S+)$";
         if(!Pattern.compile(regexPattern).matcher(email).matches()) {
-            throw new CustomException(CustomExceptionStatus.INVALID_EMAIL, "잘못된 이메일 입니다.");
+            throw new CustomException(CustomExceptionStatus.INVALID_EMAIL,"AUTH-003", "잘못된 이메일 입니다.");
         }
 
         int leftLimit = 48; // numeral '0'
@@ -148,9 +153,9 @@ public class SignService {
         successCode.setIsSuccess(true);
         successCode.setCode("1000");
         successCode.setMessage(generatedString);
-        response.setSuccess("SUCCESS");
+        response.setResult("SUCCESS");
         response.setMessage("Email Send Successfully");
-        response.setSuccessCode(successCode);
+        response.setData(successCode);
 
         return response;
     }
@@ -160,7 +165,7 @@ public class SignService {
         UserAccount exist = accountRepository.findByEmail(email);
 
         if (exist == null)
-            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND, "아이디를 찾을 수 없습니다.");
+            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-006", "아이디를 찾을 수 없습니다.");
 
         ResponseCodeDto<Object> response = new ResponseCodeDto<>();
         SuccessCodeDto successCode = new SuccessCodeDto();
@@ -168,9 +173,9 @@ public class SignService {
         successCode.setIsSuccess(true);
         successCode.setCode("1000");
         successCode.setMessage(exist.getUserid());
-        response.setSuccess("SUCCESS");
+        response.setResult("SUCCESS");
         response.setMessage("Get Userid Successfully");
-        response.setSuccessCode(successCode);
+        response.setData(successCode);
         return response;
     }
 
@@ -179,9 +184,9 @@ public class SignService {
         UserAccount exist = accountRepository.findByEmail(dto.getEmail());
 
         if (exist == null)
-            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND, "아이디를 찾을 수 없습니다.");
-//        if (!dto.getId().equals(exist.getUserid()))
-//            throw new CustomException(CustomExceptionStatus.INVALID_ID, "아이디가 일치하지 않습니다.");
+            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-007", "아이디를 찾을 수 없습니다.");
+        if (!dto.getId().equals(exist.getUserid()))
+            throw new CustomException(CustomExceptionStatus.WRONG_ID, "AUTH-007", "아이디가 일치하지 않습니다.");
 
         exist.setPassword(passwordEncoder.encode(dto.getPassword()));
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -193,9 +198,65 @@ public class SignService {
         successCode.setIsSuccess(true);
         successCode.setCode("1000");
         successCode.setMessage("Edit Password Successfully");
-        response.setSuccess("SUCCESS");
+        response.setResult("SUCCESS");
         response.setMessage("Request Done Successfully");
-        response.setSuccessCode(successCode);
+        response.setData(successCode);
+
+        return response;
+    }
+
+    @Transactional
+    public ResponseProfileDto getProfile(String id) {
+        UserAccount exist = accountRepository.findByUserid(id);
+
+        if (exist == null)
+            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-008", "아이디를 찾을 수 없습니다.");
+
+        ResponseProfileDto response = new ResponseProfileDto();
+        ProfileDto profile = new ProfileDto();
+
+        profile.setId(id);
+        profile.setName(exist.getName());
+        profile.setProfileImage(exist.getProfileImage());
+        profile.setDescription(exist.getDescription());
+        response.setResult("SUCCESS");
+        response.setMessage("Get Profile Successfully");
+        response.setData(profile);
+        return response;
+    }
+
+    @Transactional
+    public ResponseCodeDto modifyProfile(ProfileDto dto) {
+        UserAccount exist = accountRepository.findByUserid(dto.getId());
+        String msg = "Edit ";
+
+        if (exist == null)
+            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-009", "아이디를 찾을 수 없습니다.");
+        if (dto.getName() != null) {
+            exist.editName(dto.getName());
+            msg += "name ";
+        }
+        if (dto.getProfileImage() != null) {
+            exist.editProfileImage(dto.getProfileImage());
+            msg += "profileImage ";
+        }
+        if (dto.getDescription() != null) {
+            exist.editDescription(dto.getDescription());
+            msg += "description ";
+        }
+        msg += "Successfully";
+
+        accountRepository.save(exist);
+
+        ResponseCodeDto<Object> response = new ResponseCodeDto<>();
+        SuccessCodeDto successCode = new SuccessCodeDto();
+
+        successCode.setIsSuccess(true);
+        successCode.setCode("1000");
+        successCode.setMessage(msg);
+        response.setResult("SUCCESS");
+        response.setMessage("Modify User Profile Successfully");
+        response.setData(successCode);
 
         return response;
     }
