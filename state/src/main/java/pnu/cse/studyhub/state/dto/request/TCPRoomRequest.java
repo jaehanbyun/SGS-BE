@@ -1,13 +1,11 @@
-package pnu.cse.studyhub.state.dto.response;
+package pnu.cse.studyhub.state.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 
 
 @Builder
-public class TCPRoomResponse {
+public class TCPRoomRequest {
     @JsonProperty("server")
     private String server;
     @JsonProperty("user_id")
