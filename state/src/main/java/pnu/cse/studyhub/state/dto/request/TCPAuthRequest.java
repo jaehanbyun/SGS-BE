@@ -16,7 +16,7 @@ import java.util.List;
 @JsonTypeName("auth")
 public class TCPAuthRequest extends TCPMessageRequest{
     @JsonProperty("user_id")
-    private List<String> userIds;
+    private String userId;
 //    @JsonProperty("room_id")
 //    private Long roomId;
 //    @JsonProperty("session")
