@@ -2,11 +2,11 @@ spring:
   application.name: auth-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql:3306/spring
-    username: root
-    password: password
+    url: jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/spring?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${ROOM_DB_USER}
+    password: ${ROOM_DB_PASSWORD}
   redis:
-    host: redis
+    host: redis-auth
     port: 6379
   jpa:
     show-sql: true
