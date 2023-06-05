@@ -8,6 +8,14 @@ import java.time.LocalTime;
 
 public class Message {
 
+    // Res-0 : 본인의 정보 받아오기 (userId, studyTime만??)
+    public static JsonObject myInfo(JsonElement myInfo) {
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", "myInfo");
+        jsonObject.add("member", myInfo);
+        return jsonObject;
+    }
+
     // Res-1 : 새로운 유저 방접속 시 기존 유저들에 대한 정보(userId, video, audio, timer, studyTime, onTime)를 새로운 유저에게 전달
     public static JsonObject existingParticipants(JsonArray participantsArray) {
         final JsonObject jsonObject = new JsonObject();

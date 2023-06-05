@@ -12,6 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
 import pnu.cse.studyhub.signaling.dao.request.AudioRequest;
 import pnu.cse.studyhub.signaling.dao.request.TimerRequest;
 import pnu.cse.studyhub.signaling.dao.request.VideoRequest;
+import pnu.cse.studyhub.signaling.dao.response.MyInfoResponse;
 import pnu.cse.studyhub.signaling.dao.response.ParticipantResponse;
 
 import javax.annotation.PreDestroy;
@@ -122,8 +123,11 @@ public class Room implements Closeable {
         }
     }
 
-    // 새로운 유저 방 접속시 기존 유저들에 대한 정보를 새로운 유저한테 전달
+    // 새로운 유저 방 접속시 기존 유저들에 대한 정보를 새로운 유저한테 전달 (여기에 본인도 추가할까..?)
     public void sendParticipantNames(UserSession user) throws IOException {
+
+        MyInfoResponse myInfoResponse = new MyInfoResponse(user.getUserId(), user.studyTimeToString());
+        user.sendMessage(myInfo(JsonUtils.toJsonObject(myInfoResponse)));
 
         final JsonArray participantsArray = new JsonArray();
         for (final UserSession participant : participants.values()) {
@@ -136,6 +140,7 @@ public class Room implements Closeable {
         }
 
         user.sendMessage(existingParticipants(participantsArray));
+
     }
 
     public void updateVideo(VideoRequest request) throws IOException {
