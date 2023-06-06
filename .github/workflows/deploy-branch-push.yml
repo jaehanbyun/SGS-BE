@@ -83,6 +83,7 @@ jobs:
             if [ "$(docker ps -qa -f name=sgs-${{ steps.extract.outputs.branch }})" ]; then
               docker rm -f sgs-${{ steps.extract.outputs.branch }}
             fi
-              
+            
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
             docker pull ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
             docker run -d --name sgs-${{ steps.extract.outputs.branch }} --network ${{ env.NETWORK_NAME }} -p ${PORT}:8080 -e ROOM_DB_USER=${{ secrets.ROOM_DB_USER }} -e ROOM_DB_PASSWORD=${{ secrets.ROOM_DB_PASSWORD }} -e SECRET_TOKEN=${{ secrets.SECRET_TOKEN }} ${{ steps.build_push_image.outputs.image }}
