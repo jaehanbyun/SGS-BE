@@ -12,6 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class TCPAuthResponse {
-    @JsonProperty("users")
-    private List<UserStudyTime> users;
+    @JsonProperty("user_id")
+    private String userId;
+    @JsonProperty("study_time")
+    private String studyTime;
 }

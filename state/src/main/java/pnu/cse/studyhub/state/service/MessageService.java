@@ -13,12 +13,11 @@ import pnu.cse.studyhub.state.dto.request.TCPChatRequest;
 import pnu.cse.studyhub.state.dto.request.TCPMessageRequest;
 import pnu.cse.studyhub.state.dto.request.TCPSignalingRequest;
 import pnu.cse.studyhub.state.dto.response.TCPAuthResponse;
-import pnu.cse.studyhub.state.dto.response.TCPRoomResponse;
+import pnu.cse.studyhub.state.dto.request.TCPRoomRequest;
 import pnu.cse.studyhub.state.dto.response.TCPSignalingResponse;
 import pnu.cse.studyhub.state.repository.entity.RealTimeData;
+import pnu.cse.studyhub.state.util.JsonConverter;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,83 +28,75 @@ public class MessageService {
 
     private final RedisService redisService;
     private final TCPClientGateway tcpClientGateway;
+    private final JsonConverter jsonConverter;
 
     public String processMessage(String message) {
         log.info("Received message: {}", message);
         ObjectMapper mapper = new ObjectMapper();
         try{
-            TCPMessageRequest response = mapper.readValue(message, TCPMessageRequest.class);
-//            String responseMessage = String.format("Message \"%s\" is processed", response.toString());
+            TCPMessageRequest response = jsonConverter.convertFromJson(message, TCPMessageRequest.class);
             String responseMessage = "";
             switch (response.getServer()) {
                 case "chat":
                     TCPChatRequest chatRequest = (TCPChatRequest) response;
-                    log.warn(chatRequest.toString());
                     if (chatRequest.getType().matches("SUBSCRIBE")) {
-                        RealTimeData realTimeData =  redisService.getData(chatRequest.getUserId());
-                        if (realTimeData == null) {
-                            realTimeData = new RealTimeData();
-                            realTimeData.setUserId(chatRequest.getUserId());
+                        RealTimeData realTimeData =  redisService.findRealTimeData(chatRequest.getUserId());
+                        if (realTimeData != null) { // 오늘 접속 이력이 있는 경우
                             realTimeData.setRoomId(chatRequest.getRoomId());
                             realTimeData.setSessionId(chatRequest.getSession());
-                            RealTimeData chatSubscribeRealTimeData =  redisService.setValue(realTimeData);
-                            responseMessage = mapper.writeValueAsString(chatSubscribeRealTimeData);
-                        } else {
-                            realTimeData.setRoomId(chatRequest.getRoomId());
-                            realTimeData.setSessionId(chatRequest.getSession());
-                            RealTimeData chatSubscribeRealTimeData = redisService.setValue(realTimeData);
-                            responseMessage = mapper.writeValueAsString(chatSubscribeRealTimeData);
+                            RealTimeData chatSubscribeRealTimeData = redisService.saveRealTimeDataAndSession(realTimeData);
+
+                            responseMessage = jsonConverter.convertToJson(chatSubscribeRealTimeData);
+                        } else { // 오늘 접속 이력이 없는 경우
+                            realTimeData = makeRealTimeData(chatRequest);
+                            RealTimeData chatSubscribeRealTimeData = redisService.saveRealTimeDataAndSession(realTimeData);
+
+                            responseMessage = jsonConverter.convertToJson(chatSubscribeRealTimeData);
                         }
                     } else if (chatRequest.getType().matches("DISCONNECT|UNSUBSCRIBE")) {
                         String userId = redisService.findUserIdBySessionId(chatRequest.getSession());
-                        redisService.delValues(userId, chatRequest.getSession());
-                        log.debug(userId, chatRequest.getSession());
 
                         if (userId  != null) {
-                            redisService.delData(userId);
-                            responseMessage = mapper.writeValueAsString(redisService.getData(userId));
+                            redisService.deleteRealTimeDataAndSession(userId, chatRequest.getSession());
+                            responseMessage = mapper.writeValueAsString(redisService.findRealTimeData(userId));
                         } else {
-                            //예외처리
+                            // 존재하지 않는 접속 이력에 대한 삭제 동작 , 예외처리
                         }
 
                     } else {
-                        // 에러처리
+                        // 구독, 구독해제, 연결해제를 제외한 나머지 소켓 동작
                     };
                     break;
                 case "signaling":
                     TCPSignalingRequest signalingRequest = (TCPSignalingRequest) response;
-                    log.warn(signalingRequest.toString());
-                    // Signaling 서버에 StudyTime 전달.
+                    // Signaling <- state, StudyTime 조회, 방 들어옴.
                     if (signalingRequest.getType().matches("STUDY_TIME_FROM_TCP")) {
-                        try {
-                            RealTimeData realTimeData =  redisService.getData(signalingRequest.getUserId());
-                            if (realTimeData != null) {
-                                responseMessage = sendSignalingStudyTimeMessage(realTimeData);
-//                                String roomInResult = sendRoomInOutMessage(realTimeData);
-//                                log.info(roomInResult);
-                            } else {
-                                //예외처리
-                            }
-                        }catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    // Signaling 서버로부터 StudyTime 저장.
-                    } else if (signalingRequest.getType().matches("STUDY_TIME_TO_TCP")) {
-                        try {
-                            RealTimeData realTimeData =  redisService.getData(signalingRequest.getUserId());
-                            if (realTimeData != null) {
-                                realTimeData.setStudyTime(signalingRequest.getStudyTime());
-                                RealTimeData signalingSetRealTimeData = redisService.setData(realTimeData);
-                                responseMessage = sendSignalingStudyTimeMessage(signalingSetRealTimeData);
-                                String roomOutResult = sendSignalingRoomInOutMessage(realTimeData);
-                                log.info("roomOutResult : " + roomOutResult);
+                        RealTimeData realTimeData =  redisService.findRealTimeData(signalingRequest.getUserId());
+                        if (realTimeData != null) { // 공부 이력이 있는 경우
+                            responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
+                        } else { // 공부 이력이 없는 경우
+                            realTimeData = makeRealTimeData(signalingRequest);
 
-                            } else {
-                                //예외처리
-                            }
-                        }catch (Exception e) {
-                            throw new RuntimeException(e);
+                            responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
                         }
+                    // Signaling -> state,  StudyTime 저장, 방 나감.
+                    } else if (signalingRequest.getType().matches("STUDY_TIME_TO_TCP")) {
+                        RealTimeData realTimeData =  redisService.findRealTimeData(signalingRequest.getUserId());
+                        String roomOutResult = "";
+                        if (realTimeData != null) { // 공부 이력이 있는 경우
+                            // 공부 시간 저장
+                            realTimeData.setStudyTime(signalingRequest.getStudyTime());
+                            RealTimeData signalingSetRealTimeData = redisService.saveRealTimeData(realTimeData);
+                            responseMessage = sendSignalingServerStudyTimeMessage(signalingSetRealTimeData);
+                            // Room Out 알림
+                            roomOutResult = sendRoomServerRoomOutMessage(realTimeData);
+                        } else {
+                            // 공부 이력이 없는 경우
+                            realTimeData = makeRealTimeData(signalingRequest);
+                            responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
+                            roomOutResult = sendRoomServerRoomOutMessage(realTimeData);
+                        }
+                        tcpClientGateway.send(roomOutResult);
                     } else {
                         // 에러처리
                     }
@@ -114,38 +105,17 @@ public class MessageService {
                     TCPAuthRequest authRequest = (TCPAuthRequest) response;
                     log.warn(authRequest.toString());
                     // 유저 서버에 공부 시간 전달
-                    if (authRequest.getType().matches("STUDY_TIME_LIST")) {
+                    if (authRequest.getType().matches("USER_STUDY_TIME")) {
                         try {
-                            List<RealTimeData> realTimeData =  redisService.getRealTimeData(authRequest.getUserIds());
+                            RealTimeData realTimeData =  redisService.findRealTimeData(authRequest.getUserId());
                             if (realTimeData != null) {
-                                responseMessage = sendAuthStudyTimeMessage(realTimeData);
-//                                String roomInResult = sendRoomInOutMessage(realTimeData);
-//                                log.info(roomInResult);
+                                responseMessage = sendAuthServerStudyTimeMessage(realTimeData);
                             } else {
                                 //예외처리
                             }
                         }catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                        // Signaling 서버로부터 StudyTime 저장.
-                    } else if (authRequest.getType().matches("test2")) {
-//                        try {
-//                            RealTimeData realTimeData =  redisService.getData(authRequest.getUserId());
-//                            if (realTimeData != null) {
-//                                realTimeData.setStudyTime(authRequest.getgetUserIdStudyTime());
-//                                RealTimeData signalingSetRealTimeData = redisService.setData(realTimeData);
-//                                responseMessage = sendStudyTimeMessage(signalingSetRealTimeData);
-//                                String roomOutResult = sendRoomInOutMessage(realTimeData);
-//                                log.info("roomOutResult : " + roomOutResult);
-//
-//                            } else {
-//                                //예외처리
-//                            }
-//                        }catch (Exception e) {
-//                            throw new RuntimeException(e);
-//                        }
-                    } else {
-                        // 에러처리
                     }
                     break;
             }
@@ -157,40 +127,45 @@ public class MessageService {
             throw new RuntimeException(e);
         }
     }
-    public String sendSignalingRoomInOutMessage(RealTimeData rtData) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-
-        TCPRoomResponse tcpRoomResponse = TCPRoomResponse.builder()
+    public String sendRoomServerRoomOutMessage(RealTimeData rtData) {
+        TCPRoomRequest tcpRoomRequest = TCPRoomRequest.builder()
                 .server("state")
                 .userId(rtData.getUserId())
                 .roomId(rtData.getRoomId())
                 .build();
 
-        String tcpRoomResponseMessage = mapper.writeValueAsString(tcpRoomResponse);
-        return tcpRoomResponseMessage;
+        String tcpRoomOutResponseMessage = jsonConverter.convertToJson(tcpRoomRequest);
+        return tcpRoomOutResponseMessage;
     }
-    public String sendSignalingStudyTimeMessage(RealTimeData rtData) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-
+    public String sendSignalingServerStudyTimeMessage(RealTimeData rtData) {
         TCPSignalingResponse tcpSignalingResponse = TCPSignalingResponse.builder()
                 .userId(rtData.getUserId())
                 .studyTime(rtData.getStudyTime())
                 .build();
 
-        String tcpSignalingResponseMessage = mapper.writeValueAsString(tcpSignalingResponse);
+        String tcpSignalingResponseMessage = jsonConverter.convertToJson(tcpSignalingResponse);
         return tcpSignalingResponseMessage;
     }
-    public String sendAuthStudyTimeMessage(List<RealTimeData> rtDatas) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        List< UserStudyTime> userStudyTimes = new ArrayList<>();
-        for (RealTimeData rtData : rtDatas) {
-            userStudyTimes.add(rtData.toUserStudyTime());
-        }
+    public String sendAuthServerStudyTimeMessage(RealTimeData realTimeData){
         TCPAuthResponse tcpAuthResponse = TCPAuthResponse.builder()
-                .users(userStudyTimes)
+                .userId(realTimeData.getUserId())
+                .studyTime(realTimeData.getStudyTime())
                 .build();
 
-        String tcpAuthResponseMessage = mapper.writeValueAsString(tcpAuthResponse);
+        String tcpAuthResponseMessage = jsonConverter.convertToJson(tcpAuthResponse);
         return tcpAuthResponseMessage;
+    }
+    public RealTimeData makeRealTimeData(TCPChatRequest chatRequest) {
+        RealTimeData realTimeData = new RealTimeData();
+        realTimeData.setUserId(chatRequest.getUserId());
+        realTimeData.setRoomId(chatRequest.getRoomId());
+        realTimeData.setSessionId(chatRequest.getSession());
+        return realTimeData;
+    }
+    public RealTimeData makeRealTimeData(TCPSignalingRequest signalingRequest) {
+        RealTimeData realTimeData = new RealTimeData();
+        realTimeData.setUserId(signalingRequest.getUserId());
+        realTimeData.setStudyTime(signalingRequest.getStudyTime());
+        return realTimeData;
     }
 }
