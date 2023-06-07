@@ -18,6 +18,9 @@ public class TCPKickoutRequest {
     private String type;
     @JsonProperty("user_id")
     private String userId;
+    @JsonProperty("room_id")
+    private Long roomId;
+
 
     @Override
     public String toString(){

@@ -19,6 +19,8 @@ public class TCPAlertRequest {
     private String type;
     @JsonProperty("user_id")
     private String userId;
+    @JsonProperty("room_id")
+    private Long roomId;
     @JsonProperty("alert_count")
     private int alertCount;
 

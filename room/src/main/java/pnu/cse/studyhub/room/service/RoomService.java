@@ -466,6 +466,7 @@ public class RoomService {
                         .server("room")
                         .type(String.valueOf(type))
                         .userId(target.getUserId())
+                        .roomId(target.getRoomId())
                         .build().toString();
                 break;
 
@@ -474,6 +475,7 @@ public class RoomService {
                         .server("room")
                         .type(String.valueOf(type))
                         .userId(target.getUserId())
+                        .roomId(target.getRoomId())
                         .alertCount(target.getAlert())
                         .build().toString();
                 break;
@@ -483,6 +485,7 @@ public class RoomService {
                         .server("room")
                         .type(String.valueOf(type))
                         .userId(target.getUserId())
+                        .roomId(target.getRoomId())
                         .build().toString();
                 break;
 
