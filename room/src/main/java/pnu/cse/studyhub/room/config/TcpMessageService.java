@@ -21,5 +21,13 @@ public class TcpMessageService {
         return response;
     }
 
+    public void onlySendMessage(String message) {
+        String timestamp = LocalDateTime.now().toString();
+        log.info("Sending message: {}", message);
+        tcpClientGateway.send(message);
+        log.info("no response");
+
+    }
+
 
 }

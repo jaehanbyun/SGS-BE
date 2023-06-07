@@ -22,7 +22,7 @@ public class TcpClientConfig implements ApplicationEventPublisherAware {
     @Value("${tcp.state.port}")
     private int port;
 
-    @Value("${tcp.state.poolSize}")
+    @Value("${tcp.state.connection.poolSize}")
     private int connectionPoolSize;
 
     private ApplicationEventPublisher applicationEventPublisher;

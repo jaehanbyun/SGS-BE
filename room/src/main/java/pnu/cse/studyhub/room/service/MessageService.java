@@ -45,17 +45,18 @@ public class MessageService {
                         OpenUserRoomEntity openUserRoom = userRoomRepository.findById(new UserRoomId(stateRequest.getUserId(), stateRequest.getRoomId())).orElseThrow(() ->
                                 new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s not founded", stateRequest.getUserId())));
 
-                        if(openUserRoom.isRoomOwner()){
-                            // openRoomEntity 삭제
+                        if(openUserRoom.isRoomOwner()){ // 방장이면 openRoomEntity 삭제
+                            // TODO : 여기서 방 폭파 TCP 설정
+                            //        responseMessage(userId, roomId)에 추가해주기
                             openRoomRepository.delete(openRoomEntity.get());
 
-                        }else{
-                            // openRoomEntity 인원수 감소
+
+                        }else{ // 일반 유저면 openRoomEntity 인원 수 감소
                             openRoomEntity.get().minusUser();
 
                         }
 
-                    }
+                    } // 스터디 그룹일때는 ..?
 
                     /*
                         1. roomId가 존재하는 room(openRoomEntity)인지 확인

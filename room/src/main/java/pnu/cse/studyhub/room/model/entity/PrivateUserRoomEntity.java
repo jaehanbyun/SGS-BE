@@ -16,7 +16,7 @@ import static javax.persistence.FetchType.LAZY;
 @Getter
 @Setter
 @IdClass(UserRoomId.class)
-public class PrivateUserRoomEntity {
+public class PrivateUserRoomEntity implements UserRoom{
 
     @Id
     private String userId;
@@ -32,7 +32,7 @@ public class PrivateUserRoomEntity {
     private boolean roomOwner;
     private boolean isMember;
 
-    private Integer alert;
+    private int alert;
     private Boolean kick_out;
 
     private Timestamp createdAt;
@@ -61,20 +61,25 @@ public class PrivateUserRoomEntity {
         return userRoom;
     }
 
-    public void addAlert()
+    @Override
+    public int addAlert()
     {
-        this.setAlert(this.getAlert()+1);
-        if(this.getAlert() == 3) this.kickOut();
+        this.alert++;
+        if(this.alert == 3) this.kickOut();
+
+        return alert;
     }
 
     // 퇴장
+    @Override
     public void kickOut(){
-        this.setKick_out(true);
+        this.kick_out = true;
     }
 
     //위임
+
     public void delegate(PrivateUserRoomEntity target){
-        this.setRoomOwner(false);
+        this.roomOwner = false;
         target.setRoomOwner(true);
     }
 
