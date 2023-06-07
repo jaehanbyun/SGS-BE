@@ -19,6 +19,14 @@ logging:
 jwt:
   secret-key: user_token
 
+# 여긴
 tcp:
+  # TcpServerConfig에 TCP 받을 본인의 포트 설정
   server:
     port: 8089
+  # TcpClientConfig에 TCP를 보낼 상태관리서버의 url 설정
+  state:
+    host: localhost
+    port: 8099
+    connection:
+      poolSize: 30
