@@ -6,16 +6,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import pnu.cse.studyhub.room.config.TcpMessageService;
+import pnu.cse.studyhub.room.dto.request.tcp.TCPAlertRequest;
+import pnu.cse.studyhub.room.dto.request.tcp.TCPDelegateRequest;
+import pnu.cse.studyhub.room.dto.request.tcp.TCPKickoutRequest;
+import pnu.cse.studyhub.room.dto.request.tcp.TCPToStateType;
 import pnu.cse.studyhub.room.dto.response.*;
+import pnu.cse.studyhub.room.model.entity.*;
 import pnu.cse.studyhub.room.service.exception.ApplicationException;
 import pnu.cse.studyhub.room.service.exception.ErrorCode;
 import pnu.cse.studyhub.room.model.OpenRoom;
 import pnu.cse.studyhub.room.model.RoomChannel;
 import pnu.cse.studyhub.room.model.UserRoomId;
-import pnu.cse.studyhub.room.model.entity.OpenRoomEntity;
-import pnu.cse.studyhub.room.model.entity.OpenUserRoomEntity;
-import pnu.cse.studyhub.room.model.entity.PrivateRoomEntity;
-import pnu.cse.studyhub.room.model.entity.PrivateUserRoomEntity;
 import pnu.cse.studyhub.room.repository.OpenRoomRepository;
 import pnu.cse.studyhub.room.repository.PrivateRoomRepository;
 import pnu.cse.studyhub.room.repository.PrivateUserRoomRepository;
@@ -36,6 +38,8 @@ public class RoomService {
     private final UserRoomRepository userRoomRepository;
     private final PrivateUserRoomRepository privateUserRoomRepository;
     private final PrivateRoomRepository privateRoomRepository;
+
+    private final TcpMessageService tcpMessageService;
 
 
     //private study group 조회
@@ -136,6 +140,7 @@ public class RoomService {
 
             // 방장 위임
             owner.delegate(target);
+            TCPToState(TCPToStateType.DELEGATE,target);
 
             return new RoomTargetResponse(roomId,target.getUserId());
         }else{
@@ -145,6 +150,8 @@ public class RoomService {
                     new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s User is not founded in %d study group", targetId, roomId)));
 
             owner.delegate(target);
+            TCPToState(TCPToStateType.DELEGATE,target);
+
 
             return new RoomTargetResponse(roomId,target.getUserId());
         }
@@ -165,6 +172,7 @@ public class RoomService {
 
             // 추방
             target.kickOut();
+            TCPToState(TCPToStateType.KICK_OUT,target);
 
             return new RoomTargetResponse(roomId,target.getUserId());
         }else{
@@ -174,6 +182,7 @@ public class RoomService {
                     new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s User is not founded in %d study group", targetId, roomId)));
 
             target.kickOut();
+            TCPToState(TCPToStateType.KICK_OUT,target);
 
             return new RoomTargetResponse(roomId,target.getUserId());
         }
@@ -192,7 +201,11 @@ public class RoomService {
                     new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s User is not founded in %d room", targetId, roomId)));
 
             // 경고
-            target.addAlert();
+            if(target.addAlert() < 3) {
+                TCPToState(TCPToStateType.ALERT, target);
+            }else{
+                TCPToState(TCPToStateType.KICK_OUT_BY_ALERT, target);
+            }
 
             return new AlertResponse(roomId,target.getUserId(),target.getAlert());
         }else{
@@ -200,7 +213,12 @@ public class RoomService {
             checkPrivateRoomOwner(roomId, userId);
             PrivateUserRoomEntity target = privateUserRoomRepository.findById(new UserRoomId(targetId, roomId)).orElseThrow(() ->
                     new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s User is not founded in %d study group", targetId, roomId)));
-            target.addAlert();
+
+            if(target.addAlert() < 3) {
+                TCPToState(TCPToStateType.ALERT, target);
+            }else{
+                TCPToState(TCPToStateType.KICK_OUT_BY_ALERT, target);
+            }
 
             return new AlertResponse(roomId,target.getUserId(),target.getAlert());
         }
@@ -431,6 +449,52 @@ public class RoomService {
             throw new ApplicationException(ErrorCode.INVALID_PERMISSION,String.format("%s User is not %d Open Study Room's RoomOwner", userId, roomId));
         }
         return owner.get();
-
     }
+
+    // 경고, 강퇴 관련 상태관리서버로 TCP 보내기
+    /*
+        경고 처리를 어떻게 하지..?
+
+     */
+    private void TCPToState(TCPToStateType type, UserRoom target) {
+        String tcpMessage = null;
+
+        switch (type){
+            case KICK_OUT:
+            case KICK_OUT_BY_ALERT :
+                tcpMessage = TCPKickoutRequest.builder()
+                        .server("room")
+                        .type(String.valueOf(type))
+                        .userId(target.getUserId())
+                        .roomId(target.getRoomId())
+                        .build().toString();
+                break;
+
+            case ALERT :
+                tcpMessage = TCPAlertRequest.builder()
+                        .server("room")
+                        .type(String.valueOf(type))
+                        .userId(target.getUserId())
+                        .roomId(target.getRoomId())
+                        .alertCount(target.getAlert())
+                        .build().toString();
+                break;
+
+            case DELEGATE :
+                tcpMessage = TCPDelegateRequest.builder()
+                        .server("room")
+                        .type(String.valueOf(type))
+                        .userId(target.getUserId())
+                        .roomId(target.getRoomId())
+                        .build().toString();
+                break;
+
+            default:
+                break;
+        }
+        System.out.println(tcpMessage);
+        tcpMessageService.onlySendMessage(tcpMessage);
+    }
+
+
 }

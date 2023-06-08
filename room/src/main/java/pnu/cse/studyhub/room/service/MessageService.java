@@ -45,26 +45,20 @@ public class MessageService {
                         OpenUserRoomEntity openUserRoom = userRoomRepository.findById(new UserRoomId(stateRequest.getUserId(), stateRequest.getRoomId())).orElseThrow(() ->
                                 new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s not founded", stateRequest.getUserId())));
 
-                        if(openUserRoom.isRoomOwner()){
-                            // openRoomEntity 삭제
+                        if(openUserRoom.isRoomOwner()){ // 방장이면 openRoomEntity 삭제
                             openRoomRepository.delete(openRoomEntity.get());
+                            responseMessage = "DELETE";
 
-                        }else{
-                            // openRoomEntity 인원수 감소
+                        }else{ // 일반 유저면 openRoomEntity 인원 수 감소
                             openRoomEntity.get().minusUser();
-
+                            responseMessage = "KEEP";
                         }
 
+                    }else{
+                        responseMessage = "KEEP";
                     }
-
-                    /*
-                        1. roomId가 존재하는 room(openRoomEntity)인지 확인
-                        2. userRoom으로 해당방에 user 있는지 체크
-                        3. 해당 userId가 해당 roomId의 roomOwner이면 삭제
-                            아니면 방의 인원만 감소
-
-                     */
-
+                    break;
+                default:
                     break;
             }
             //log.warn("responseMessage : " + responseMessage);
