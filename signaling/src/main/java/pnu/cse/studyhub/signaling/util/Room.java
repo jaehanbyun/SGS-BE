@@ -56,7 +56,6 @@ public class Room implements Closeable {
     }
 
     public UserSession join(String userId, WebSocketSession session, boolean video, boolean audio, LocalTime studyTime) throws IOException {
-        // TODO : 여기서 redis 사용하자 ??
 
         final UserSession participant = new UserSession(userId,this.roomId, session, this.pipeline, video, audio,studyTime);
 
@@ -164,6 +163,14 @@ public class Room implements Closeable {
         }
     }
 
+    public void delegateOwner(String type, String userId) throws IOException {
+        final JsonObject userTypeMessageJson = userTypeMessage(type, userId);
+        for (final UserSession participant: participants.values()) {
+            participant.sendMessage(userTypeMessageJson);
+        }
+    }
+
+
     /*
         젤 처음 들어오면 각 유저의 (userId, videoState, audioState, 공부시간, 타이머상태, 타이머 누른 시간)을 받을거임.
             Off 유저 : (공부시간) 화면에 출력
@@ -196,7 +203,7 @@ public class Room implements Closeable {
      */
 
     // 여기서 request.getTime이 hh:mm:ss 형식의 String
-    // TODO : 자 타이머를 시작한 것부터 차근차근해보자!
+
     public void updateTimer(TimerRequest request, UserSession user) throws IOException {
         //request : timerState, time
         //final UserSession user = participants.get(request.getUserId());

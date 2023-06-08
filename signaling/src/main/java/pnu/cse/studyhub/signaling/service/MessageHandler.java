@@ -71,7 +71,6 @@ public class MessageHandler extends TextWebSocketHandler {
                     log.info("방접속");
                     JoinRequest joinRequest = mapper.readValue(message.getPayload(), JoinRequest.class);
                     join(joinRequest, session);
-                    // TODO : 방 접속시에 본인에게 본인관련 정보도 보내줘야할듯?
                     break;
 
                 // SDP 정보 전송
@@ -145,18 +144,29 @@ public class MessageHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("[ws] Session has been closed with status [{} {}]", status, session);
         final UserSession user = userRegistry.removeBySession(session);
+        if (Objects.isNull(user)) return;
 
         if(user.getTimer()){ // user가 On 상태일때
             user.setTimer(false);
-            //ValueOperations<String, String> userTime = redisTemplate.opsForValue();
             user.countStudyTime(LocalTime.now(),user.getOnTime());
-            //userTime.set(user.getUserId(), user.studyTimeToString());
         }
 
-        userStudyTimeToTCP(user);
+        // TODO : 아마 reponse 아스키관련 처리도 해줘야할듯?
+        String response = userStudyTimeToTCP(user);
+        final Room room = roomManager.onlyGetRoom(user.getRoomId());
+        /*
+            TODO : 여기서 만약 response로 방장이 바꼈다고 오면
+                userId(바뀐 방장) 나중에 제호가 보낸 타입에 따라 달라질듯..?
 
-        if (Objects.isNull(user)) return;
-        Room room = roomManager.getRoom(user.getRoomId());
+            if(response가 DELEGATE type이라면)
+            room.delegateOwner("DELEGATE",userId);
+
+         */
+
+
+
+        // removeParticipant로 participants에서도 삭제하고 남아있는 유저들한테 알림
+        // 여기서 user.close()
         room.leave(user);
 
         if (room.getParticipants().isEmpty()) {
@@ -248,7 +258,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
     }
 
-    private void userStudyTimeToTCP(UserSession user) {
+    private String userStudyTimeToTCP(UserSession user) {
         String tcpMessage;
         // TCP 서버로 userId랑 studyTime 보내줌
         tcpMessage = TCPTimerRequest.builder()
@@ -258,8 +268,8 @@ public class MessageHandler extends TextWebSocketHandler {
                 .studyTime(user.studyTimeToString())
                 .build().toString();
 
-        tcpMessageService.sendMessage(tcpMessage);
         log.info("[tcp to state] {} user's studyTime : {}",user.getUserId(),user.studyTimeToString());
+        return tcpMessageService.sendMessage(tcpMessage);
     }
 
     private String userStudyTimeFromTCP(String userId) {
