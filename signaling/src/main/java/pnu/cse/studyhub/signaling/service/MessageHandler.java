@@ -8,9 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SetOperations;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -18,6 +15,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import pnu.cse.studyhub.signaling.config.tcp.TCPMessageService;
 import pnu.cse.studyhub.signaling.dao.request.*;
+import pnu.cse.studyhub.signaling.dao.request.tcp.TCPTimerRequest;
+import pnu.cse.studyhub.signaling.dao.request.tcp.TCPUserRequest;
 import pnu.cse.studyhub.signaling.dao.response.TCPUserResponse;
 import pnu.cse.studyhub.signaling.util.Room;
 import pnu.cse.studyhub.signaling.util.RoomManager;
@@ -25,14 +24,8 @@ import pnu.cse.studyhub.signaling.util.UserRegistry;
 import pnu.cse.studyhub.signaling.util.UserSession;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component

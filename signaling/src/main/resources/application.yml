@@ -11,7 +11,11 @@ server:
   port: 8059
 
 tcp:
+  # 해당 시그널링 서버의 TCPServer Port
   server:
+    port: 8058
+  # 상태관리서버의 host, port
+  state:
     host: localhost
     port: 8099
     connection:

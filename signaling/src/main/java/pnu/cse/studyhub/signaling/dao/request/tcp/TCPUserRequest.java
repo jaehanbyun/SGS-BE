@@ -1,4 +1,4 @@
-package pnu.cse.studyhub.signaling.dao.request;
+package pnu.cse.studyhub.signaling.dao.request.tcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,19 +7,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TCPTimerRequest {
-    // TODO : TCP
+public class TCPUserRequest {
     @JsonProperty("server")
     private String server;
     @JsonProperty("type")
     private String type;
     @JsonProperty("user_id")
     private String userId;
-    @JsonProperty("study_time")
-    private String studyTime;
 
     @Override
     public String toString(){
