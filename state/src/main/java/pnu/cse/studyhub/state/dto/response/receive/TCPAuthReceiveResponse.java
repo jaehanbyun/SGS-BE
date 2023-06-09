@@ -1,4 +1,4 @@
-package pnu.cse.studyhub.state.dto.response;
+package pnu.cse.studyhub.state.dto.response.receive;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TCPSignalingResponse {
+public class TCPAuthReceiveResponse {
     @JsonProperty("user_id")
     private String userId;
     @JsonProperty("study_time")
