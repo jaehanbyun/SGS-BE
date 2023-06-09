@@ -18,7 +18,12 @@ tcp:
     host : localhost
     port : 8089
     connection :
-      poolSize : 30
+      poolSize : 10
+  signaling:
+    host : localhost
+    port : 8058
+    connection :
+      poolSize : 10
 logging:
   level:
     pnu.cse.studyhub: DEBUG

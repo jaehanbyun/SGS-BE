@@ -1,4 +1,4 @@
-package pnu.cse.studyhub.state.dto.request;
+package pnu.cse.studyhub.state.dto.request.receive;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@JsonTypeName("chat")
-public class TCPChatRequest extends TCPMessageRequest{
+@JsonTypeName("auth")
+public class TCPAuthReceiveRequest extends TCPMessageReceiveRequest {
     @JsonProperty("user_id")
     private String userId;
-    @JsonProperty("room_id")
-    private Long roomId;
-    @JsonProperty("session")
-    private String session;
+//    @JsonProperty("room_id")
+//    private Long roomId;
+//    @JsonProperty("session")
+//    private String session;
     @JsonProperty("type")
     private String type;
     @Override
