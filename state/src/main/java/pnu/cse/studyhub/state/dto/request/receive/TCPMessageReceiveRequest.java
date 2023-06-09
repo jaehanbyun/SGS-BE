@@ -1,4 +1,4 @@
-package pnu.cse.studyhub.state.dto.request;
+package pnu.cse.studyhub.state.dto.request.receive;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -15,11 +15,12 @@ import lombok.NoArgsConstructor;
         property = "server",
         visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = TCPChatRequest.class, name = "chat"),
-        @JsonSubTypes.Type(value = TCPSignalingRequest.class, name = "signaling"),
-        @JsonSubTypes.Type(value = TCPAuthRequest.class, name = "auth")
+        @JsonSubTypes.Type(value = TCPChatReceiveRequest.class, name = "chat"),
+        @JsonSubTypes.Type(value = TCPSignalingReceiveRequest.class, name = "signaling"),
+        @JsonSubTypes.Type(value = TCPAuthReceiveRequest.class, name = "auth"),
+        @JsonSubTypes.Type(value = TCPRoomReceiveRequest.class, name = "room")
 })
-public abstract class TCPMessageRequest{
+public abstract class TCPMessageReceiveRequest {
     private String server;
 
 }
