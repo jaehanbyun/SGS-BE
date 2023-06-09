@@ -4,7 +4,7 @@ import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.stereotype.Component;
 
 @Component
-@MessagingGateway(defaultRequestChannel = "outboundChannel")
-public interface TCPClientGateway {
+@MessagingGateway(defaultRequestChannel = "roomOutboundChannel")
+public interface TCPRoomClientGateway {
     String send(String message);
 }
