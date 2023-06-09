@@ -15,7 +15,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
 @Configuration
-public class TCPClientConfig implements ApplicationEventPublisherAware {
+public class TCPRoomClientConfig implements ApplicationEventPublisherAware {
     @Value("${tcp.room.host}")
     private String host;
 
@@ -33,7 +33,7 @@ public class TCPClientConfig implements ApplicationEventPublisherAware {
     }
 
     @Bean
-    public AbstractClientConnectionFactory clientConnectionFactory() {
+    public AbstractClientConnectionFactory roomClientConnectionFactory() {
         TcpNioClientConnectionFactory tcpNioClientConnectionFactory = new TcpNioClientConnectionFactory(host, port);
         tcpNioClientConnectionFactory.setUsingDirectBuffers(true);
         tcpNioClientConnectionFactory.setApplicationEventPublisher(applicationEventPublisher);
@@ -42,15 +42,15 @@ public class TCPClientConfig implements ApplicationEventPublisherAware {
 
 
     @Bean
-    public MessageChannel outboundChannel() {
+    public MessageChannel roomOutboundChannel() {
         return new DirectChannel();
     }
 
     @Bean
-    @ServiceActivator(inputChannel = "outboundChannel")
-    public MessageHandler outboundGateway(AbstractClientConnectionFactory clientConnectionFactory) {
+    @ServiceActivator(inputChannel = "roomOutboundChannel")
+    public MessageHandler roomOutboundGateway(AbstractClientConnectionFactory roomClientConnectionFactory) {
         TcpOutboundGateway tcpOutboundGateway = new TcpOutboundGateway();
-        tcpOutboundGateway.setConnectionFactory(clientConnectionFactory);
+        tcpOutboundGateway.setConnectionFactory(roomClientConnectionFactory);
         return tcpOutboundGateway;
     }
 }
