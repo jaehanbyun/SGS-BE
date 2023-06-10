@@ -17,7 +17,8 @@ import pnu.cse.studyhub.signaling.config.tcp.TCPMessageService;
 import pnu.cse.studyhub.signaling.dao.request.*;
 import pnu.cse.studyhub.signaling.dao.request.tcp.TCPTimerRequest;
 import pnu.cse.studyhub.signaling.dao.request.tcp.TCPUserRequest;
-import pnu.cse.studyhub.signaling.dao.response.TCPUserResponse;
+import pnu.cse.studyhub.signaling.dao.response.TCPOwnerResponse;
+import pnu.cse.studyhub.signaling.dao.response.TCPStudyTimeResponse;
 import pnu.cse.studyhub.signaling.util.Room;
 import pnu.cse.studyhub.signaling.util.RoomManager;
 import pnu.cse.studyhub.signaling.util.UserRegistry;
@@ -143,38 +144,40 @@ public class MessageHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("[ws] Session has been closed with status [{} {}]", status, session);
+        // userRegistry에서 삭제하고 유저 세션 객체 들고옴
         final UserSession user = userRegistry.removeBySession(session);
         if (Objects.isNull(user)) return;
 
-        if(user.getTimer()){ // user가 On 상태일때
+        // user의 타이머가 켜져 있는 상태일 때
+        if(user.getTimer()){
             user.setTimer(false);
             user.countStudyTime(LocalTime.now(),user.getOnTime());
         }
 
-        // TODO : 아마 reponse 아스키관련 처리도 해줘야할듯?
+        // 유저의 공부시간 상태관리서버로 보내기
+        // 방장이면 CHANGE / 일반 유저 or 방 사라질때 KEEP
+
         String response = userStudyTimeToTCP(user);
+        String res = TCPConverter(response);
+
+        // 현재 방
         final Room room = roomManager.onlyGetRoom(user.getRoomId());
-        /*
-            TODO : 여기서 만약 response로 방장이 바꼈다고 오면
-                userId(바뀐 방장) 나중에 제호가 보낸 타입에 따라 달라질듯..?
-
-            if(response가 DELEGATE type이라면)
-            room.delegateOwner("DELEGATE",userId);
-
-         */
-
-
-
-        // removeParticipant로 participants에서도 삭제하고 남아있는 유저들한테 알림
-        // 여기서 user.close()
+        // 현재 방에서 유저 지우기, 유저도 userSession close하기
         room.leave(user);
-
+        // 만약 방에 아무도 없으면 해당 방 지우기
         if (room.getParticipants().isEmpty()) {
             roomManager.removeRoom(room);
 
             kurento.getServerManager().getPipelines().stream()
                     .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
                     .findAny().ifPresent(pipeline -> pipeline.release());
+        }else{ // 방에 누군가 존재하면 (1명일때도)
+            Gson gson = new Gson();
+            TCPOwnerResponse tcpOwnerResponse = gson.fromJson(res, TCPOwnerResponse.class);
+            if(tcpOwnerResponse.getType().equals("CHANGE")){
+                // tcpOwnerResponse.getUserId() 에서 받은 userId가 새로운 방장임을 알림
+                room.delegateOwner("DELEGATE",tcpOwnerResponse.getUserId());
+            }
         }
 
     }
@@ -215,17 +218,7 @@ public class MessageHandler extends TextWebSocketHandler {
         //LocalTime studyTime = LocalTime.of(0,0,0);
         String userStudyTime = userStudyTimeFromTCP(userId);
 
-        String[] arr = userStudyTime.split(",");
-        StringBuilder sb = new StringBuilder();
-        for(String code : arr){
-            int ascii = Integer.parseInt(code.trim());
-            sb.append((char) ascii);
-        }
-
-        String res = sb.toString();
-        System.out.println(res);
-
-        TCPUserResponse response = mapper.readValue(res, TCPUserResponse.class);
+        TCPStudyTimeResponse response = mapper.readValue(TCPConverter(userStudyTime), TCPStudyTimeResponse.class);
         LocalTime studyTime;
         if(response.getStudyTime() == null){
             studyTime = LocalTime.of(0,0,0);
@@ -284,6 +277,20 @@ public class MessageHandler extends TextWebSocketHandler {
         log.info("[tcp from state] request {} user's studyTime",userId);
         return tcpMessageService.sendMessage(tcpMessage);
 
+    }
+
+    public String TCPConverter(String response){
+
+        String[] arr = response.split(",");
+        StringBuilder sb = new StringBuilder();
+        for(String code : arr){
+            int ascii = Integer.parseInt(code.trim());
+            sb.append((char) ascii);
+        }
+
+        String res = sb.toString();
+
+        return res;
     }
 
 }
