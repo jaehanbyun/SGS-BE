@@ -87,9 +87,26 @@ public class Message {
         }else{
             jsonObject.addProperty("studyTime", time);
         }
-
         return jsonObject;
     }
 
+    // Res-9 : 경고받은 유저에게 보낼 메시지
+    //      id : alert , userId : donu , alertCount : 1
+    //      해당 메시지 받으면 화면에 alertCount 번째 경고라고 출력시켜주면 될듯..?
+    public static JsonObject userAlertMessage(String userId, int alertCount) {
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id","ALERT");
+        jsonObject.addProperty("userId", userId);
+        jsonObject.addProperty("alertCount", alertCount);
+        return jsonObject;
+    }
+
+    // Res-10 : 강제퇴장, 경고 누적으로 퇴장, 방장위임 시 유저에게 보낼 메시지
+    public static JsonObject userTypeMessage(String type, String userId) {
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id",type);
+        jsonObject.addProperty("userId", userId);
+        return jsonObject;
+    }
 
 }

@@ -18,14 +18,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 public class TCPClientConfig implements ApplicationEventPublisherAware {
-    @Value("${tcp.server.host}")
+    @Value("${tcp.state.host}")
     private String host;
 
-    @Value("${tcp.server.port}")
+    @Value("${tcp.state.port}")
     private int port;
 
-    @Value("${tcp.server.connection.poolSize}")
+    @Value("${tcp.state.connection.poolSize}")
     private int connectionPoolSize;
+
 
     private ApplicationEventPublisher applicationEventPublisher;
 

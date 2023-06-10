@@ -14,6 +14,14 @@ public class RoomManager {
     private final KurentoClient kurento;
     private final ConcurrentMap<Long, Room> rooms = new ConcurrentHashMap<>();
 
+    public Room onlyGetRoom(Long roomId) {
+        Room room = rooms.get(roomId);
+        if(room == null) {
+            throw new RuntimeException();
+        }
+        return room;
+    }
+
     public Room getRoom(Long roomId) {
         Room room = rooms.get(roomId);
         if (room == null) { // 방이 없는 경우 새로운 미디어 파이프라인 생성

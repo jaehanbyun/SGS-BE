@@ -1,4 +1,4 @@
-package pnu.cse.studyhub.signaling.dao.request;
+package pnu.cse.studyhub.signaling.dao.request.tcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;

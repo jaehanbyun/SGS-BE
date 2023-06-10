@@ -8,9 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.KurentoClient;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SetOperations;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -18,21 +15,18 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import pnu.cse.studyhub.signaling.config.tcp.TCPMessageService;
 import pnu.cse.studyhub.signaling.dao.request.*;
-import pnu.cse.studyhub.signaling.dao.response.TCPUserResponse;
+import pnu.cse.studyhub.signaling.dao.request.tcp.TCPTimerRequest;
+import pnu.cse.studyhub.signaling.dao.request.tcp.TCPUserRequest;
+import pnu.cse.studyhub.signaling.dao.response.TCPOwnerResponse;
+import pnu.cse.studyhub.signaling.dao.response.TCPStudyTimeResponse;
 import pnu.cse.studyhub.signaling.util.Room;
 import pnu.cse.studyhub.signaling.util.RoomManager;
 import pnu.cse.studyhub.signaling.util.UserRegistry;
 import pnu.cse.studyhub.signaling.util.UserSession;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -78,7 +72,6 @@ public class MessageHandler extends TextWebSocketHandler {
                     log.info("방접속");
                     JoinRequest joinRequest = mapper.readValue(message.getPayload(), JoinRequest.class);
                     join(joinRequest, session);
-                    // TODO : 방 접속시에 본인에게 본인관련 정보도 보내줘야할듯?
                     break;
 
                 // SDP 정보 전송
@@ -151,27 +144,40 @@ public class MessageHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("[ws] Session has been closed with status [{} {}]", status, session);
+        // userRegistry에서 삭제하고 유저 세션 객체 들고옴
         final UserSession user = userRegistry.removeBySession(session);
+        if (Objects.isNull(user)) return;
 
-        if(user.getTimer()){ // user가 On 상태일때
+        // user의 타이머가 켜져 있는 상태일 때
+        if(user.getTimer()){
             user.setTimer(false);
-            //ValueOperations<String, String> userTime = redisTemplate.opsForValue();
             user.countStudyTime(LocalTime.now(),user.getOnTime());
-            //userTime.set(user.getUserId(), user.studyTimeToString());
         }
 
-        userStudyTimeToTCP(user);
+        // 유저의 공부시간 상태관리서버로 보내기
+        // 방장이면 CHANGE / 일반 유저 or 방 사라질때 KEEP
 
-        if (Objects.isNull(user)) return;
-        Room room = roomManager.getRoom(user.getRoomId());
+        String response = userStudyTimeToTCP(user);
+        String res = TCPConverter(response);
+
+        // 현재 방
+        final Room room = roomManager.onlyGetRoom(user.getRoomId());
+        // 현재 방에서 유저 지우기, 유저도 userSession close하기
         room.leave(user);
-
+        // 만약 방에 아무도 없으면 해당 방 지우기
         if (room.getParticipants().isEmpty()) {
             roomManager.removeRoom(room);
 
             kurento.getServerManager().getPipelines().stream()
                     .filter(pipeline -> pipeline.getId().equals(room.getPipeLineId()))
                     .findAny().ifPresent(pipeline -> pipeline.release());
+        }else{ // 방에 누군가 존재하면 (1명일때도)
+            Gson gson = new Gson();
+            TCPOwnerResponse tcpOwnerResponse = gson.fromJson(res, TCPOwnerResponse.class);
+            if(tcpOwnerResponse.getType().equals("CHANGE")){
+                // tcpOwnerResponse.getUserId() 에서 받은 userId가 새로운 방장임을 알림
+                room.delegateOwner("DELEGATE",tcpOwnerResponse.getUserId());
+            }
         }
 
     }
@@ -212,17 +218,7 @@ public class MessageHandler extends TextWebSocketHandler {
         //LocalTime studyTime = LocalTime.of(0,0,0);
         String userStudyTime = userStudyTimeFromTCP(userId);
 
-        String[] arr = userStudyTime.split(",");
-        StringBuilder sb = new StringBuilder();
-        for(String code : arr){
-            int ascii = Integer.parseInt(code.trim());
-            sb.append((char) ascii);
-        }
-
-        String res = sb.toString();
-        System.out.println(res);
-
-        TCPUserResponse response = mapper.readValue(res, TCPUserResponse.class);
+        TCPStudyTimeResponse response = mapper.readValue(TCPConverter(userStudyTime), TCPStudyTimeResponse.class);
         LocalTime studyTime;
         if(response.getStudyTime() == null){
             studyTime = LocalTime.of(0,0,0);
@@ -255,7 +251,7 @@ public class MessageHandler extends TextWebSocketHandler {
 
     }
 
-    private void userStudyTimeToTCP(UserSession user) {
+    private String userStudyTimeToTCP(UserSession user) {
         String tcpMessage;
         // TCP 서버로 userId랑 studyTime 보내줌
         tcpMessage = TCPTimerRequest.builder()
@@ -265,8 +261,8 @@ public class MessageHandler extends TextWebSocketHandler {
                 .studyTime(user.studyTimeToString())
                 .build().toString();
 
-        tcpMessageService.sendMessage(tcpMessage);
         log.info("[tcp to state] {} user's studyTime : {}",user.getUserId(),user.studyTimeToString());
+        return tcpMessageService.sendMessage(tcpMessage);
     }
 
     private String userStudyTimeFromTCP(String userId) {
@@ -281,6 +277,20 @@ public class MessageHandler extends TextWebSocketHandler {
         log.info("[tcp from state] request {} user's studyTime",userId);
         return tcpMessageService.sendMessage(tcpMessage);
 
+    }
+
+    public String TCPConverter(String response){
+
+        String[] arr = response.split(",");
+        StringBuilder sb = new StringBuilder();
+        for(String code : arr){
+            int ascii = Integer.parseInt(code.trim());
+            sb.append((char) ascii);
+        }
+
+        String res = sb.toString();
+
+        return res;
     }
 
 }
