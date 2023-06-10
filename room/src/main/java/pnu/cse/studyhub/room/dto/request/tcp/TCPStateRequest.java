@@ -17,10 +17,6 @@ public class TCPStateRequest extends TCPMessageRequest{
     private String userId;
     @JsonProperty("room_id")
     private Long roomId;
-//    @JsonProperty("session")
-//    private String session;
-    @JsonProperty("type")
-    private String type;
 
     @Override
     public String toString(){

@@ -124,7 +124,7 @@ public class RoomService {
 
     }
 
-    // TODO : delegate, kickout, delegate 리팩토링
+    // TODO : 리팩토링
     @Transactional
     public RoomTargetResponse delegate(Boolean roomType, Long roomId, String userId, String targetId){
         if(roomType) { // 공개방
@@ -295,12 +295,50 @@ public class RoomService {
         }
     }
 
+    @Transactional
+    public String stateTCP(Long roomId, String userId){
+        Optional<OpenRoomEntity> openRoomEntity = openRoomRepository.findById(roomId);
+
+        if(openRoomEntity.isPresent()) { // 공개방이면
+            Optional<OpenUserRoomEntity> openUserRoom = userRoomRepository.findById(new UserRoomId(userId, roomId));
+
+            int userCount = openRoomEntity.get().minusUser();
+            System.out.println("인원 수 : " + userCount);
+
+            if(userCount == 0){
+                openRoomRepository.delete(openRoomEntity.get());
+
+            }else{ // 인원 존재할 때
+                // 1. userRoom에 leaved_at 기록
+                openUserRoom.get().setLeftAt(Timestamp.from(Instant.now()));
+
+                if(openUserRoom.get().isRoomOwner()){ // 방장
+                    // 2. leaved_at 기준으로 방장 위임
+                    List<OpenUserRoomEntity> NextOwner =
+                            userRoomRepository.findFastestAccessedRooms(roomId, PageRequest.of(0, 1));
+
+                    System.out.println("다음 방장 :" + NextOwner.get(0).getUserId());
+
+                    // 3. nextOwner한테 방장 위임하기
+                    openUserRoom.get().delegate(NextOwner.get(0));
+
+                    return "{\"type\":\"CHANGE\",\"user_id\":\""
+                            +NextOwner.get(0).getUserId()+
+                            "\",\"room_id\":"+NextOwner.get(0).getRoomId()+"}";
+                }else{ // 일반 유저일때
+                    return "{\"type\" : \"KEEP\"}";
+                }
+            }
+        }
+        // 스터디 그룹일 때
+        return "{\"type\" : \"KEEP\"}";
+    }
+
     // 일반 user의 공개방 입장
     @Transactional
     public void in(Long roomId, String userId){
         // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
         OpenRoomEntity openRoomEntity = checkRoomId(roomId);
-
 
         // 만약 현재 인원이 Max면 Exception
         if(openRoomEntity.getCurUser().equals(openRoomEntity.getMaxUser())){
@@ -319,6 +357,7 @@ public class RoomService {
                         ErrorCode.INVALID_PERMISSION,String.format("%s User is kicked out of the %d Room",userId,roomId));
             }
             userRoom.get().setAccessedAt(Timestamp.from(Instant.now()));
+            userRoom.get().setLeftAt(null);
 
         }else{ // 해당 방 첫 입장 (UserRoomRepository로 테이블에 추가 (일반 user))
             OpenUserRoomEntity newUserRoom = userRoomRepository.save(OpenUserRoomEntity.create(userId, roomId, false));
@@ -410,11 +449,6 @@ public class RoomService {
 
         return studyGroup.getRoomCode();
     }
-
-
-
-    ///////////////////////////////
-
 
     // 스터디 그룹용 roomId 확인
     private PrivateRoomEntity checkPrivateRoomId(Long roomId){

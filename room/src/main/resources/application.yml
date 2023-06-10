@@ -26,6 +26,7 @@ logging:
 
 jwt:
   secret-key: ${SECRET_TOKEN}
+#  secret-key: user_token
 
 # 여긴
 tcp:

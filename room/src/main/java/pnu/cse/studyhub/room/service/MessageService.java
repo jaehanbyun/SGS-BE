@@ -16,6 +16,8 @@ import pnu.cse.studyhub.room.repository.UserRoomRepository;
 import pnu.cse.studyhub.room.service.exception.ApplicationException;
 import pnu.cse.studyhub.room.service.exception.ErrorCode;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -23,8 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MessageService {
 
-    private final OpenRoomRepository openRoomRepository;
-    private final UserRoomRepository userRoomRepository;
+    private final RoomService roomService;
 
     public String processMessage(String message) {
         log.info("Received message: {}", message);
@@ -37,26 +38,8 @@ public class MessageService {
                 case "state":
                     TCPStateRequest stateRequest = (TCPStateRequest) response;
                     log.warn(stateRequest.toString());
+                    responseMessage = roomService.stateTCP(stateRequest.getRoomId(),stateRequest.getUserId());
 
-
-                    Optional<OpenRoomEntity> openRoomEntity = openRoomRepository.findById(stateRequest.getRoomId());
-
-                    if(openRoomEntity.isPresent()){ // 공개방이면
-                        OpenUserRoomEntity openUserRoom = userRoomRepository.findById(new UserRoomId(stateRequest.getUserId(), stateRequest.getRoomId())).orElseThrow(() ->
-                                new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s not founded", stateRequest.getUserId())));
-
-                        if(openUserRoom.isRoomOwner()){ // 방장이면 openRoomEntity 삭제
-                            openRoomRepository.delete(openRoomEntity.get());
-                            responseMessage = "DELETE";
-
-                        }else{ // 일반 유저면 openRoomEntity 인원 수 감소
-                            openRoomEntity.get().minusUser();
-                            responseMessage = "KEEP";
-                        }
-
-                    }else{
-                        responseMessage = "KEEP";
-                    }
                     break;
                 default:
                     break;
