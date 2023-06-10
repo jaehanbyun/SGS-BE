@@ -38,6 +38,8 @@ public class OpenUserRoomEntity implements UserRoom{
     private Timestamp createdAt;
     private Timestamp accessedAt;
 
+    private Timestamp leftAt;
+
     @PrePersist
     void createdAt(){
         this.createdAt = Timestamp.from(Instant.now());

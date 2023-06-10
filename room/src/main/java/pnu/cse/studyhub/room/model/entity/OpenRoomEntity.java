@@ -85,8 +85,9 @@ public class OpenRoomEntity {
         this.curUser++;
         //this.setCurUser(this.getCurUser()+1);
     }
-    public void minusUser(){
+    public int minusUser(){
         this.curUser--;
+        return this.curUser;
     }
 
 
