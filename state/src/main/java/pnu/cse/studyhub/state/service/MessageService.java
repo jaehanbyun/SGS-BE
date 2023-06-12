@@ -101,14 +101,17 @@ public class MessageService {
                     TCPAuthReceiveRequest authRequest = (TCPAuthReceiveRequest) response;
                     log.warn(authRequest.toString());
                     // 유저 서버에 공부 시간 전달
-                    if (authRequest.getType().matches("USER_STUDY_TIME")) {
+                    if (authRequest.getType().matches("STUDY_TIME_FROM_TCP")) {
                         try {
                             RealTimeData realTimeData =  redisService.findRealTimeData(authRequest.getUserId());
                             if (realTimeData != null) {
                                 responseMessage = sendAuthServerStudyTimeMessage(realTimeData);
                             } else {
-                                //예외처리
+                                realTimeData = new RealTimeData();
+                                realTimeData.setUserId(authRequest.getUserId());
+                                responseMessage = sendAuthServerStudyTimeMessage(realTimeData);
                             }
+
                         }catch (Exception e) {
                             throw new RuntimeException(e);
                         }
