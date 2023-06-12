@@ -43,31 +43,28 @@ class RedisServiceTest {
         realTimeData2.setStudyTime(TEST_STUDYTIME2);
 
         // Clear any existing data in Redis before each test
-        redisService.setData(realTimeData);
-        redisService.setData(realTimeData2);
+        redisService.saveRealTimeData(realTimeData);
+        redisService.saveRealTimeData(realTimeData2);
     }
-    @AfterEach
-    void tearDown() {
-        // Clear any existing data in Redis after each test
-        redisService.delData(TEST_ID);
-        redisService.delData(TEST_ID2);
-    }
+//    @AfterEach
+//    void tearDown() {
+//        // Clear any existing data in Redis after each test
+//        redisService.delData(TEST_ID);
+//        redisService.delData(TEST_ID2);
+//    }
 
     @Test
     void getDataTest() {
         // Call the setValues method
-        RealTimeData savedData = redisService.getData(TEST_ID);
+        RealTimeData savedData = redisService.findRealTimeData(TEST_ID);
         Assertions.assertEquals(TEST_SESSION, savedData.getSessionId());
         System.out.println(savedData);
     }
     @Test
     void getDataListTest(){
-        List<String> ids = List.of(TEST_ID, TEST_ID2);
-        System.out.println(ids);
-        List<RealTimeData> savedData = redisService.getRealTimeData(ids);
-        System.out.println(savedData.get(0));
+        RealTimeData savedData = redisService.findRealTimeData(TEST_ID);
         System.out.println(savedData);
-        Assertions.assertEquals(TEST_SESSION, savedData.get(0).getSessionId());
+        Assertions.assertEquals(TEST_SESSION, savedData.getSessionId());
 
     }
 
