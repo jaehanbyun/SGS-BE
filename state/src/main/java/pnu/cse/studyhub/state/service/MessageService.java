@@ -107,8 +107,11 @@ public class MessageService {
                             if (realTimeData != null) {
                                 responseMessage = sendAuthServerStudyTimeMessage(realTimeData);
                             } else {
-                                //예외처리
+                                realTimeData = new RealTimeData();
+                                realTimeData.setUserId(authRequest.getUserId());
+                                responseMessage = sendAuthServerStudyTimeMessage(realTimeData);
                             }
+
                         }catch (Exception e) {
                             throw new RuntimeException(e);
                         }
