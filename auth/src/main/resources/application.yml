@@ -14,9 +14,7 @@ spring:
     url: jdbc:mysql://localhost:3306/spring
     username: root
     password:
-  redis:
-    host: localhost
-    port: 6379
+
   jpa:
     show-sql: true
     generate-ddl: true
@@ -45,6 +43,14 @@ spring:
 logging:
   level:
     org.hibernate: DEBUG
+
+tcp:
+  # 상태관리서버의 host, port
+  state:
+    host: localhost
+    port: 8099
+    connection:
+      poolSize: 30
 
 token:
   secret: user_token

@@ -5,9 +5,9 @@ spring:
     url: jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/spring?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: ${ROOM_DB_USER}
     password: ${ROOM_DB_PASSWORD}
-  redis:
-    host: redis-auth
-    port: 6379
+#  redis:
+#    host: redis-auth
+#    port: 6379
   jpa:
     show-sql: true
     generate-ddl: true

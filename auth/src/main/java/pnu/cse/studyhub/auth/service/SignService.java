@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pnu.cse.studyhub.auth.config.JwtTokenProvider;
+import pnu.cse.studyhub.auth.config.TCPMessageService;
 import pnu.cse.studyhub.auth.dto.*;
 import pnu.cse.studyhub.auth.exception.CustomException;
 import pnu.cse.studyhub.auth.exception.CustomExceptionStatus;
@@ -19,6 +20,7 @@ import pnu.cse.studyhub.auth.repository.AccountRepository;
 
 import javax.servlet.http.Cookie;
 import javax.validation.constraints.Email;
+import java.util.Base64;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -31,8 +33,8 @@ public class SignService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AccountRepository accountRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final EmailService emailService;
+    private final TCPMessageService tcpMessageService;
 
     private long refreshTime = 14 * 24 * 60 * 60 * 1000L;
 
@@ -219,6 +221,7 @@ public class SignService {
         profile.setName(exist.getName());
         profile.setProfileImage(exist.getProfileImage());
         profile.setDescription(exist.getDescription());
+        profile.setStudyTime(userStudyTimeFromTCP(id));
         response.setResult("SUCCESS");
         response.setMessage("Get Profile Successfully");
         response.setData(profile);
@@ -259,6 +262,20 @@ public class SignService {
         response.setData(successCode);
 
         return response;
+    }
+
+    private String userStudyTimeFromTCP(String userId) {
+        String tcpMessage;
+        // TCP 서버로 userId보내고 userId랑 studyTime을 response로 받음
+        tcpMessage = TCPUserRequest.builder()
+                .server("signaling")
+                .type("STUDY_TIME_FROM_TCP")
+                .userId(userId)
+                .build().toString();
+
+        log.info("[tcp from state] request {} user's studyTime",userId);
+        return tcpMessageService.sendMessage(tcpMessage);
+
     }
 
 }

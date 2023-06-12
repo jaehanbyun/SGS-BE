@@ -12,4 +12,5 @@ public class ProfileDto {
 
     private String profileImage;
     private String description;
+    private String studyTime;
 }
