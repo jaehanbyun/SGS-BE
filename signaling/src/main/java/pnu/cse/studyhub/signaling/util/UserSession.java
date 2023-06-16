@@ -120,13 +120,7 @@ public class UserSession implements Closeable {
 
     public void setOnTime(LocalTime onTime) {this.onTime = onTime;}
     public void countStudyTime(LocalTime offTime, LocalTime onTime){
-//        onTime.minusHours(offTime.getHour());
-//        onTime.minusMinutes(offTime.getMinute());
-//        onTime.minusSeconds(offTime.getSecond());
-//
-//        this.studyTime.minusHours(onTime.getHour());
-//        this.studyTime.minusMinutes(onTime.getMinute());
-//        this.studyTime.minusSeconds(onTime.getSecond());
+
         onTime = onTime.minusHours(offTime.getHour())
                 .minusMinutes(offTime.getMinute())
                 .minusSeconds(offTime.getSecond());
