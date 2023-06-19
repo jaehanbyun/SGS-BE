@@ -176,13 +176,15 @@ public class RoomService {
 
             return new RoomTargetResponse(roomId,target.getUserId());
         }else{
-            checkPrivateRoomId(roomId);
+            PrivateRoomEntity studyGroup = checkPrivateRoomId(roomId);
             checkPrivateRoomOwner(roomId, userId);
             PrivateUserRoomEntity target = privateUserRoomRepository.findById(new UserRoomId(targetId, roomId)).orElseThrow(() ->
                     new ApplicationException(ErrorCode.User_NOT_FOUND, String.format("%s User is not founded in %d study group", targetId, roomId)));
 
             target.kickOut();
+            target.setMember(false);
             TCPToState(TCPToStateType.KICK_OUT,target);
+            studyGroup.minusUser();
 
             return new RoomTargetResponse(roomId,target.getUserId());
         }
