@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import pnu.cse.studyhub.state.config.TCPRoomClientGateway;
 import pnu.cse.studyhub.state.config.TCPSignalingClientGateway;
+import pnu.cse.studyhub.state.dto.request.receive.TCPRoomReceiveRequest;
 import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendRequest;
 import pnu.cse.studyhub.state.repository.entity.RealTimeData;
 import pnu.cse.studyhub.state.service.MessageService;
@@ -40,7 +41,7 @@ public class TCPClientTest {
     }
     @Test
     public void testSendSignalingServerRoomMessage() {
-        TCPSignalingSendRequest testRequest =  TCPSignalingSendRequest.builder()
+        TCPRoomReceiveRequest testRequest =  TCPRoomReceiveRequest.builder()
                 .server("state")
                 .type("ALERT")
                 .userId("jeho")
