@@ -248,7 +248,11 @@ public class MessageService {
 
             log.debug(dataAsString);
 
-            tcpAuthClientGateway.send(dataAsString);
+            String response = tcpAuthClientGateway.send(dataAsString);
+
+            if (response.contains("SUCCESS")) {
+                redisService.deleteAllData();
+            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

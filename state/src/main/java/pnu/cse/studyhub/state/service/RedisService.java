@@ -68,5 +68,19 @@ public class RedisService {
 
         return allData;
     }
+    public void deleteAllData() {
+        Set<String> keys = realTimeDataRedisTemplate.keys("realTimeData:*");
 
+        if (keys!= null) {
+            // realTimeData 삭제
+            realTimeDataRedisTemplate.delete(keys);
+            Set<String> sessionKeys = keys.stream()
+                    .map(key -> findRealTimeData(key.replace("realTimeData:", "")).getSessionId())
+                    .map(sessionId->"sessionIdIndex:"+sessionId)
+                    .collect(Collectors.toSet());
+            // sessionIdIndex 삭제
+            sessionRedisTemplate.delete(sessionKeys);
+
+        }
+    }
 }
