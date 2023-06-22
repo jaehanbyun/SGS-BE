@@ -12,6 +12,7 @@ import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendRequest;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 @JsonTypeName("room")
 public class TCPRoomReceiveRequest extends TCPMessageReceiveRequest {
     @JsonProperty("server")

@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pnu.cse.studyhub.state.config.TCPAuthClientGateway;
 import pnu.cse.studyhub.state.config.TCPRoomClientGateway;
 import pnu.cse.studyhub.state.config.TCPSignalingClientGateway;
+import pnu.cse.studyhub.state.dto.UserDto;
 import pnu.cse.studyhub.state.dto.request.receive.*;
 import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendRequest;
 import pnu.cse.studyhub.state.dto.response.receive.TCPAuthReceiveResponse;
@@ -15,6 +17,11 @@ import pnu.cse.studyhub.state.dto.request.send.TCPRoomSendRequest;
 import pnu.cse.studyhub.state.dto.response.receive.TCPSignalingReceiveResponse;
 import pnu.cse.studyhub.state.repository.entity.RealTimeData;
 import pnu.cse.studyhub.state.util.JsonConverter;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,6 +31,7 @@ public class MessageService {
     private final RedisService redisService;
     private final TCPRoomClientGateway tcpRoomClientGateway;
     private final TCPSignalingClientGateway tcpSignalingClientGateway;
+    private final TCPAuthClientGateway tcpAuthClientGateway;
     private final JsonConverter jsonConverter;
 
     public String processMessage(String message) {
@@ -65,6 +73,7 @@ public class MessageService {
                     break;
                 case "signaling":
                     TCPSignalingReceiveRequest signalingRequest = (TCPSignalingReceiveRequest) response;
+                    TCPSignalingReceiveSchedulingRequest signalingSchedulingRequest = (TCPSignalingReceiveSchedulingRequest) response;
                     // Signaling <- state, StudyTime 조회, 방 들어옴.
                     if (signalingRequest.getType().matches("STUDY_TIME_FROM_TCP")) {
                         RealTimeData realTimeData =  redisService.findRealTimeData(signalingRequest.getUserId());
@@ -93,6 +102,33 @@ public class MessageService {
                             roomOutResult = sendRoomServerRoomOutMessage(realTimeData);
                         }
                         tcpRoomClientGateway.send(roomOutResult);
+                    // 새벽 05:00에 시그널링 서버로 부터 데이터 동기화를 위해 일괄적으로 데이터륿 받음.
+                    } else if (signalingSchedulingRequest.getType().matches("SCHEDULED")) {
+                        List<UserDto> userList = signalingSchedulingRequest.getUsers();
+                        for (UserDto userDto : userList) {
+                            RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                            if (realTimeData != null) {
+                                realTimeData.setStudyTime(userDto.getStudyTime());
+                                redisService.saveRealTimeData(realTimeData);
+                            } else {
+                                realTimeData = makeRealTimeData(userDto);
+                                redisService.saveRealTimeData(realTimeData);
+                            }
+                        }
+                    } else if (signalingSchedulingRequest.getType().matches("SCHEDULED_LAST")) {
+                        List<UserDto> userList = signalingSchedulingRequest.getUsers();
+                        for (UserDto userDto : userList) {
+                            RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                            if (realTimeData != null) {
+                                realTimeData.setStudyTime(userDto.getStudyTime());
+                                redisService.saveRealTimeData(realTimeData);
+                            } else {
+                                realTimeData = makeRealTimeData(userDto);
+                                redisService.saveRealTimeData(realTimeData);
+                            }
+                        }
+                        List<RealTimeData> allData = redisService.getAllRealTimeData();
+                        processAndSendBatch(allData);
                     } else {
                         // 에러처리
                     }
@@ -185,5 +221,40 @@ public class MessageService {
         realTimeData.setUserId(signalingRequest.getUserId());
         realTimeData.setStudyTime(signalingRequest.getStudyTime());
         return realTimeData;
+    }
+    public RealTimeData makeRealTimeData(UserDto userDto) {
+        RealTimeData realTimeData = new RealTimeData();
+        realTimeData.setUserId(userDto.getUserId());
+        realTimeData.setStudyTime(userDto.getStudyTime());
+
+        return realTimeData;
+    }
+    public void processAndSendBatch(List<RealTimeData> batch) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Convert all RealTimeData objects to UserDto objects
+        List<UserDto> userDtoBatch = batch.stream()
+                .map(realTimeData -> new UserDto(realTimeData.getUserId(), realTimeData.getStudyTime()))
+                .collect(Collectors.toList());
+        // Construct the data structure to be sent
+        Map<String, Object> data = new HashMap<>();
+        data.put("server", "state");
+        data.put("type", "SCHEDULED");
+        data.put("users", userDtoBatch);
+
+        // Convert the data structure to a JSON string and send it over TCP
+        try {
+            String dataAsString = objectMapper.writeValueAsString(data);
+
+            log.debug(dataAsString);
+
+            String response = tcpAuthClientGateway.send(dataAsString);
+
+            if (response.contains("SUCCESS")) {
+                redisService.deleteAllData();
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
