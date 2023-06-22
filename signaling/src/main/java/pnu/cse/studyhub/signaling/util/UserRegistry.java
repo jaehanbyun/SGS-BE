@@ -3,6 +3,7 @@ package pnu.cse.studyhub.signaling.util;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,6 +17,10 @@ public class UserRegistry {
     public void register(UserSession user) {
         usersByUserId.put(user.getUserId(), user);
         usersBySessionId.put(user.getSession().getId(), user);
+    }
+
+    public Collection<UserSession> getAllUsers(){
+        return usersByUserId.values();
     }
 
     // userId로 user session 얻어오기
