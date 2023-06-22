@@ -81,7 +81,7 @@ public class Message {
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id","timerStateAnswer");
         jsonObject.addProperty("userId", userId);
-        jsonObject.addProperty("timerState", timer);
+        jsonObject.addProperty("timer", timer);
         if(timer){ // on 이면 현재시간도 추가
             jsonObject.addProperty("onTime", time);
         }else{
