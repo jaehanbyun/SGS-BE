@@ -18,9 +18,14 @@ tcp:
       poolSize : 30
   signaling:
     host: sgs-signaling
-    port: 8058
+    port: 8051
+    connection:
+      poolSize: 10
+  auth:
+    host: sgs-auth
+    port: 8011
     connection:
       poolSize: 10
 logging:
   level:
-    pnu.cse.studyhub: INFO
+    pnu.cse.studyhub: DEBUG
