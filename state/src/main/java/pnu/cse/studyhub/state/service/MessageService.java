@@ -73,7 +73,7 @@ public class MessageService {
                     break;
                 case "signaling":
                     TCPSignalingReceiveRequest signalingRequest = (TCPSignalingReceiveRequest) response;
-                    TCPSignalingReceiveSchedulingRequest signalingSchedulingRequest = (TCPSignalingReceiveSchedulingRequest) response;
+//                    TCPSignalingReceiveSchedulingRequest signalingSchedulingRequest = (TCPSignalingReceiveSchedulingRequest) response;
                     // Signaling <- state, StudyTime 조회, 방 들어옴.
                     if (signalingRequest.getType().matches("STUDY_TIME_FROM_TCP")) {
                         RealTimeData realTimeData =  redisService.findRealTimeData(signalingRequest.getUserId());
