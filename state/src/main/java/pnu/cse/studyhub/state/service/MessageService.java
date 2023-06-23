@@ -103,7 +103,7 @@ public class MessageService {
                         }
                         tcpRoomClientGateway.send(roomOutResult);
                     // 새벽 05:00에 시그널링 서버로 부터 데이터 동기화를 위해 일괄적으로 데이터륿 받음.
-                    } else if (signalingSchedulingRequest.getType().matches("SCHEDULED")) {
+                    } /*else if (signalingSchedulingRequest.getType().matches("SCHEDULED")) {
                         List<UserDto> userList = signalingSchedulingRequest.getUsers();
                         for (UserDto userDto : userList) {
                             RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
@@ -129,7 +129,7 @@ public class MessageService {
                         }
                         List<RealTimeData> allData = redisService.getAllRealTimeData();
                         processAndSendBatch(allData);
-                    } else {
+                    }*/ else {
                         // 에러처리
                     }
                     break;
