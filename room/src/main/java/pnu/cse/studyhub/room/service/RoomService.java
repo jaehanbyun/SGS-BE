@@ -97,7 +97,7 @@ public class RoomService {
 
         // 해당 roomCode를 가진 방이 있는지 확인하고 없으면 exception
         PrivateRoomEntity studyGroup = privateRoomRepository.findByRoomCode(roomCode).orElseThrow(() ->
-                new ApplicationException(ErrorCode.ROOM_NOT_FOUND, "This roomCode room does not exist."));
+                new ApplicationException(ErrorCode.INCORRECT_ROOMCODE, "This roomCode room does not exist."));
 
         // 만약 스터디 그룹의 현재 인원이 Max면 Exception
         if(studyGroup.getCurUser().equals(studyGroup.getMaxUser())){
@@ -110,11 +110,18 @@ public class RoomService {
         Optional<PrivateUserRoomEntity> userRoom = privateUserRoomRepository.findById(new UserRoomId(userId, studyGroup.getRoomId()));
 
         if(userRoom.isPresent()){ // 재입장 유저
+
             //user의 kick_out으로 해당 방 권한 확인
             if(userRoom.get().getKick_out()){
                 throw new ApplicationException(
-                        ErrorCode.INVALID_PERMISSION,String.format("%s User is kicked out of the %d Room",userId,studyGroup.getRoomId()));
+                        ErrorCode.INVALID_PERMISSION,String.format("%s User is kicked out of the %d Study Group",userId,studyGroup.getRoomId()));
             }
+
+            if(userRoom.get().isMember()){
+                throw new ApplicationException(
+                        ErrorCode.ALREADY_JOIN,String.format("%s User has already joined the %s study group.",userId,studyGroup.getRoomId()));
+            }
+
             userRoom.get().setMember(true);
 
         }else{ // 첫입장 유저
