@@ -18,4 +18,14 @@ import java.util.List;
 public class TCPSignalingReceiveSchedulingRequest extends TCPMessageReceiveRequest {
     @JsonProperty("users")
     private List<UserDto> users;
+
+    @Override
+    public String toString(){
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
