@@ -15,12 +15,6 @@ import lombok.NoArgsConstructor;
 public class TCPAuthReceiveRequest extends TCPMessageReceiveRequest {
     @JsonProperty("user_id")
     private String userId;
-//    @JsonProperty("room_id")
-//    private Long roomId;
-//    @JsonProperty("session")
-//    private String session;
-    @JsonProperty("type")
-    private String type;
     @Override
     public String toString(){
         ObjectMapper mapper = new ObjectMapper();
