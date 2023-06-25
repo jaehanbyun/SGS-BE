@@ -72,64 +72,80 @@ public class MessageService {
                     };
                     break;
                 case "signaling":
-                    TCPSignalingReceiveRequest signalingRequest = (TCPSignalingReceiveRequest) response;
-//                    TCPSignalingReceiveSchedulingRequest signalingSchedulingRequest = (TCPSignalingReceiveSchedulingRequest) response;
-                    // Signaling <- state, StudyTime 조회, 방 들어옴.
-                    if (signalingRequest.getType().matches("STUDY_TIME_FROM_TCP")) {
-                        RealTimeData realTimeData =  redisService.findRealTimeData(signalingRequest.getUserId());
-                        if (realTimeData != null) { // 공부 이력이 있는 경우
-                            responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
-                        } else { // 공부 이력이 없는 경우
-                            realTimeData = makeRealTimeData(signalingRequest);
+                    TCPSignalingReceiveRequest signalingRequest = new TCPSignalingReceiveRequest();
+                    TCPSignalingReceiveSchedulingRequest signalingSchedulingRequest = new TCPSignalingReceiveSchedulingRequest();
+                    if (response.getType().startsWith("STUDY_TIME") && response instanceof TCPSignalingReceiveRequest) {
+                        signalingRequest = (TCPSignalingReceiveRequest) response;
 
-                            responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
-                        }
-                    // Signaling -> state,  StudyTime 저장, 방 나감.
-                    } else if (signalingRequest.getType().matches("STUDY_TIME_TO_TCP")) {
-                        RealTimeData realTimeData =  redisService.findRealTimeData(signalingRequest.getUserId());
-                        String roomOutResult = "";
-                        if (realTimeData != null) { // 공부 이력이 있는 경우
-                            // 공부 시간 저장
-                            realTimeData.setStudyTime(signalingRequest.getStudyTime());
-                            RealTimeData signalingSetRealTimeData = redisService.saveRealTimeData(realTimeData);
-                            responseMessage = sendSignalingServerStudyTimeMessage(signalingSetRealTimeData);
-                            // Room Out 알림
-                            roomOutResult = sendRoomServerRoomOutMessage(realTimeData);
+                        // Signaling <- state, StudyTime 조회, 방 들어옴.
+                        if (signalingRequest.getType().matches("STUDY_TIME_FROM_TCP")) {
+                            RealTimeData realTimeData =  redisService.findRealTimeData(signalingRequest.getUserId());
+                            if (realTimeData != null) { // 공부 이력이 있는 경우
+                                responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
+                            } else { // 공부 이력이 없는 경우
+                                realTimeData = makeRealTimeData(signalingRequest);
+
+                                responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
+                                log.debug("STUDY_TIME_FROM_TCP: {}", responseMessage);
+                            }
+                            // Signaling -> state,  StudyTime 저장, 방 나감.
+                        } else if (signalingRequest.getType().matches("STUDY_TIME_TO_TCP")) {
+                            RealTimeData realTimeData = redisService.findRealTimeData(signalingRequest.getUserId());
+                            String roomOutResult = "";
+                            if (realTimeData != null) { // 공부 이력이 있는 경우
+                                // 공부 시간 저장
+                                realTimeData.setStudyTime(signalingRequest.getStudyTime());
+                                RealTimeData signalingSetRealTimeData = redisService.saveRealTimeData(realTimeData);
+                                responseMessage = sendSignalingServerStudyTimeMessage(signalingSetRealTimeData);
+                                // Room Out 알림
+                                roomOutResult = sendRoomServerRoomOutMessage(realTimeData);
+                            } else {
+                                // 공부 이력이 없는 경우
+                                realTimeData = makeRealTimeData(signalingRequest);
+                                responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
+                                roomOutResult = sendRoomServerRoomOutMessage(realTimeData);
+                            }
+                            tcpRoomClientGateway.send(roomOutResult);
                         } else {
-                            // 공부 이력이 없는 경우
-                            realTimeData = makeRealTimeData(signalingRequest);
-                            responseMessage = sendSignalingServerStudyTimeMessage(realTimeData);
-                            roomOutResult = sendRoomServerRoomOutMessage(realTimeData);
+                            // ClassCastException
                         }
-                        tcpRoomClientGateway.send(roomOutResult);
-                    // 새벽 05:00에 시그널링 서버로 부터 데이터 동기화를 위해 일괄적으로 데이터륿 받음.
-                    } /*else if (signalingSchedulingRequest.getType().matches("SCHEDULED")) {
-                        List<UserDto> userList = signalingSchedulingRequest.getUsers();
-                        for (UserDto userDto : userList) {
-                            RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
-                            if (realTimeData != null) {
-                                realTimeData.setStudyTime(userDto.getStudyTime());
-                                redisService.saveRealTimeData(realTimeData);
-                            } else {
-                                realTimeData = makeRealTimeData(userDto);
-                                redisService.saveRealTimeData(realTimeData);
+
+                    } else if (response.getType().startsWith("SCHEDULED") && response instanceof TCPSignalingReceiveSchedulingRequest) {
+                        signalingSchedulingRequest = (TCPSignalingReceiveSchedulingRequest) response;
+
+                        // 새벽 05:00에 시그널링 서버로 부터 데이터 동기화를 위해 일괄적으로 데이터를 받음.
+                        if (signalingSchedulingRequest.getType().matches("SCHEDULED")) {
+                            List<UserDto> userList = signalingSchedulingRequest.getUsers();
+                            for (UserDto userDto : userList) {
+                                RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                                if (realTimeData != null) {
+                                    realTimeData.setStudyTime(userDto.getStudyTime());
+                                    redisService.saveRealTimeData(realTimeData);
+                                } else {
+                                    realTimeData = makeRealTimeData(userDto);
+                                    redisService.saveRealTimeData(realTimeData);
+                                }
                             }
-                        }
-                    } else if (signalingSchedulingRequest.getType().matches("SCHEDULED_LAST")) {
-                        List<UserDto> userList = signalingSchedulingRequest.getUsers();
-                        for (UserDto userDto : userList) {
-                            RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
-                            if (realTimeData != null) {
-                                realTimeData.setStudyTime(userDto.getStudyTime());
-                                redisService.saveRealTimeData(realTimeData);
-                            } else {
-                                realTimeData = makeRealTimeData(userDto);
-                                redisService.saveRealTimeData(realTimeData);
+                            responseMessage = signalingSchedulingRequest.toString();
+                        } else if (signalingSchedulingRequest.getType().matches("SCHEDULED_LAST")) {
+                            List<UserDto> userList = signalingSchedulingRequest.getUsers();
+                            for (UserDto userDto : userList) {
+                                RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                                if (realTimeData != null) {
+                                    realTimeData.setStudyTime(userDto.getStudyTime());
+                                    redisService.saveRealTimeData(realTimeData);
+                                } else {
+                                    realTimeData = makeRealTimeData(userDto);
+                                    redisService.saveRealTimeData(realTimeData);
+                                }
                             }
+                            List<RealTimeData> allData = redisService.getAllRealTimeData();
+                            processAndSendBatch(allData);
+                            responseMessage = signalingSchedulingRequest.toString();
+                        } else {
+                            // 에러처리
                         }
-                        List<RealTimeData> allData = redisService.getAllRealTimeData();
-                        processAndSendBatch(allData);
-                    }*/ else {
+                    } else {
                         // 에러처리
                     }
                     break;
