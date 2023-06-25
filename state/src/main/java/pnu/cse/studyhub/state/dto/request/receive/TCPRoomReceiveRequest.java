@@ -6,19 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendRequest;
 
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
+@SuperBuilder
 @JsonTypeName("room")
 public class TCPRoomReceiveRequest extends TCPMessageReceiveRequest {
-    @JsonProperty("server")
-    private String server;
-    @JsonProperty("type")
-    private String type;
     @JsonProperty("user_id")
     private String userId;
     @JsonProperty("room_id")
@@ -29,7 +26,7 @@ public class TCPRoomReceiveRequest extends TCPMessageReceiveRequest {
     public TCPSignalingSendRequest toTCPSignalingSendRequest() {
         return TCPSignalingSendRequest.builder()
                 .server("state")
-                .type(this.type)
+                .type(super.getType())
                 .userId(this.userId)
                 .roomId(this.roomId)
                 .alertCount(this.alertCount)

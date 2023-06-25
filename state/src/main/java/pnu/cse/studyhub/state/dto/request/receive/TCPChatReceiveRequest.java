@@ -19,8 +19,6 @@ public class TCPChatReceiveRequest extends TCPMessageReceiveRequest {
     private Long roomId;
     @JsonProperty("session")
     private String session;
-    @JsonProperty("type")
-    private String type;
     @Override
     public String toString(){
         ObjectMapper mapper = new ObjectMapper();
