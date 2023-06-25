@@ -66,9 +66,9 @@ public class RoomService {
 
     // private study group 입장
     @Transactional
-    public void privateIn(Long roomId, String userId){
+    public PrivateDetailResponse privateIn(Long roomId, String userId){
         // roomId 체크
-        checkPrivateRoomId(roomId);
+        PrivateRoomEntity privateRoom = checkPrivateRoomId(roomId);
 
         // 해당 방에 user있는지 체크 있어도 ismember이지 체크
         PrivateUserRoomEntity userRoom = privateUserRoomRepository.findById(new UserRoomId(userId, roomId)).orElseThrow(() ->
@@ -82,7 +82,13 @@ public class RoomService {
             throw new ApplicationException(ErrorCode.User_NOT_FOUND,
                     String.format("%s User is not founded in %d study group", userId, roomId));
         }
+
+        return new PrivateDetailResponse(privateRoom.getRoomId(),privateRoom.getRoomName(),privateRoom.getRoomNotice(),privateRoomRepository.findRoomOwnerByRoomId(roomId).getUserId()
+                ,privateRoom.getCurUser(),privateRoom.getMaxUser(),privateRoom.getCreatedAt());
     }
+
+
+
 
     // roomID가 필요 없어야함
     // roomCode로만 roomID 방을 찾기
@@ -233,20 +239,6 @@ public class RoomService {
         }
     }
 
-    @Transactional
-    public DetailResponse info(Long roomId){
-        // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-        OpenRoom openRoom = OpenRoom.fromEntity(checkRoomId(roomId));
-
-        // 방장 이름
-        String roomOwnerId= userRoomRepository.findRoomOwnerByRoomId(roomId).getUserId();
-
-        // TODO : 더보기에 출력해줄 내용들 추가
-
-        return new DetailResponse(openRoom.getRoomId(), openRoom.getRoomName(),openRoom.getChannel(), openRoom.getRoomNotice()
-                ,roomOwnerId, openRoom.getCurUser(), openRoom.getMaxUser(), openRoom.getCreatedAt());
-
-    }
 
     @Transactional
     public List<RoomListResponse> roomList(Long lastRoomId, int size , String keyword, RoomChannel channel){
@@ -343,23 +335,37 @@ public class RoomService {
         return "{\"type\" : \"KEEP\"}";
     }
 
+    @Transactional
+    public OpenDetailResponse info(Long roomId){
+        // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
+        OpenRoom openRoom = OpenRoom.fromEntity(checkRoomId(roomId));
+
+        // 방장 이름
+        String roomOwnerId= userRoomRepository.findRoomOwnerByRoomId(roomId).getUserId();
+
+        return new OpenDetailResponse(openRoom.getRoomId(), openRoom.getRoomName(),openRoom.getChannel(), openRoom.getRoomNotice()
+                ,roomOwnerId, openRoom.getCurUser(), openRoom.getMaxUser(), openRoom.getCreatedAt());
+
+    }
+
     // 일반 user의 공개방 입장
     @Transactional
-    public void in(Long roomId, String userId){
+    public OpenDetailResponse in(Long roomId, String userId){
         // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-        OpenRoomEntity openRoomEntity = checkRoomId(roomId);
+        OpenRoomEntity openRoom = checkRoomId(roomId);
 
         // 만약 현재 인원이 Max면 Exception
-        if(openRoomEntity.getCurUser().equals(openRoomEntity.getMaxUser())){
+        if(openRoom.getCurUser().equals(openRoom.getMaxUser())){
             throw new ApplicationException(ErrorCode.MAX_USER,String.format("%d Room is full",roomId));
         }
         // 인원 증가
-        openRoomEntity.addUser();
+        openRoom.addUser();
 
         // 해당방에 이전에 들어온적 있는 유저인지 check
         Optional<OpenUserRoomEntity> userRoom = userRoomRepository.findById(new UserRoomId(userId, roomId));
 
-        if(userRoom.isPresent()){
+        if(userRoom.isPresent()){ // 재입장!
+
             //user의 alert 또는 kick_out으로 해당 방 권한 확인
             if(userRoom.get().getKick_out()){
                 throw new ApplicationException(
@@ -370,9 +376,11 @@ public class RoomService {
 
         }else{ // 해당 방 첫 입장 (UserRoomRepository로 테이블에 추가 (일반 user))
             OpenUserRoomEntity newUserRoom = userRoomRepository.save(OpenUserRoomEntity.create(userId, roomId, false));
-            openRoomEntity.addUserRoom(newUserRoom);
+            openRoom.addUserRoom(newUserRoom);
         }
 
+        return new OpenDetailResponse(openRoom.getRoomId(), openRoom.getRoomName(),openRoom.getChannel(), openRoom.getRoomNotice()
+                ,userRoomRepository.findRoomOwnerByRoomId(roomId).getUserId(), openRoom.getCurUser(), openRoom.getMaxUser(), openRoom.getCreatedAt());
     }
 
 

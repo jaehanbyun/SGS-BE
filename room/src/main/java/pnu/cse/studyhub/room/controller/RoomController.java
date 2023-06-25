@@ -66,9 +66,9 @@ public class RoomController {
 
     // 공개 스터디방 상세 정보 조회
     @GetMapping("/{roomId}")
-    public Response<DetailResponse> roomInfo(@PathVariable Long roomId){
+    public Response<OpenDetailResponse> roomInfo(@PathVariable Long roomId){
 
-        DetailResponse info = roomService.info(roomId);
+        OpenDetailResponse info = roomService.info(roomId);
 
         return Response.success("Query info of the room Successfully",info);
 
@@ -77,13 +77,13 @@ public class RoomController {
 
     // 공개 스터디방 입장
     @PostMapping("/in")
-    public Response<Void> in(HttpServletRequest jwt,@RequestBody RoomIdRequest request){
+    public Response<OpenDetailResponse> in(HttpServletRequest jwt, @RequestBody RoomIdRequest request){
 
         String userId = (String) jwt.getAttribute("userId");
 
-        roomService.in(request.getRoomId(),userId);
+        OpenDetailResponse info =roomService.in(request.getRoomId(),userId);
 
-        return Response.success("Enter Room Successfully");
+        return Response.success("Enter Room Successfully",info);
     }
 
     // 공지사항 설정
@@ -163,13 +163,14 @@ public class RoomController {
         return Response.success("Withdraw Room Successfully");
     }
 
+    // 스터디 그룹 방 입장
     @PostMapping("/private/in")
-    public Response<Void> privateIn(HttpServletRequest jwt,@RequestBody RoomIdRequest request){
+    public Response<PrivateDetailResponse> privateIn(HttpServletRequest jwt,@RequestBody RoomIdRequest request){
         String userId = (String) jwt.getAttribute("userId");
 
-        roomService.privateIn(request.getRoomId(),userId);
+        PrivateDetailResponse info = roomService.privateIn(request.getRoomId(),userId);
 
-        return Response.success("Enter Study Group Successfully");
+        return Response.success("Enter Study Group Successfully", info);
     }
 
     // 코드 생성
