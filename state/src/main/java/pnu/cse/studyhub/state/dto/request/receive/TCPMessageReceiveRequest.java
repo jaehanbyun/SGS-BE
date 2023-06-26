@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,11 +18,14 @@ import lombok.NoArgsConstructor;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = TCPChatReceiveRequest.class, name = "chat"),
         @JsonSubTypes.Type(value = TCPSignalingReceiveRequest.class, name = "signaling"),
+        @JsonSubTypes.Type(value = TCPSignalingReceiveSchedulingRequest.class, name = "signaling_scheduling"),
         @JsonSubTypes.Type(value = TCPAuthReceiveRequest.class, name = "auth"),
         @JsonSubTypes.Type(value = TCPRoomReceiveRequest.class, name = "room")
 })
+@SuperBuilder
 public abstract class TCPMessageReceiveRequest {
     private String server;
+    private String type;
 
 }
 //public class TCPMessageRequest {

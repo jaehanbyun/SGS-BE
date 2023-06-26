@@ -1,6 +1,9 @@
 package pnu.cse.studyhub.state.dto.request.receive;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,9 +14,18 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonTypeName("signaling")
+@JsonTypeName("signaling_scheduling")
 public class TCPSignalingReceiveSchedulingRequest extends TCPMessageReceiveRequest {
-    private String server;
-    private String type;
+    @JsonProperty("users")
     private List<UserDto> users;
+
+    @Override
+    public String toString(){
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
