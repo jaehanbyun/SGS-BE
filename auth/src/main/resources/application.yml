@@ -2,18 +2,13 @@ server:
   address: localhost
   port: 8080
 
-eureka.client:
-  register-with-eureka: true
-  fetch-registry: true
-  service-url.defaultZone: http://localhost:8761/eureka
-
 spring:
   application.name: auth-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/spring
-    username: root
-    password:
+    url: jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/spring?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${ROOM_DB_USER}
+    password: ${ROOM_DB_PASSWORD}
 
   jpa:
     show-sql: true
@@ -39,6 +34,17 @@ spring:
           starttls:
             enable: true
             required: true
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: pnu-studyhub
+    credentials:
+      accessKey: ${STUDYHUB_S3_ACCESS_KEY}
+      secretKey: ${STUDYHUB_S3_SECRET_KEY}
+    stack:
+      auto: false
 
 logging:
   level:
@@ -51,6 +57,8 @@ tcp:
     port: 8099
     connection:
       poolSize: 30
+  server:
+    port: 8019
 
 token:
   secret: user_token

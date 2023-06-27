@@ -2,7 +2,6 @@ package pnu.cse.studyhub.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -22,6 +21,7 @@ import pnu.cse.studyhub.auth.util.JsonConverter;
 
 import javax.servlet.http.Cookie;
 import javax.validation.constraints.Email;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -38,6 +38,7 @@ public class SignService {
     private final EmailService emailService;
     private final TCPMessageService tcpMessageService;
     private final ByteArrayToStringConverter byteArrayToStringConverter;
+    private final S3Uploader s3Uploader;
     private final JsonConverter jsonConverter;
 
     private long refreshTime = 14 * 24 * 60 * 60 * 1000L;
@@ -225,7 +226,8 @@ public class SignService {
         profile.setName(exist.getName());
         profile.setProfileImage(exist.getProfileImage());
         profile.setDescription(exist.getDescription());
-        profile.setStudyTime(userStudyTimeFromTCP(id));
+        profile.setStudyTime("01:00:00");
+//        profile.setStudyTime(userStudyTimeFromTCP(id));
         response.setResult("SUCCESS");
         response.setMessage("Get Profile Successfully");
         response.setData(profile);
@@ -244,7 +246,13 @@ public class SignService {
             msg += "name ";
         }
         if (dto.getProfileImage() != null) {
-            exist.editProfileImage(dto.getProfileImage());
+            try {
+                String base64Profile = dto.getProfileImage();
+                String profileUri = s3Uploader.base64ImageUpload(base64Profile,dto.getId());
+                exist.editProfileImage(profileUri);
+            } catch (IOException e) {
+                throw new CustomException(CustomExceptionStatus.INCORRECT_IMAGE_FORMAT,"AUTH-011", "프로필 이미지 형식이 올바르지 않습니다.");
+            }
             msg += "profileImage ";
         }
         if (dto.getDescription() != null) {

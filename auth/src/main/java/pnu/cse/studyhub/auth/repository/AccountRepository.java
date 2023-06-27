@@ -1,6 +1,5 @@
 package pnu.cse.studyhub.auth.repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import pnu.cse.studyhub.auth.model.UserAccount;
