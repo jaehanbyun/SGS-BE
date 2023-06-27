@@ -17,6 +17,8 @@ import pnu.cse.studyhub.auth.exception.CustomException;
 import pnu.cse.studyhub.auth.exception.CustomExceptionStatus;
 import pnu.cse.studyhub.auth.model.UserAccount;
 import pnu.cse.studyhub.auth.repository.AccountRepository;
+import pnu.cse.studyhub.auth.util.ByteArrayToStringConverter;
+import pnu.cse.studyhub.auth.util.JsonConverter;
 
 import javax.servlet.http.Cookie;
 import javax.validation.constraints.Email;
@@ -35,6 +37,8 @@ public class SignService {
     private final AccountRepository accountRepository;
     private final EmailService emailService;
     private final TCPMessageService tcpMessageService;
+    private final ByteArrayToStringConverter byteArrayToStringConverter;
+    private final JsonConverter jsonConverter;
 
     private long refreshTime = 14 * 24 * 60 * 60 * 1000L;
 
@@ -268,13 +272,16 @@ public class SignService {
         String tcpMessage;
         // TCP 서버로 userId보내고 userId랑 studyTime을 response로 받음
         tcpMessage = TCPUserRequest.builder()
-                .server("signaling")
+                .server("auth")
                 .type("STUDY_TIME_FROM_TCP")
                 .userId(userId)
                 .build().toString();
-
-        log.info("[tcp from state] request {} user's studyTime",userId);
-        return tcpMessageService.sendMessage(tcpMessage);
+        String response = tcpMessageService.sendMessage(tcpMessage);
+        String stringObj = byteArrayToStringConverter.convert(response);
+        TCPUserResponse obj = jsonConverter.convertFromJson(stringObj,TCPUserResponse.class);
+        log.debug(obj.toString());
+        log.info("[tcp from state] request {} user's studyTime {}",userId, obj.getStudyTime());
+        return obj.getStudyTime();
 
     }
 
