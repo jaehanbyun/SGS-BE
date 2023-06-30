@@ -6,12 +6,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import pnu.cse.studyhub.chat.dto.request.ChatFileRequest;
 import pnu.cse.studyhub.chat.dto.request.ChatRequest;
-import pnu.cse.studyhub.chat.exception.ChatNotFoundException;
+import pnu.cse.studyhub.chat.exception.FileConversionException;
 import pnu.cse.studyhub.chat.repository.ChatRepository;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -38,24 +38,25 @@ public class ChatService {
             String uri = s3Uploader.multipartFileUpload(chatFileRequest.getContent(), chatFileRequest.getRoomId());
             chatEntity.setContent(uri);
         } catch (IOException e) { // 파일 업로드 실패 혹은 변환 실패
-            throw new RuntimeException(e);
+            log.warn(e.getMessage());
+            throw new FileConversionException("파일 변환에 실패했습니다.");
         }
         Chat savedChat = chatRepository.save(chatEntity);
         return savedChat;
     }
     public List<Chat> getChatsInRoom(String roomId) {
         List<Chat> chatList = chatRepository.findByRoomId(roomId);
-        if (chatList == null || chatList.isEmpty() ) throw new ChatNotFoundException("해당 방에 존재하는 채팅이 없음.");
-        log.info(String.valueOf(chatList));
+        if (chatList == null || chatList.isEmpty()) {
+            return Collections.emptyList();
+        }
         return chatList;
     }
     public List<Chat> getChatsInRoomWithPaging(String roomId, int page, int size) {
         Page<Chat> chatPage = chatRepository.findByRoomIdWithPagingAndFiltering(roomId,page,size);
-        List<Chat> chatList = new ArrayList<>();
         if (chatPage == null || chatPage.isEmpty()) {
-            throw new ChatNotFoundException("페이지에 해당하는 채팅이 없음.");
+            return Collections.emptyList();
         }
-        chatList = chatPage.getContent();
+        List<Chat> chatList  = chatPage.getContent();
         return chatList;
     }
 }

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public enum ErrorCode {
     //SERVER
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND.toString(),"CHAT-001", "채팅이 존재하지 않는 경우"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND.toString(),"CHAT-001", "해당 유저가이 존재하지 않는 경우"),
     MESSAGE_NOT_DELIVERED(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "CHAT-002", "메시지 전송 실패"),
     INVALID_MESSAGE_FORMAT(HttpStatus.BAD_REQUEST.toString(), "CHAT-003", "메시지 형식이 잘못된 경우"),
     //SOCKET
@@ -20,7 +20,8 @@ public enum ErrorCode {
     TCP_TIMEOUT("TCP-ERROR", "CHAT-023", "TCP 연결 시간 초과"),
     //ETC
     UNKNOWN_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "CHAT-031", "알 수 없는 서버 오류"),
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED.toString(), "CHAT-032", "토큰이 유효하지 않은 경우");
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED.toString(), "CHAT-032", "토큰이 유효하지 않은 경우"),
+    FILE_CONVERSION_ERROR(HttpStatus.BAD_REQUEST.toString(), "CHAT-033", "파일 변환 실패"),;
 
     private final String status;
 
@@ -32,6 +33,11 @@ public enum ErrorCode {
         this.code = code;
         this.message = message;
     }
+
+    public HttpStatus getStatus() {
+        return HttpStatus.valueOf(status);
+    }
+
     public ErrorResponse toErrorResponse(String description) {
         return ErrorResponse.builder()
                 .result("Failed") // 실패했음을 알림
