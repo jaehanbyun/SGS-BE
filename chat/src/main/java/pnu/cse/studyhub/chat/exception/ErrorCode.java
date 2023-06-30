@@ -1,14 +1,13 @@
 package pnu.cse.studyhub.chat.exception;
 
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import pnu.cse.studyhub.chat.dto.ErrorResponse;
 
-import java.time.LocalDateTime;
-
+@Getter
 public enum ErrorCode {
     //SERVER
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND.toString(),"CHAT-001", "해당 유저가이 존재하지 않는 경우"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND.toString(),"CHAT-001", "해당 유저가 존재하지 않는 경우"),
     MESSAGE_NOT_DELIVERED(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "CHAT-002", "메시지 전송 실패"),
     INVALID_MESSAGE_FORMAT(HttpStatus.BAD_REQUEST.toString(), "CHAT-003", "메시지 형식이 잘못된 경우"),
     //SOCKET
@@ -32,19 +31,5 @@ public enum ErrorCode {
         this.status = status;
         this.code = code;
         this.message = message;
-    }
-
-    public HttpStatus getStatus() {
-        return HttpStatus.valueOf(status);
-    }
-
-    public ErrorResponse toErrorResponse(String description) {
-        return ErrorResponse.builder()
-                .result("Failed") // 실패했음을 알림
-                .status(status) // HTTP 상태 코드 또는, TCP, 소켓 여부
-                .code(code) // 에러 코드, 어떤 서버에서, 어떤 에러가 발생했는지 식별
-                .message(message) // 실패 메시지
-                .description(description) // 구체적인 실패 경위
-                .build();
     }
 }
