@@ -59,7 +59,6 @@ public class ChatController {
     public ResponseEntity<SuccessResponse> sendMessage(@RequestHeader("Authorization") String authorization, @RequestBody ChatRequest chat) {
         String accessToken = authorization.replace("Bearer ","");
         Chat savedChat = chatService.saveChat(accessToken, chat );
-        log.info("Produce message : " + savedChat.toString());
         try {
             kafkaProducer.send(TOPIC,savedChat);
         } catch (Exception e) {
@@ -71,7 +70,6 @@ public class ChatController {
     @PostMapping(value = "/send", consumes = "multipart/form-data")
     public ResponseEntity<SuccessResponse> sendFileMessage(ChatFileRequest chat) {
         Chat savedChat = chatService.saveFileChat(chat);
-        log.info("Produce message : " + savedChat.toString());
         try {
             kafkaProducer.send(TOPIC,savedChat);
         } catch (Exception e) {
@@ -84,7 +82,6 @@ public class ChatController {
     @MessageMapping("/send")
     @SendTo("/topic/group")
     public Chat broadcastMessage(@Payload Chat chat){
-        log.info("Consume message : " + chat.toString());
         return chat;
     }
 

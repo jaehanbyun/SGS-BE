@@ -1,16 +1,13 @@
 package pnu.cse.studyhub.chat.repository;
 
-import com.mongodb.client.result.DeleteResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
-import pnu.cse.studyhub.chat.exception.ChatNotFoundException;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.util.List;
