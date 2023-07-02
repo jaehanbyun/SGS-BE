@@ -8,7 +8,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
-import pnu.cse.studyhub.state.repository.RedisRepository;
 import pnu.cse.studyhub.state.repository.entity.RealTimeData;
 
 import java.util.ArrayList;
