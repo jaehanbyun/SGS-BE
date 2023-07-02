@@ -77,23 +77,23 @@ public class SocketChatController {
     }
     // MessageMapping에 연결되지 않은 메소드에서 발생하는 예외를 처리하는 핸들러
     // 전반적으로 발생하는 예외 처리
-    @ExceptionHandler({KafkaTimeOutException.class, KafkaSerializationException.class, KafkaInterruptException.class, KafkaAbnormalException.class})
-    @SendToUser("/queue/errors")
-    public FailedResponse handleKafkaException(Exception exception, Principal principal) {
-        log.debug("ExceptionHandler : {}", exception.getMessage());
-        FailedResponse failedResponse;
-        if (exception instanceof TimeoutException)
-            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_TIMEOUT);
-        else if (exception instanceof SerializationException)
-            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_SERIALIZE_FAILED);
-        else if (exception instanceof  InterruptException)
-            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_INTERRUPTTED);
-        else if (exception instanceof KafkaException)
-            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_UNKNOWN_ERROR);
-        else
-            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.UNKNOWN_SERVER_ERROR);
-        return failedResponse;
-    }
+//    @ExceptionHandler({KafkaTimeOutException.class, KafkaSerializationException.class, KafkaInterruptException.class, KafkaAbnormalException.class})
+//    @SendToUser("/queue/errors")
+//    public FailedResponse handleKafkaException(Exception exception, Principal principal) {
+//        log.debug("ExceptionHandler : {}", exception.getMessage());
+//        FailedResponse failedResponse;
+//        if (exception instanceof TimeoutException)
+//            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_TIMEOUT);
+//        else if (exception instanceof SerializationException)
+//            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_SERIALIZE_FAILED);
+//        else if (exception instanceof  InterruptException)
+//            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_INTERRUPTTED);
+//        else if (exception instanceof KafkaException)
+//            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.KAFKA_UNKNOWN_ERROR);
+//        else
+//            failedResponse = createFailedResponse(exception.getMessage(), ErrorCode.UNKNOWN_SERVER_ERROR);
+//        return failedResponse;
+//    }
     private FailedResponse createFailedResponse(String message, ErrorCode errorCode) {
         return new FailedResponse<>(
                 "Failed",
