@@ -25,7 +25,7 @@ public class ChatRepositoryImpl implements ChatRepository{
 
 
     @Override
-    public List<Chat> findByRoomId(String roomId) {
+    public List<Chat> findByRoomId(Long roomId) {
         // 최신 메시지부터 순서대로
         Query query = Query.query(where("roomId").is(roomId)).with(Sort.by(Sort.Direction.DESC, "createdAt"));
         // 메시지 고유 ID는 보내지 않음
@@ -54,7 +54,7 @@ public class ChatRepositoryImpl implements ChatRepository{
     }
 
     @Override
-    public Chat getLastMessage(String roomId) {
+    public Chat getLastMessage(Long roomId) {
         Query query = Query.query(where("roomId").is(roomId)).with(Sort.by(Sort.Direction.DESC,"createdAt"));
 //        query.fields().exclude("_id");
 
@@ -63,7 +63,7 @@ public class ChatRepositoryImpl implements ChatRepository{
     }
 
     @Override
-    public Page<Chat> findByRoomIdWithPagingAndFiltering(String roomId, int page, int size) {
+    public Page<Chat> findByRoomIdWithPagingAndFiltering(Long roomId, int page, int size) {
         Pageable pageable = PageRequest.of(page,size,Sort.by("createdAt").descending());
 
         Query query = new Query()

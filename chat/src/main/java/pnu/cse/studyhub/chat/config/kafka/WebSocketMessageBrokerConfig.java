@@ -22,8 +22,8 @@ public class WebSocketMessageBrokerConfig implements WebSocketMessageBrokerConfi
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 메세지를 보낼 때, 관련 경로를 설정
-        // 클라이언트가 메세지를 보낼 때, 경로 앞에 "/topic"이 붙어있으면 Broker로 보냄
-        registry.setApplicationDestinationPrefixes("/pub");
+        // 클라이언트가 메세지를 보낼 때, 경로 앞에 "/queue"이 붙어있으면 Broker로 보냄
+        registry.setApplicationDestinationPrefixes("/queue");
         // 메세지를 받을 때, 관련 경로를 설정
 //        registry.enableSimpleBroker("/sub");
         registry.enableSimpleBroker("/topic");

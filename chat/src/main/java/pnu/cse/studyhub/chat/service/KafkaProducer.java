@@ -16,7 +16,6 @@ import java.io.IOException;
 @Slf4j
 public class KafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final S3Uploader s3Uploader;
 
     public void send(String topic, Chat chat) {
         log.info("producer_topic : " + topic);

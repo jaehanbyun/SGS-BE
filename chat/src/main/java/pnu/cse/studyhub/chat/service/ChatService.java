@@ -25,11 +25,9 @@ public class ChatService {
 
     public Chat saveChat(String jwtToken, ChatRequest chatRequest){
         Chat chatEntity = chatRequest.toEntity();
-        log.error(chatEntity.toString());
         String senderId = jwtTokenProvider.getUserInfo(jwtToken);
         chatEntity.setSenderId(senderId);
         Chat savedChat = chatRepository.save(chatEntity);
-        log.error(savedChat.toString());
         return savedChat;
     }
     public Chat saveFileChat(ChatFileRequest chatFileRequest){
@@ -44,14 +42,14 @@ public class ChatService {
         Chat savedChat = chatRepository.save(chatEntity);
         return savedChat;
     }
-    public List<Chat> getChatsInRoom(String roomId) {
+    public List<Chat> getChatsInRoom(Long roomId) {
         List<Chat> chatList = chatRepository.findByRoomId(roomId);
         if (chatList == null || chatList.isEmpty()) {
             return Collections.emptyList();
         }
         return chatList;
     }
-    public List<Chat> getChatsInRoomWithPaging(String roomId, int page, int size) {
+    public List<Chat> getChatsInRoomWithPaging(Long roomId, int page, int size) {
         Page<Chat> chatPage = chatRepository.findByRoomIdWithPagingAndFiltering(roomId,page,size);
         if (chatPage == null || chatPage.isEmpty()) {
             return Collections.emptyList();
