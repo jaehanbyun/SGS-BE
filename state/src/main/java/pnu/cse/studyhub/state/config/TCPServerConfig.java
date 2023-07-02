@@ -28,10 +28,13 @@ public class TCPServerConfig {
     }
 
     @Bean
+    public MessageChannel errorChannel() {return new DirectChannel();}
+    @Bean
     public TcpInboundGateway inboundGateway(AbstractServerConnectionFactory serverConnectionFactory) {
         TcpInboundGateway tcpInboundGateway = new TcpInboundGateway();
         tcpInboundGateway.setConnectionFactory(serverConnectionFactory);
         tcpInboundGateway.setRequestChannel(inboundChannel());
+        tcpInboundGateway.setErrorChannel(errorChannel());
         return tcpInboundGateway;
     }
 }
