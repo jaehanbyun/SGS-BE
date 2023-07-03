@@ -453,6 +453,7 @@ public class RoomService {
     }
 
     // private 스터디 그룹 roomCode 들고오기
+    @Transactional
     public UUID generateCode(Long roomId, String userId){
         // roomId 존재하는지 확인
         PrivateRoomEntity studyGroup = checkPrivateRoomId(roomId);
