@@ -24,7 +24,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
         if (token == null) {
             request.setAttribute("exception", "토큰이 존재하지 않습니다.");
-        } else if (jwtTokenProvider.validateToken(token, (HttpServletRequest) request)) {
+        } else if (jwtTokenProvider.validateToken(token)) {
 //            Authentication authentication = jwtTokenProvider.getAuthentication(token);
 //            SecurityContextHolder.getContext().setAuthentication(authentication);
         }

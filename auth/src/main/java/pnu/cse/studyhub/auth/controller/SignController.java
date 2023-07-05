@@ -54,13 +54,29 @@ public class SignController {
     }
 
     @GetMapping("/get-profile")
-    public ResponseProfileDto getProfile(@RequestParam(value = "id") String id) {
+    public ResponseProfileDto getProfile(@RequestHeader(value = "id") String id) {
         return responseService.successProfileResponse(signService.getProfile(id));
+    }
+
+    @GetMapping("/get-study-month")
+    public ResponseStudyTimeDto getStudyMonth(@RequestHeader(value = "id") String id, @RequestParam(value = "month") String month) {
+        return responseService.successStudyTimeResponse(signService.getStudyMonth(id, month));
+    }
+
+    @GetMapping("/get-study-day")
+    public ResponseStudyTimeDto getStudyDay(@RequestHeader(value = "id") String id, @RequestParam(value = "day") String day) {
+        return responseService.successStudyTimeResponse(signService.getStudyDay(id, day));
     }
 
     @PatchMapping("/modify-profile")
     public ResponseCodeDto modifyProfile(@RequestBody @Valid ProfileDto dto) {
         return responseService.successResponse(signService.modifyProfile(dto));
+    }
+
+    @PostMapping ("/refreshToken")
+    public ResponseEntity<ResponseDataDto> checkRefresh(@RequestHeader(value = "refresh_token") String refreshToken) {
+
+        return responseService.successDataResponse(signService.checkRefresh(refreshToken));
     }
 
 }

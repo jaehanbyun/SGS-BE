@@ -61,7 +61,7 @@ tcp:
     port: 8019
 
 token:
-  secret: user_token
+  secret: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
   expiration_time: 86400000
 
 

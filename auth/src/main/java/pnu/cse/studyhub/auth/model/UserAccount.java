@@ -36,6 +36,9 @@ public class UserAccount {
     @Column(nullable = true)
     private String description;
 
+    @Column(nullable = true)
+    private String url;
+
     public static UserAccount createAccount(AccountDto dto) {
 
         return UserAccount.builder()
@@ -59,5 +62,9 @@ public class UserAccount {
 
     public void editDescription(String description) {
         this.description = description;
+    }
+
+    public void editUrl(String url) {
+        this.url = url;
     }
 }

@@ -11,7 +11,9 @@ public class UserInfoDto {
 
     private String id;
 
-    private String date;
+    private String month;
+
+    private String day;
 
     private String studyTime;
 }

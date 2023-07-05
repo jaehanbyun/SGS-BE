@@ -1,5 +1,6 @@
 package pnu.cse.studyhub.auth.service;
 
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -14,8 +15,10 @@ import pnu.cse.studyhub.auth.config.TCPMessageService;
 import pnu.cse.studyhub.auth.dto.*;
 import pnu.cse.studyhub.auth.exception.CustomException;
 import pnu.cse.studyhub.auth.exception.CustomExceptionStatus;
+import pnu.cse.studyhub.auth.model.User;
 import pnu.cse.studyhub.auth.model.UserAccount;
 import pnu.cse.studyhub.auth.repository.AccountRepository;
+import pnu.cse.studyhub.auth.repository.StudyTimeRepository;
 import pnu.cse.studyhub.auth.util.ByteArrayToStringConverter;
 import pnu.cse.studyhub.auth.util.JsonConverter;
 
@@ -23,6 +26,7 @@ import javax.servlet.http.Cookie;
 import javax.validation.constraints.Email;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -35,6 +39,7 @@ public class SignService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AccountRepository accountRepository;
+    private final StudyTimeRepository studyTimeRepository;
     private final EmailService emailService;
     private final TCPMessageService tcpMessageService;
     private final ByteArrayToStringConverter byteArrayToStringConverter;
@@ -95,14 +100,14 @@ public class SignService {
             throw new CustomException(CustomExceptionStatus.WRONG_PASSWORD, "AUTH-002", "잘못된 비밀번호 입니다.");
         }
 
-        String refreshToken = jwtTokenProvider.CreateRefreshToken(account.getUserid());
+        String refreshToken = jwtTokenProvider.CreateRefreshToken(account.getEmail(),account.getUserid());
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
         // expires in 1 day
-        .maxAge(24*60*60)
-        .secure(true)
-        .httpOnly(true)
-        .path("/")
-        .build();
+            .maxAge(24*60*60)
+            .secure(true)
+            .httpOnly(true)
+            .path("/")
+            .build();
 
         ResponseDataDto<Object> response = new ResponseDataDto<>();
         HttpHeaders headers = new HttpHeaders();
@@ -115,7 +120,6 @@ public class SignService {
                 .accessToken(jwtTokenProvider.createToken(account.getEmail(),account.getUserid()))
                 .build();
         response.setData(res);
-
 
 
         return new ResponseEntity<ResponseDataDto>(response, headers, HttpStatus.valueOf(200));
@@ -224,13 +228,95 @@ public class SignService {
 
         profile.setId(id);
         profile.setName(exist.getName());
+        profile.setEmail(exist.getEmail());
         profile.setProfileImage(exist.getProfileImage());
         profile.setDescription(exist.getDescription());
         profile.setStudyTime("01:00:00");
+        profile.setUrl(exist.getUrl());
 //        profile.setStudyTime(userStudyTimeFromTCP(id));
         response.setResult("SUCCESS");
         response.setMessage("Get Profile Successfully");
         response.setData(profile);
+        return response;
+    }
+
+    @Transactional
+    public ResponseStudyTimeDto getStudyMonth(String id, String month) {
+        List<User> exist = studyTimeRepository.findByUseridAndMonth(id, month);
+
+        if (exist == null)
+            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-008", "아이디를 찾을 수 없습니다.");
+
+        ResponseStudyTimeDto response = new ResponseStudyTimeDto();
+        StudyTimeDto studyTime = new StudyTimeDto();
+
+        int sec = 0;
+        int minute = 0;
+        int hour = 0;
+
+        for (int i=0; i<exist.size();i++) {
+            String temp = exist.get(i).getStudyTime();
+            hour += Integer.parseInt(temp.substring(0,3));
+            minute += Integer.parseInt(temp.substring(4,6));
+            sec += Integer.parseInt(temp.substring(6,8));
+        }
+        if (sec > 59) {
+            minute = minute + (sec / 60);
+            sec = sec % 60;
+        }
+        if (minute > 59) {
+            hour = hour + (minute / 60);
+            minute = minute % 60;
+        }
+        String studyTimeStr = String.valueOf(hour) + ":" + String.valueOf(minute) + ":" + String.valueOf(sec);
+
+        studyTime.setUserid(id);
+        studyTime.setDate(month);
+        studyTime.setStudyTime(studyTimeStr);
+        response.setResult("SUCCESS");
+        response.setMessage("Get StudyTime Successfully");
+        response.setData(studyTime);
+        return response;
+    }
+
+    @Transactional
+    public ResponseStudyTimeDto getStudyDay(String id, String day) {
+        String month = day.substring(0, 7);
+        String daySubStr = day.substring(8,10);
+        List<User> exist = studyTimeRepository.findByUseridAndMonthAndDay(id, month, daySubStr);
+
+        if (exist == null)
+            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-008", "아이디를 찾을 수 없습니다.");
+
+        ResponseStudyTimeDto response = new ResponseStudyTimeDto();
+        StudyTimeDto studyTime = new StudyTimeDto();
+
+        int sec = 0;
+        int minute = 0;
+        int hour = 0;
+
+        for (int i=0; i<exist.size();i++) {
+            String temp = exist.get(i).getStudyTime();
+            hour += Integer.parseInt(temp.substring(0,3));
+            minute += Integer.parseInt(temp.substring(4,6));
+            sec += Integer.parseInt(temp.substring(6,8));
+        }
+        if (sec > 59) {
+            minute = minute + (sec / 60);
+            sec = sec % 60;
+        }
+        if (minute > 59) {
+            hour = hour + (minute / 60);
+            minute = minute % 60;
+        }
+        String studyTimeStr = String.valueOf(hour) + ":" + String.valueOf(minute) + ":" + String.valueOf(sec);
+
+        studyTime.setUserid(id);
+        studyTime.setDate(day);
+        studyTime.setStudyTime(studyTimeStr);
+        response.setResult("SUCCESS");
+        response.setMessage("Get StudyTime Successfully");
+        response.setData(studyTime);
         return response;
     }
 
@@ -258,6 +344,10 @@ public class SignService {
         if (dto.getDescription() != null) {
             exist.editDescription(dto.getDescription());
             msg += "description ";
+        }
+        if (dto.getUrl() != null) {
+            exist.editUrl(dto.getUrl());
+            msg += "url ";
         }
         msg += "Successfully";
 
@@ -291,6 +381,49 @@ public class SignService {
         log.info("[tcp from state] request {} user's studyTime {}",userId, obj.getStudyTime());
         return obj.getStudyTime();
 
+    }
+
+    @Transactional
+    public ResponseEntity<ResponseDataDto> checkRefresh(String refreshToken) {
+
+        if(!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new CustomException(CustomExceptionStatus.USERID_NOT_FOUND, "AUTH-002", "존재하지 않는 아이디 입니다.");
+        }
+
+        String userid = jwtTokenProvider.getUserid(refreshToken);
+
+        UserAccount account = accountRepository.findByUserid(userid);
+
+        if (account == null)
+            throw new CustomException(CustomExceptionStatus.USERID_NOT_FOUND, "AUTH-002", "존재하지 않는 아이디 입니다.");
+
+
+        String newRefreshToken = jwtTokenProvider.CreateRefreshToken(account.getEmail(), account.getUserid());
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
+                // expires in 1 day
+                .maxAge(24*60*60)
+                .secure(true)
+                .httpOnly(true)
+                .path("/")
+                .build();
+
+        log.error("check header  {}", cookie.toString());
+
+        ResponseDataDto<Object> response = new ResponseDataDto<>();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("refreshToken", cookie.toString());
+        response.setResult("SUCCESS");
+        response.setMessage("SignIn Successfully");
+        SignInResponseDto res = SignInResponseDto.builder()
+                .id(account.getUserid())
+                .email(account.getEmail())
+                .accessToken(jwtTokenProvider.createToken(account.getEmail(),account.getUserid()))
+                .build();
+        response.setData(res);
+
+
+        //return new ResponseEntity<ResponseDataDto>(response, headers, HttpStatus.valueOf(200));
+        return new ResponseEntity<ResponseDataDto>(response, headers, HttpStatus.valueOf(200));
     }
 
 }

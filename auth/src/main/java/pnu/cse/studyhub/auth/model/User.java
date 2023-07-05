@@ -23,7 +23,10 @@ public class User {
     private String userid;
 
     @Column(nullable = false)
-    private String date;
+    private String month;
+
+    @Column(nullable = false)
+    private String day;
 
     @Column(nullable = false)
     private String studyTime;
@@ -34,7 +37,8 @@ public class User {
 
         return User.builder()
                 .userid(dto.getId())
-                .date(dto.getDate())
+                .month(dto.getMonth())
+                .day(dto.getDay())
                 .studyTime(dto.getStudyTime())
                 .build();
     }

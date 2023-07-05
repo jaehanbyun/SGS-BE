@@ -44,6 +44,14 @@ cloud:
     stack:
       auto: false
 
+tcp:
+  # 상태관리서버의 host, port
+  state:
+    host: localhost
+    port: 8099
+    connection:
+      poolSize: 30
+
 logging:
   level:
     org.hibernate: DEBUG
