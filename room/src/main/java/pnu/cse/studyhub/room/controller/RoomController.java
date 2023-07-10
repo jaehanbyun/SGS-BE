@@ -46,7 +46,7 @@ public class RoomController {
         String userId = (String) jwt.getAttribute("userId");
 
         Long Id = roomService.modify(request.isRoomType(), request.getRoomId()
-                , userId, request.getRoomName(),request.getMaxUser(), request.getRoomChannel());
+                , userId, request.getRoomName(),request.getMaxUser(), request.getRoomChannel(),request.getRoomNotice());
 
         return Response.success("Modify Study Room Successfully",RoomIdResponse.fromRoomId(Id));
     }
@@ -64,11 +64,15 @@ public class RoomController {
                 roomService.roomList(lastRoomId, 15, title, channel ));
     }
 
-    // 공개 스터디방 상세 정보 조회
-    @GetMapping("/{roomId}")
-    public Response<OpenDetailResponse> roomInfo(@PathVariable Long roomId){
 
-        OpenDetailResponse info = roomService.info(roomId);
+    // 정보 조회 (스터디 그룹은 그룹 멤버만 가능하도록)
+    @GetMapping("/{roomId}")
+    public Response<OpenDetailResponse> roomInfo(HttpServletRequest jwt,@PathVariable Long roomId ,
+                                                 @RequestParam Boolean roomType ){
+
+        String userId = (String) jwt.getAttribute("userId");
+
+        OpenDetailResponse info = (OpenDetailResponse) roomService.info(userId , roomId , roomType);
 
         return Response.success("Query info of the room Successfully",info);
 

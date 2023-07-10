@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name="open_study_room")
@@ -18,6 +19,7 @@ import java.util.List;
 @SequenceGenerator(
         name = "SEQ_GENERATOR",
         sequenceName = "MY_SEQ",
+        initialValue = 1,
         allocationSize = 1
 )
 public class OpenRoomEntity {
@@ -62,6 +64,7 @@ public class OpenRoomEntity {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
+
     // 생성 메소드
     public static OpenRoomEntity create(String name, RoomChannel channel, Integer maxUser){
         OpenRoomEntity room = new OpenRoomEntity();
@@ -90,5 +93,18 @@ public class OpenRoomEntity {
         return this.curUser;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OpenRoomEntity that = (OpenRoomEntity) o;
+        return Objects.equals(roomId, that.roomId) && Objects.equals(openUserRoomEntities, that.openUserRoomEntities) && Objects.equals(roomName, that.roomName) && channel == that.channel && Objects.equals(curUser, that.curUser) && Objects.equals(maxUser, that.maxUser) && Objects.equals(roomNotice, that.roomNotice) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt, that.updatedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(roomId, openUserRoomEntities, roomName, channel, curUser, maxUser, roomNotice, createdAt, updatedAt);
+    }
 
 }

@@ -16,6 +16,4 @@ public interface PrivateRoomRepository  extends JpaRepository<PrivateRoomEntity,
 
     Optional<PrivateRoomEntity> findByRoomCode(UUID roomCode);
 
-    @Query("select o from PrivateUserRoomEntity o where o.roomId = :roomId And o.roomOwner = true")
-    OpenUserRoomEntity findRoomOwnerByRoomId(@Param("roomId") Long roomId);
 }

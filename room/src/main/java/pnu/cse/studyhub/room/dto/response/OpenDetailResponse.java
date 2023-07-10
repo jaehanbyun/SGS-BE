@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @Getter
 @AllArgsConstructor
-public class OpenDetailResponse {
+public class OpenDetailResponse implements DetailResponse {
     private Long roomId;
 
     private String roomName;

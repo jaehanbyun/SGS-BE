@@ -83,7 +83,7 @@ public class RoomService {
                     String.format("%s User is not founded in %d study group", userId, roomId));
         }
 
-        return new PrivateDetailResponse(privateRoom.getRoomId(),privateRoom.getRoomName(),privateRoom.getRoomNotice(),privateRoomRepository.findRoomOwnerByRoomId(roomId).getUserId()
+        return new PrivateDetailResponse(privateRoom.getRoomId(),privateRoom.getRoomName(),privateRoom.getRoomNotice(),privateUserRoomRepository.findRoomOwnerByRoomId(roomId).getUserId()
                 ,privateRoom.getCurUser(),privateRoom.getMaxUser(),privateRoom.getCreatedAt());
     }
 
@@ -335,16 +335,40 @@ public class RoomService {
         return "{\"type\" : \"KEEP\"}";
     }
 
+    // 상세 주소
     @Transactional
-    public OpenDetailResponse info(Long roomId){
-        // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
-        OpenRoom openRoom = OpenRoom.fromEntity(checkRoomId(roomId));
+    public DetailResponse info(String userId, Long roomId , Boolean roomType){
+        if(roomType){  // 공개방 일때
 
-        // 방장 이름
-        String roomOwnerId= userRoomRepository.findRoomOwnerByRoomId(roomId).getUserId();
+            // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
+            OpenRoom openRoom = OpenRoom.fromEntity(checkRoomId(roomId));
 
-        return new OpenDetailResponse(openRoom.getRoomId(), openRoom.getRoomName(),openRoom.getChannel(), openRoom.getRoomNotice()
-                ,roomOwnerId, openRoom.getCurUser(), openRoom.getMaxUser(), openRoom.getCreatedAt());
+            // 방장 이름
+            String roomOwnerId= userRoomRepository.findRoomOwnerByRoomId(roomId).getUserId();
+
+            return new OpenDetailResponse(openRoom.getRoomId(), openRoom.getRoomName(),openRoom.getChannel(), openRoom.getRoomNotice()
+                    ,roomOwnerId, openRoom.getCurUser(), openRoom.getMaxUser(), openRoom.getCreatedAt());
+
+        }else{ // 스터디 그룹
+
+            // 방 있는지 체크
+            PrivateRoomEntity privateRoom = checkPrivateRoomId(roomId);
+
+            // 해당 방에 유저 존재하는 지 체크 ()
+
+            PrivateUserRoomEntity userRoom = privateUserRoomRepository.findById(new UserRoomId(userId, roomId)).orElseThrow(() ->
+                    new ApplicationException(ErrorCode.User_NOT_FOUND,
+                            String.format("%s User is not founded in %d study group", userId, roomId)));
+
+            if(!userRoom.isMember()){
+                new ApplicationException(ErrorCode.User_NOT_FOUND,String.format("%s User is not founded in %d study group", userId, roomId));
+            }
+
+            return new PrivateDetailResponse(privateRoom.getRoomId(),privateRoom.getRoomName(),privateRoom.getRoomNotice(),
+                    privateUserRoomRepository.findRoomOwnerByRoomId(roomId).getUserId(),privateRoom.getCurUser(),privateRoom.getMaxUser(),privateRoom.getCreatedAt());
+
+        }
+
 
     }
 
@@ -385,7 +409,7 @@ public class RoomService {
 
 
     @Transactional
-    public Long modify(Boolean roomType, Long roomId, String userId,String roomName ,Integer maxUser, RoomChannel roomChannel){
+    public Long modify(Boolean roomType, Long roomId, String userId, String roomName , Integer maxUser, RoomChannel roomChannel, String roomNotice){
         // TODO : 현재인원보다 작게 변경 x -> Exception
         if(roomType){
             // roomId로 db에 있는지 확인 (없으면 Exception 던짐)
@@ -395,28 +419,34 @@ public class RoomService {
             checkRoomOwner(roomId, userId);
 
             // 내용이 동일할 경우 굳이 넣을 필요 없을듯??
-            if(openRoomEntity.getRoomName().equals(roomName) &&
-            openRoomEntity.getMaxUser().equals(maxUser) &&
-            openRoomEntity.getChannel().equals(roomChannel)){
-                throw new ApplicationException(ErrorCode.SAME_DATA,"");
-            }
+//            if(openRoomEntity.getRoomName().equals(roomName) &&
+//            openRoomEntity.getMaxUser().equals(maxUser) &&
+//            openRoomEntity.getChannel().equals(roomChannel)&&
+//                    (openRoomEntity.getRoomNotice().equals(null))){
+//                throw new ApplicationException(ErrorCode.SAME_DATA,"");
+//            }
 
             // 해당 룸 수정
             openRoomEntity.setRoomName(roomName);
             openRoomEntity.setMaxUser(maxUser);
             openRoomEntity.setChannel(roomChannel);
+            openRoomEntity.setRoomNotice(roomNotice);
 
             return openRoomRepository.saveAndFlush(openRoomEntity).getRoomId();
 
         }else{
             PrivateRoomEntity privateRoomEntity = checkPrivateRoomId(roomId);
             checkPrivateRoomOwner(roomId,userId);
-            if(privateRoomEntity.getRoomName().equals(roomName) &&
-                    privateRoomEntity.getMaxUser().equals(maxUser)){
-                throw new ApplicationException(ErrorCode.SAME_DATA,"");
-            }
+
+//            if(privateRoomEntity.getRoomName().equals(roomName) &&
+//                    privateRoomEntity.getMaxUser().equals(maxUser) &&
+//                    (privateRoomEntity.getRoomNotice().isBlank()||privateRoomEntity.getRoomNotice().equals(roomNotice))){
+//                throw new ApplicationException(ErrorCode.SAME_DATA,"");
+//            }
+
             privateRoomEntity.setRoomName(roomName);
             privateRoomEntity.setMaxUser(maxUser);
+            privateRoomEntity.setRoomNotice(roomNotice);
 
             return privateRoomRepository.saveAndFlush(privateRoomEntity).getRoomId();
         }

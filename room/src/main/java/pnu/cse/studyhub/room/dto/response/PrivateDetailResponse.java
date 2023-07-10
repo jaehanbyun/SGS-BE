@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Getter
 @AllArgsConstructor
-public class PrivateDetailResponse {
+public class PrivateDetailResponse implements DetailResponse{
 
     private Long roomId;
 

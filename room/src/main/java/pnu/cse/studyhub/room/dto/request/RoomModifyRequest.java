@@ -16,6 +16,7 @@ public class RoomModifyRequest {
     private Integer maxUser;
 
     private RoomChannel roomChannel;
+    private String roomNotice;
 
 }
 
