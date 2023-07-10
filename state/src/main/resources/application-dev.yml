@@ -13,17 +13,17 @@ tcp:
     port : 8099
   room:
     host : sgs-room
-    port : 8081
+    port : 8089
     connection :
       poolSize : 30
   signaling:
     host: sgs-signaling
-    port: 8051
+    port: 8058
     connection:
       poolSize: 10
   auth:
     host: sgs-auth
-    port: 8011
+    port: 8019
     connection:
       poolSize: 10
 logging:
