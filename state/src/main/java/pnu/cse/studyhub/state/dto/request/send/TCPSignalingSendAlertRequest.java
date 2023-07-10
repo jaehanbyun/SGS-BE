@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TCPSignalingSendRequest {
+public class TCPSignalingSendAlertRequest {
     @JsonProperty("server")
     private String server;
     @JsonProperty("type")
@@ -18,5 +18,7 @@ public class TCPSignalingSendRequest {
     private String userId;
     @JsonProperty("room_id")
     private Long roomId;
+    @JsonProperty("alert_count")
+    private Long alertCount;
 }
 
