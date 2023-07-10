@@ -5,10 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pnu.cse.studyhub.auth.dto.StudyTimeDto;
 import pnu.cse.studyhub.auth.dto.TCPUserSchedulingRequest;
 import pnu.cse.studyhub.auth.dto.UserInfoDto;
 import pnu.cse.studyhub.auth.model.User;
+import pnu.cse.studyhub.auth.model.UserAccount;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -33,8 +39,19 @@ public class MessageService {
                 String userId = userInfoDto.getId();
                 // 아마 date는 null 값이 들어올 것으로 추측
                 // date는 DB에 적합한 형태로 바꿔야함. String, Date, LocalDateTime 등
-                String date = userInfoDto.getDate();
+                LocalDateTime localDateTime = LocalDateTime.now(); // Or any other LocalDateTime
+                Date now = Date.from(localDateTime.atZone(ZoneId.of("Asia/Seoul")).toInstant());
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String formatedDate = dateFormat.format(now);
+                log.info("time test month ={} day = {}",formatedDate.substring(0,7), formatedDate.substring(8,10));
+                String month = formatedDate.substring(0,7);
+                String day = formatedDate.substring(8,10);
                 String studyTime = userInfoDto.getStudyTime();
+
+                userInfoDto.setMonth(month);
+                userInfoDto.setDay(day);
+
+                User user = User.createInfo(userInfoDto);
             }
             log.info("Parsed message: {}", tcpUserSchedulingRequest);
         } catch (JsonProcessingException e) {

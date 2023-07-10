@@ -8,7 +8,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class StudyTimeDto {
-    protected String userid;
-    protected String date;
-    protected String studyTime;
+    private String userid;
+
+    private String date;
+
+    private String studyTime;
 }

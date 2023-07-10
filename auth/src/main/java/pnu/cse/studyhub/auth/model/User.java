@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pnu.cse.studyhub.auth.dto.AccountDto;
+import pnu.cse.studyhub.auth.dto.StudyTimeDto;
 import pnu.cse.studyhub.auth.dto.UserInfoDto;
 
 import javax.persistence.*;

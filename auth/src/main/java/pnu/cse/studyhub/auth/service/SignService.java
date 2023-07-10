@@ -25,7 +25,11 @@ import pnu.cse.studyhub.auth.util.JsonConverter;
 import javax.servlet.http.Cookie;
 import javax.validation.constraints.Email;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -43,7 +47,7 @@ public class SignService {
     private final EmailService emailService;
     private final TCPMessageService tcpMessageService;
     private final ByteArrayToStringConverter byteArrayToStringConverter;
-    private final S3Uploader s3Uploader;
+//    private final S3Uploader s3Uploader;
     private final JsonConverter jsonConverter;
 
     private long refreshTime = 14 * 24 * 60 * 60 * 1000L;
@@ -331,16 +335,16 @@ public class SignService {
             exist.editName(dto.getName());
             msg += "name ";
         }
-        if (dto.getProfileImage() != null) {
-            try {
-                String base64Profile = dto.getProfileImage();
-                String profileUri = s3Uploader.base64ImageUpload(base64Profile,dto.getId());
-                exist.editProfileImage(profileUri);
-            } catch (IOException e) {
-                throw new CustomException(CustomExceptionStatus.INCORRECT_IMAGE_FORMAT,"AUTH-011", "프로필 이미지 형식이 올바르지 않습니다.");
-            }
-            msg += "profileImage ";
-        }
+//        if (dto.getProfileImage() != null) {
+//            try {
+//                String base64Profile = dto.getProfileImage();
+//                String profileUri = s3Uploader.base64ImageUpload(base64Profile,dto.getId());
+//                exist.editProfileImage(profileUri);
+//            } catch (IOException e) {
+//                throw new CustomException(CustomExceptionStatus.INCORRECT_IMAGE_FORMAT,"AUTH-011", "프로필 이미지 형식이 올바르지 않습니다.");
+//            }
+//            msg += "profileImage ";
+//        }
         if (dto.getDescription() != null) {
             exist.editDescription(dto.getDescription());
             msg += "description ";
@@ -413,17 +417,38 @@ public class SignService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("refreshToken", cookie.toString());
         response.setResult("SUCCESS");
-        response.setMessage("SignIn Successfully");
+        response.setMessage("Update Access Token Successfully");
         SignInResponseDto res = SignInResponseDto.builder()
                 .id(account.getUserid())
                 .email(account.getEmail())
                 .accessToken(jwtTokenProvider.createToken(account.getEmail(),account.getUserid()))
                 .build();
         response.setData(res);
+        log.error("check header sec  {}", headers.toString());
+        log.error("check header sec  {}", new ResponseEntity<ResponseDataDto>(response, headers, HttpStatus.valueOf(200)).toString());
 
-
-        //return new ResponseEntity<ResponseDataDto>(response, headers, HttpStatus.valueOf(200));
         return new ResponseEntity<ResponseDataDto>(response, headers, HttpStatus.valueOf(200));
+    }
+
+    @Transactional
+    public String testSaveStudytime() {
+        LocalDateTime localDateTime = LocalDateTime.now(); // Or any other LocalDateTime
+        Date now = Date.from(localDateTime.atZone(ZoneId.of("Asia/Seoul")).toInstant());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formatedDate = dateFormat.format(now);
+        log.info("time test month ={} day = {}",formatedDate.substring(0,7), formatedDate.substring(8,10));
+        String month = formatedDate.substring(0,7);
+        String day = formatedDate.substring(8,10);
+        UserInfoDto userInfoDto = new UserInfoDto();
+        userInfoDto.setId("testId");
+        userInfoDto.setStudyTime("test time");
+
+        userInfoDto.setMonth(month);
+        userInfoDto.setDay(day);
+
+        User user = User.createInfo(userInfoDto);
+        studyTimeRepository.save(user);
+        return "Good";
     }
 
 }

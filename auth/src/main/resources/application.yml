@@ -7,8 +7,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/spring?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${ROOM_DB_USER}
-    password: ${ROOM_DB_PASSWORD}
+    username: ${ROOM_DB_USER}  # root
+    password: ${ROOM_DB_PASSWORD}  # sgs-room
 
   jpa:
     show-sql: true

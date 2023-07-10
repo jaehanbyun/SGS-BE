@@ -79,4 +79,10 @@ public class SignController {
         return responseService.successDataResponse(signService.checkRefresh(refreshToken));
     }
 
+    @PostMapping ("/testTime")
+    public String testSaveTime() {
+
+        return signService.testSaveStudytime();
+    }
+
 }
