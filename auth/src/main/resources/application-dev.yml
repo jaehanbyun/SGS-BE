@@ -49,6 +49,8 @@ tcp:
     port: 8099
     connection:
       poolSize: 30
+    server:
+      port: 8019
 
 logging:
   level:
