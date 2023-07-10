@@ -10,6 +10,7 @@ import pnu.cse.studyhub.auth.dto.TCPUserSchedulingRequest;
 import pnu.cse.studyhub.auth.dto.UserInfoDto;
 import pnu.cse.studyhub.auth.model.User;
 import pnu.cse.studyhub.auth.model.UserAccount;
+import pnu.cse.studyhub.auth.repository.StudyTimeRepository;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.util.List;
 //TCP 요청 처리하는 클래스
 public class MessageService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final StudyTimeRepository studyTimeRepository;
     public String processMessage(String message) {
         // String 형태로 받은 message
         log.info("Received message: {}", message);
@@ -36,22 +38,24 @@ public class MessageService {
             // 아래 코드는 user 정보 리스트 불러오는거. 여기서 date 추가해서 db에 저장하면 될듯?
             List<UserInfoDto> userInfoDtoList = tcpUserSchedulingRequest.getUsers();
             for(UserInfoDto userInfoDto : userInfoDtoList) {
-                String userId = userInfoDto.getId();
+//                String userId = userInfoDto.getId();
                 // 아마 date는 null 값이 들어올 것으로 추측
                 // date는 DB에 적합한 형태로 바꿔야함. String, Date, LocalDateTime 등
                 LocalDateTime localDateTime = LocalDateTime.now(); // Or any other LocalDateTime
                 Date now = Date.from(localDateTime.atZone(ZoneId.of("Asia/Seoul")).toInstant());
+                Date date = new Date(now.getTime() - (1000 * 60 * 60 * 24));
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String formatedDate = dateFormat.format(now);
+                String formatedDate = dateFormat.format(date);
                 log.info("time test month ={} day = {}",formatedDate.substring(0,7), formatedDate.substring(8,10));
                 String month = formatedDate.substring(0,7);
                 String day = formatedDate.substring(8,10);
-                String studyTime = userInfoDto.getStudyTime();
+//                String studyTime = userInfoDto.getStudyTime();
 
                 userInfoDto.setMonth(month);
                 userInfoDto.setDay(day);
 
                 User user = User.createInfo(userInfoDto);
+                studyTimeRepository.save(user);
             }
             log.info("Parsed message: {}", tcpUserSchedulingRequest);
         } catch (JsonProcessingException e) {
