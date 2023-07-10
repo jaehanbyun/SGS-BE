@@ -11,6 +11,7 @@ import pnu.cse.studyhub.state.config.TCPRoomClientGateway;
 import pnu.cse.studyhub.state.config.TCPSignalingClientGateway;
 import pnu.cse.studyhub.state.dto.UserDto;
 import pnu.cse.studyhub.state.dto.request.receive.*;
+import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendAlertRequest;
 import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendRequest;
 import pnu.cse.studyhub.state.dto.response.receive.TCPAuthReceiveResponse;
 import pnu.cse.studyhub.state.dto.request.send.TCPRoomSendRequest;
@@ -172,9 +173,15 @@ public class MessageService {
                 case "room":
                     TCPRoomReceiveRequest roomRequest = (TCPRoomReceiveRequest) response;
                     log.debug(roomRequest.toString());
-                    if (roomRequest.getType().matches("ALERT|KICK_OUT|KICK_OUT_BY_ALERT|DELEGATE")) {
-                        // 내부적으로 server : "room" 요청 온 것이 server : "state" 로 바뀜
+                    if (roomRequest.getType().matches("ALERT")) {
                         String signalingServerRoomRequestMessage = sendSignalingServerRoomMessage(roomRequest);
+                        String resp = tcpSignalingClientGateway.send(signalingServerRoomRequestMessage);
+                        log.debug("resq : " + signalingServerRoomRequestMessage);
+                        log.debug("resp : " + resp);
+                    }
+                    if (roomRequest.getType().matches("KICK_OUT|KICK_OUT_BY_ALERT|DELEGATE")) {
+                        // 내부적으로 server : "room" 요청 온 것이 server : "state" 로 바뀜
+                        String signalingServerRoomRequestMessage = sendSignalingServerAlertMessage(roomRequest);
                         String resp = tcpSignalingClientGateway.send(signalingServerRoomRequestMessage);
                         log.debug("resq : " + signalingServerRoomRequestMessage);
                         log.debug("resp : " + resp);
@@ -221,7 +228,11 @@ public class MessageService {
     }
     public String sendSignalingServerRoomMessage(TCPRoomReceiveRequest tcpRoomReceiveRequest){
         TCPSignalingSendRequest tcpSignalingSendRequest = tcpRoomReceiveRequest.toTCPSignalingSendRequest();
-
+        String tcpSignalingSendRequestMessage = jsonConverter.convertToJson(tcpSignalingSendRequest);
+        return tcpSignalingSendRequestMessage;
+    }
+    public String sendSignalingServerAlertMessage(TCPRoomReceiveRequest tcpRoomReceiveRequest) {
+        TCPSignalingSendAlertRequest tcpSignalingSendRequest = tcpRoomReceiveRequest.toTCPSignalingSendAlertRequest();
         String tcpSignalingSendRequestMessage = jsonConverter.convertToJson(tcpSignalingSendRequest);
         return tcpSignalingSendRequestMessage;
     }
