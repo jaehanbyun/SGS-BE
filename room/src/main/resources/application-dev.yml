@@ -1,0 +1,30 @@
+spring.jpa:
+  database: mysql
+  hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+#  hibernate.ddl-auto: create
+  hibernate.ddl-auto: update
+  hibernate.format_sql: true
+  hibernate.show-sql: true
+
+spring.datasource:
+  driver-class-name : com.mysql.cj.jdbc.Driver
+  url : jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/room?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+  username : ${ROOM_DB_USER}
+  password : ${ROOM_DB_PASSWORD}
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
+
+jwt:
+  secret-key: ${SECRET_TOKEN}
+
+tcp:
+  server:
+    port: 8089
+  state:
+    host: sgs-signaling
+    port: 8099
+    connection:
+      poolSize: 30
