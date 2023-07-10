@@ -48,10 +48,8 @@ spring:
           uri: wss://${EC2_IP}:8091
           predicates:
             - Path=/socket/**
-          filters:
-            - AuthorizationHeaderFilter
 
 token:
   access_expired_time: 3600000
-  secret_key: user_token
+  secret_key: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
   refresh_expired_time: 3600000
