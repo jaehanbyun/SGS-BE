@@ -24,7 +24,7 @@ tcp:
   server:
     port: 8089
   state:
-    host: sgs-signaling
+    host: sgs-state
     port: 8099
     connection:
       poolSize: 30
