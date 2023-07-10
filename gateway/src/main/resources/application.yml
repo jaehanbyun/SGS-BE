@@ -6,7 +6,7 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: 
+            allowedOrigins:
               - "http://localhost:3000"
               - "http://localhost:3001"
               - "http://localhost:3002"
@@ -18,24 +18,39 @@ spring:
               - PUT
               - DELETE
               - OPTIONS
+              - PATCH
       routes:
         - id: auth-service
           uri: http://${EC2_IP}:8011
           predicates:
             - Path=/auth/**
+            - Method=POST
+        - id: auth-service
+          uri: http://${EC2_IP}:8011
+          predicates:
+            - Path=/auth/**
+            - Method=GET,PATCH
+          filters:
+            - AuthorizationHeaderFilter
         - id: chat-service
           uri: http://${EC2_IP}:8031
           predicates:
             - Path=/chat/**
+          filters:
+            - AuthorizationHeaderFilter
         - id: room-service
           uri: http://${EC2_IP}:8081
           predicates:
             - Path=/room/**
+          filters:
+            - AuthorizationHeaderFilter
         - id: signaling-service
           uri: wss://${EC2_IP}:8091
           predicates:
             - Path=/socket/**
-         
+          filters:
+            - AuthorizationHeaderFilter
+
 token:
   access_expired_time: 3600000
   secret_key: user_token
