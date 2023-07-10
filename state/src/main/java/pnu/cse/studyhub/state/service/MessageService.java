@@ -174,14 +174,14 @@ public class MessageService {
                     TCPRoomReceiveRequest roomRequest = (TCPRoomReceiveRequest) response;
                     log.debug(roomRequest.toString());
                     if (roomRequest.getType().matches("ALERT")) {
-                        String signalingServerRoomRequestMessage = sendSignalingServerRoomMessage(roomRequest);
+                        String signalingServerRoomRequestMessage = sendSignalingServerAlertMessage(roomRequest);
                         String resp = tcpSignalingClientGateway.send(signalingServerRoomRequestMessage);
                         log.debug("resq : " + signalingServerRoomRequestMessage);
                         log.debug("resp : " + resp);
                     }
                     if (roomRequest.getType().matches("KICK_OUT|KICK_OUT_BY_ALERT|DELEGATE")) {
                         // 내부적으로 server : "room" 요청 온 것이 server : "state" 로 바뀜
-                        String signalingServerRoomRequestMessage = sendSignalingServerAlertMessage(roomRequest);
+                        String signalingServerRoomRequestMessage = sendSignalingServerRoomMessage(roomRequest);
                         String resp = tcpSignalingClientGateway.send(signalingServerRoomRequestMessage);
                         log.debug("resq : " + signalingServerRoomRequestMessage);
                         log.debug("resp : " + resp);

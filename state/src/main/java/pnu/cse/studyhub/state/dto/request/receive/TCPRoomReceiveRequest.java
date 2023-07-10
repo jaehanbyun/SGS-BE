@@ -3,10 +3,10 @@ package pnu.cse.studyhub.state.dto.request.receive;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendAlertRequest;
 import pnu.cse.studyhub.state.dto.request.send.TCPSignalingSendRequest;
 
 
@@ -23,13 +23,21 @@ public class TCPRoomReceiveRequest extends TCPMessageReceiveRequest {
     @JsonProperty("alert_count")
     private Long alertCount;
 
+    public TCPSignalingSendAlertRequest toTCPSignalingSendAlertRequest() {
+        return TCPSignalingSendAlertRequest.builder()
+                .server("state")
+                .type(super.getType())
+                .userId(this.userId)
+                .roomId(this.roomId)
+                .alertCount(this.alertCount)
+                .build();
+    }
     public TCPSignalingSendRequest toTCPSignalingSendRequest() {
         return TCPSignalingSendRequest.builder()
                 .server("state")
                 .type(super.getType())
                 .userId(this.userId)
                 .roomId(this.roomId)
-                .alertCount(this.alertCount)
                 .build();
     }
 }
