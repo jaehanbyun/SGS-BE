@@ -290,6 +290,8 @@ public class MessageHandler extends TextWebSocketHandler {
 
         String res = sb.toString();
 
+        log.info(res);
+
         return res;
     }
 

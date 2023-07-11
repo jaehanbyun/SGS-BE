@@ -26,6 +26,8 @@ public class SchedulerService {
 
     @Scheduled(cron = "0 0 5 * * *")
     public void run() throws IOException {
+        log.info("[05:00] Scheduling Start !!");
+
         int countInTCP = 0;
         int nowUserCount = 0;
 
@@ -62,6 +64,8 @@ public class SchedulerService {
         if (!serializedUsers.isEmpty()) {
             studyTimeScheduledTCP(serializedUsers,"SCHEDULER_LAST");
         }
+
+        log.info("[05:00] Scheduling End !!");
     }
 
     private void studyTimeScheduledTCP(List<Map<String, Object>> Users,String Type) {
