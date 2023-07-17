@@ -2,6 +2,7 @@ package pnu.cse.studyhub.room.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RoomService {
@@ -298,6 +300,7 @@ public class RoomService {
 
     @Transactional
     public String stateTCP(Long roomId, String userId){
+        log.info("상태한테 받은 방 인원수 관련 데이터");
         Optional<OpenRoomEntity> openRoomEntity = openRoomRepository.findById(roomId);
 
         if(openRoomEntity.isPresent()) { // 공개방이면

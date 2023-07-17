@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@JsonTypeName("state")
 public class TCPStateRequest extends TCPMessageRequest{
     @JsonProperty("user_id")
     private String userId;

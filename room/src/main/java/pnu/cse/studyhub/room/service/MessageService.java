@@ -37,7 +37,7 @@ public class MessageService {
             switch (response.getServer()) {
                 case "state":
                     TCPStateRequest stateRequest = (TCPStateRequest) response;
-                    log.warn(stateRequest.toString());
+                    log.info(stateRequest.toString());
                     responseMessage = roomService.stateTCP(stateRequest.getRoomId(),stateRequest.getUserId());
 
                     break;
