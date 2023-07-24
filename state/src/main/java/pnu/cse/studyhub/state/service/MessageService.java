@@ -74,7 +74,6 @@ public class MessageService {
                     break;
                 case "signaling":
                     TCPSignalingReceiveRequest signalingRequest = new TCPSignalingReceiveRequest();
-                    TCPSignalingReceiveSchedulingRequest signalingSchedulingRequest = new TCPSignalingReceiveSchedulingRequest();
                     if (response.getType().startsWith("STUDY_TIME") && response instanceof TCPSignalingReceiveRequest) {
                         signalingRequest = (TCPSignalingReceiveRequest) response;
 
@@ -110,8 +109,13 @@ public class MessageService {
                         } else {
                             // ClassCastException
                         }
-
-                    } else if (response.getType().startsWith("SCHEDULER") && response instanceof TCPSignalingReceiveSchedulingRequest) {
+                    } else {
+                        // 에러처리
+                    }
+                    break;
+                case "signaling_scheduling":
+                    TCPSignalingReceiveSchedulingRequest signalingSchedulingRequest = new TCPSignalingReceiveSchedulingRequest();
+                    if (response.getType().startsWith("SCHEDULER") && response instanceof TCPSignalingReceiveSchedulingRequest) {
                         signalingSchedulingRequest = (TCPSignalingReceiveSchedulingRequest) response;
                         // 새벽 05:00에 시그널링 서버로 부터 데이터 동기화를 위해 일괄적으로 데이터를 받음.
                         if (signalingSchedulingRequest.getType().matches("SCHEDULER")) {
@@ -145,10 +149,8 @@ public class MessageService {
                         } else {
                             // 에러처리
                         }
-                    } else {
-                        // 에러처리
                     }
-                    break;
+                        break;
                 case "auth":
                     TCPAuthReceiveRequest authRequest = (TCPAuthReceiveRequest) response;
                     log.warn(authRequest.toString());
