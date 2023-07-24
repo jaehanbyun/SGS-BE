@@ -24,7 +24,8 @@ public class SchedulerService {
     private final UserRegistry userRegistry;
     private final TCPMessageService tcpMessageService;
 
-    @Scheduled(cron = "0 0 5 * * *")
+    //@Scheduled(cron = "0 0 5 * * *")
+    @Scheduled(cron = "0 45 20 * * *")
     public void run() throws IOException {
         log.info("[05:00] Scheduling Start !!");
 
