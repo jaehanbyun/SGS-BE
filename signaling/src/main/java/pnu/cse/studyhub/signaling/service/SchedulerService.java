@@ -71,7 +71,7 @@ public class SchedulerService {
 
     private void studyTimeScheduledTCP(List<Map<String, Object>> Users,String Type) {
         Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("server", "signaling");
+        jsonMap.put("server", "signaling_scheduling");
         jsonMap.put("type", Type);
         jsonMap.put("users", Users);
 
