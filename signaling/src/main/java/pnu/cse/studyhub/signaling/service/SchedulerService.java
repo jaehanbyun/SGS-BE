@@ -25,7 +25,7 @@ public class SchedulerService {
     private final TCPMessageService tcpMessageService;
 
     //@Scheduled(cron = "0 0 5 * * *")
-    @Scheduled(cron = "0 45 20 * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     public void run() throws IOException {
         log.info("[05:00] Scheduling Start !!");
 
@@ -45,8 +45,8 @@ public class SchedulerService {
             }
 
             serializedUsers.add(Map.of(
-                    "studyTime", user.studyTimeToString(),
-                    "userId", user.getUserId()
+                    "study_time", user.studyTimeToString(),
+                    "user_id", user.getUserId()
             ));
 
             user.setStudyTime(LocalTime.of(0,0,0));
