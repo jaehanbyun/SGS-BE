@@ -111,11 +111,10 @@ public class MessageService {
                             // ClassCastException
                         }
 
-                    } else if (response.getType().startsWith("SCHEDULED") && response instanceof TCPSignalingReceiveSchedulingRequest) {
+                    } else if (response.getType().startsWith("SCHEDULER") && response instanceof TCPSignalingReceiveSchedulingRequest) {
                         signalingSchedulingRequest = (TCPSignalingReceiveSchedulingRequest) response;
-
                         // 새벽 05:00에 시그널링 서버로 부터 데이터 동기화를 위해 일괄적으로 데이터를 받음.
-                        if (signalingSchedulingRequest.getType().matches("SCHEDULED")) {
+                        if (signalingSchedulingRequest.getType().matches("SCHEDULER")) {
                             List<UserDto> userList = signalingSchedulingRequest.getUsers();
                             for (UserDto userDto : userList) {
                                 RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
@@ -128,7 +127,7 @@ public class MessageService {
                                 }
                             }
                             responseMessage = signalingSchedulingRequest.toString();
-                        } else if (signalingSchedulingRequest.getType().matches("SCHEDULED_LAST")) {
+                        } else if (signalingSchedulingRequest.getType().matches("SCHEDULER_LAST")) {
                             List<UserDto> userList = signalingSchedulingRequest.getUsers();
                             for (UserDto userDto : userList) {
                                 RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
@@ -266,7 +265,7 @@ public class MessageService {
         // Construct the data structure to be sent
         Map<String, Object> data = new HashMap<>();
         data.put("server", "state");
-        data.put("type", "SCHEDULED");
+        data.put("type", "SCHEDULER");
         data.put("users", userDtoBatch);
 
         // Convert the data structure to a JSON string and send it over TCP

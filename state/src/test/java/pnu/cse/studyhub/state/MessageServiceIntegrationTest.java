@@ -92,7 +92,7 @@ public class MessageServiceIntegrationTest {
             users.add(new UserDto("test1","01:00:00"));
             users.add(new UserDto("test2","02:00:00"));
 
-            TCPSignalingReceiveSchedulingRequest expectedRequest = createRequest("signaling","SCHEDULED",users);
+            TCPSignalingReceiveSchedulingRequest expectedRequest = createRequest("signaling","SCHEDULER",users);
             String message = jsonConverter.convertToJson(expectedRequest);
             String messageResponse = messageService.processMessage(message);
             TCPSignalingReceiveSchedulingRequest actualRequest = jsonConverter.convertFromJson(messageResponse, TCPSignalingReceiveSchedulingRequest.class);
@@ -113,7 +113,7 @@ public class MessageServiceIntegrationTest {
             users.add(new UserDto("test1","01:00:00"));
             users.add(new UserDto("test2","02:00:00"));
 
-            TCPSignalingReceiveSchedulingRequest expectedRequest = createRequest("signaling","SCHEDULED_LAST",users);
+            TCPSignalingReceiveSchedulingRequest expectedRequest = createRequest("signaling","SCHEDULER_LAST",users);
             String message = jsonConverter.convertToJson(expectedRequest);
             String messageResponse = messageService.processMessage(message);
             TCPSignalingReceiveSchedulingRequest actualRequest = jsonConverter.convertFromJson(messageResponse, TCPSignalingReceiveSchedulingRequest.class);
