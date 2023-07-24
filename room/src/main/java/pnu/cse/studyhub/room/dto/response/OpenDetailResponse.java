@@ -23,4 +23,17 @@ public class OpenDetailResponse implements DetailResponse {
 
     private Timestamp createdAt;
 
+    @Override
+    public String toString() {
+        return "OpenDetailResponse{" +
+                "roomId=" + roomId +
+                ", roomName='" + roomName + '\'' +
+                ", channel=" + channel +
+                ", roomNotice='" + roomNotice + '\'' +
+                ", roomOwner='" + roomOwner + '\'' +
+                ", curUser=" + curUser +
+                ", maxUser=" + maxUser +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

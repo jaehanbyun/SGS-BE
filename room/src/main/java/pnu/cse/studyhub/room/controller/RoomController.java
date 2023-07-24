@@ -67,14 +67,20 @@ public class RoomController {
 
     // 정보 조회 (스터디 그룹은 그룹 멤버만 가능하도록)
     @GetMapping("/{roomId}")
-    public Response<OpenDetailResponse> roomInfo(HttpServletRequest jwt,@PathVariable Long roomId ,
+    public Response<DetailResponse> roomInfo(HttpServletRequest jwt,@PathVariable Long roomId ,
                                                  @RequestParam Boolean roomType ){
 
         String userId = (String) jwt.getAttribute("userId");
 
-        OpenDetailResponse info = (OpenDetailResponse) roomService.info(userId , roomId , roomType);
+        //OpenDetailResponse info = (OpenDetailResponse) roomService.info(userId , roomId , roomType);
 
-        return Response.success("Query info of the room Successfully",info);
+        if(roomType){
+            OpenDetailResponse info = (OpenDetailResponse) roomService.info(userId, roomId, roomType);
+            return Response.success("Query info of the room Successfully",info);
+        }else{
+            PrivateDetailResponse info = (PrivateDetailResponse) roomService.info(userId, roomId, roomType);
+            return Response.success("Query info of the room Successfully",info);
+        }
 
     }
 

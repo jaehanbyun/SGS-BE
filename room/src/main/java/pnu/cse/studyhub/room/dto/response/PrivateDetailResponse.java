@@ -22,4 +22,16 @@ public class PrivateDetailResponse implements DetailResponse{
 
     private Timestamp createdAt;
 
+    @Override
+    public String toString() {
+        return "PrivateDetailResponse{" +
+                "roomId=" + roomId +
+                ", roomName='" + roomName + '\'' +
+                ", roomNotice='" + roomNotice + '\'' +
+                ", roomOwner='" + roomOwner + '\'' +
+                ", curUser=" + curUser +
+                ", maxUser=" + maxUser +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }
