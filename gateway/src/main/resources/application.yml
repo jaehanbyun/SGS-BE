@@ -20,11 +20,11 @@ spring:
               - OPTIONS
               - PATCH
       routes:
-        - id: auth-service
+        - id: auth-service-post
           uri: http://${EC2_IP}:8011
           predicates:
             - Path=/auth/**
-            - Method=POST
+            - Method=POST,OPTIONS
         - id: auth-service
           uri: http://${EC2_IP}:8011
           predicates:
