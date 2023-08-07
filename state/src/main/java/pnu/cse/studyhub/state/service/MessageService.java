@@ -228,12 +228,12 @@ public class MessageService {
         return tcpAuthResponseMessage;
     }
     public String sendSignalingServerRoomMessage(TCPRoomReceiveRequest tcpRoomReceiveRequest){
-        TCPSignalingSendRequest tcpSignalingSendRequest = tcpRoomReceiveRequest.toTCPSignalingSendRequest();
+        TCPSignalingSendRequest tcpSignalingSendRequest = tcpRoomReceiveRequest.toTCPSignalingSendRequest(tcpRoomReceiveRequest.getType());
         String tcpSignalingSendRequestMessage = jsonConverter.convertToJson(tcpSignalingSendRequest);
         return tcpSignalingSendRequestMessage;
     }
     public String sendSignalingServerAlertMessage(TCPRoomReceiveRequest tcpRoomReceiveRequest) {
-        TCPSignalingSendAlertRequest tcpSignalingSendRequest = tcpRoomReceiveRequest.toTCPSignalingSendAlertRequest();
+        TCPSignalingSendAlertRequest tcpSignalingSendRequest = tcpRoomReceiveRequest.toTCPSignalingSendAlertRequest(tcpRoomReceiveRequest.getType());
         String tcpSignalingSendRequestMessage = jsonConverter.convertToJson(tcpSignalingSendRequest);
         return tcpSignalingSendRequestMessage;
     }
