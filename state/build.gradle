@@ -23,6 +23,11 @@ dependencies {
     implementation 'org.springframework.integration:spring-integration-ip'
     implementation 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //grpc
+    implementation 'io.grpc:grpc-protobuf:1.53.0'
+    implementation 'io.grpc:grpc-stub:1.53.0'
+
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.integration:spring-integration-test'
