@@ -23,19 +23,19 @@ public class TCPRoomReceiveRequest extends TCPMessageReceiveRequest {
     @JsonProperty("alert_count")
     private Long alertCount;
 
-    public TCPSignalingSendAlertRequest toTCPSignalingSendAlertRequest() {
+    public TCPSignalingSendAlertRequest toTCPSignalingSendAlertRequest(String type) {
         return TCPSignalingSendAlertRequest.builder()
                 .server("state")
-                .type(super.getType())
+                .type(type)
                 .userId(this.userId)
                 .roomId(this.roomId)
                 .alertCount(this.alertCount)
                 .build();
     }
-    public TCPSignalingSendRequest toTCPSignalingSendRequest() {
+    public TCPSignalingSendRequest toTCPSignalingSendRequest(String type) {
         return TCPSignalingSendRequest.builder()
                 .server("state")
-                .type(super.getType())
+                .type(type)
                 .userId(this.userId)
                 .roomId(this.roomId)
                 .build();
