@@ -39,7 +39,7 @@ public class SchedulerService {
 
         if(userSize == 0){ // 아무도 없다면
 
-            studyTimeScheduledTCP(null,"SCHEDULER_LAST");
+            studyTimeScheduledTCP(serializedUsers,"SCHEDULER_LAST");
             log.info("[05:00] Scheduling End !!");
             return;
         }
