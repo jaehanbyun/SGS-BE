@@ -37,6 +37,13 @@ public class SchedulerService {
         List<Map<String, Object>> serializedUsers = new ArrayList<>();
         int userSize = users.size();
 
+        if(userSize == 0){ // 아무도 없다면
+
+            studyTimeScheduledTCP(null,"SCHEDULER_LAST");
+            log.info("[05:00] Scheduling End !!");
+            return;
+        }
+
         for (UserSession user : users) {
 
             if(user.getTimer()){ // 켜져있다면
