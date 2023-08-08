@@ -37,7 +37,9 @@ public class MessageService {
             // userInfoDto의 JsonProperty 를 user_id, study_time으로 바꾸던지, 새로 dto를 하나 파던지 해야할듯?
             // 아래 코드는 user 정보 리스트 불러오는거. 여기서 date 추가해서 db에 저장하면 될듯?
             List<UserInfoDto> userInfoDtoList = tcpUserSchedulingRequest.getUsers();
+            log.info("Check user list = {}", userInfoDtoList.toString());
             for(UserInfoDto userInfoDto : userInfoDtoList) {
+                log.info("Check contents in list = {}",userInfoDto.toString());
 //                String userId = userInfoDto.getId();
                 // 아마 date는 null 값이 들어올 것으로 추측
                 // date는 DB에 적합한 형태로 바꿔야함. String, Date, LocalDateTime 등
