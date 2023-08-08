@@ -2,6 +2,8 @@ package pnu.cse.studyhub.auth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.shaded.json.JSONArray;
+import com.nimbusds.jose.shaded.json.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,9 +42,12 @@ public class MessageService {
             // userInfoDto의 JsonProperty 를 user_id, study_time으로 바꾸던지, 새로 dto를 하나 파던지 해야할듯?
             // 아래 코드는 user 정보 리스트 불러오는거. 여기서 date 추가해서 db에 저장하면 될듯?
 //            List<UserInfoDto> userInfoDtoList = tcpUserSchedulingRequest.getUsers();
-            String json = jsonConverter.convertToJson(message);
+            JSONObject json = jsonConverter.stringToJson(message);
+            log.info("Check user list = {}", json.toJSONString());
 
-            log.info("Check user list = {}", json);
+            JSONArray userArray = (JSONArray) json.get("users");
+            log.info("Check for JSONArray users = {}", userArray.toJSONString());
+
 //            for(UserInfoDto userInfoDto : userInfoDtoList) {
 //                log.info("Check contents in list = {}",userInfoDto.toString());
 ////                String userId = userInfoDto.getId();
