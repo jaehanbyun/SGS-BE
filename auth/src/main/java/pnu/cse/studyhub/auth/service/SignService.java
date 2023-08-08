@@ -47,7 +47,7 @@ public class SignService {
     private final EmailService emailService;
     private final TCPMessageService tcpMessageService;
     private final ByteArrayToStringConverter byteArrayToStringConverter;
-//    private final S3Uploader s3Uploader;
+    private final S3Uploader s3Uploader;
     private final JsonConverter jsonConverter;
 
     private long refreshTime = 14 * 24 * 60 * 60 * 1000L;
@@ -235,9 +235,9 @@ public class SignService {
         profile.setEmail(exist.getEmail());
         profile.setProfileImage(exist.getProfileImage());
         profile.setDescription(exist.getDescription());
-        profile.setStudyTime("01:00:00");
+//        profile.setStudyTime("01:00:00");
         profile.setUrl(exist.getUrl());
-//        profile.setStudyTime(userStudyTimeFromTCP(id));
+        profile.setStudyTime(userStudyTimeFromTCP(id));
         response.setResult("SUCCESS");
         response.setMessage("Get Profile Successfully");
         response.setData(profile);
@@ -335,16 +335,16 @@ public class SignService {
             exist.editName(dto.getName());
             msg += "name ";
         }
-//        if (dto.getProfileImage() != null) {
-//            try {
-//                String base64Profile = dto.getProfileImage();
-//                String profileUri = s3Uploader.base64ImageUpload(base64Profile,dto.getId());
-//                exist.editProfileImage(profileUri);
-//            } catch (IOException e) {
-//                throw new CustomException(CustomExceptionStatus.INCORRECT_IMAGE_FORMAT,"AUTH-011", "프로필 이미지 형식이 올바르지 않습니다.");
-//            }
-//            msg += "profileImage ";
-//        }
+        if (dto.getProfileImage() != null) {
+            try {
+                String base64Profile = dto.getProfileImage();
+                String profileUri = s3Uploader.base64ImageUpload(base64Profile,dto.getId());
+                exist.editProfileImage(profileUri);
+            } catch (IOException e) {
+                throw new CustomException(CustomExceptionStatus.INCORRECT_IMAGE_FORMAT,"AUTH-011", "프로필 이미지 형식이 올바르지 않습니다.");
+            }
+            msg += "profileImage ";
+        }
         if (dto.getDescription() != null) {
             exist.editDescription(dto.getDescription());
             msg += "description ";
@@ -434,8 +434,9 @@ public class SignService {
     public String testSaveStudytime() {
         LocalDateTime localDateTime = LocalDateTime.now(); // Or any other LocalDateTime
         Date now = Date.from(localDateTime.atZone(ZoneId.of("Asia/Seoul")).toInstant());
+        Date date = new Date(now.getTime() - (1000 * 60 * 60 * 24));
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String formatedDate = dateFormat.format(now);
+        String formatedDate = dateFormat.format(date);
         log.info("time test month ={} day = {}",formatedDate.substring(0,7), formatedDate.substring(8,10));
         String month = formatedDate.substring(0,7);
         String day = formatedDate.substring(8,10);
