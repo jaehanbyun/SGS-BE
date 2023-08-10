@@ -62,7 +62,9 @@ public class MessageService {
                         String userId = redisService.findUserIdBySessionId(chatRequest.getSession());
 
                         if (userId  != null) {
-                            redisService.deleteRealTimeDataAndSession(userId, chatRequest.getSession());
+                            // RealTimeData, 즉 공부 시간 기록은 남기고, session 정보만 삭제
+                            redisService.deleteSession(userId);
+                            // redisService.deleteRealTimeDataAndSession(userId, chatRequest.getSession());
                             responseMessage = mapper.writeValueAsString(redisService.findRealTimeData(userId));
                         } else {
                             // 존재하지 않는 접속 이력에 대한 삭제 동작 , 예외처리
@@ -122,9 +124,11 @@ public class MessageService {
                             List<UserDto> userList = signalingSchedulingRequest.getUsers();
                             for (UserDto userDto : userList) {
                                 RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                                // 유저가 존재하면, redis에 유저의 시간 정보를 갱신함
                                 if (realTimeData != null) {
                                     realTimeData.setStudyTime(userDto.getStudyTime());
                                     redisService.saveRealTimeData(realTimeData);
+                                    // 유저가 존재하지 않으면 redis에 상태 정보를 생성하여 저장
                                 } else {
                                     realTimeData = makeRealTimeData(userDto);
                                     redisService.saveRealTimeData(realTimeData);
@@ -135,9 +139,11 @@ public class MessageService {
                             List<UserDto> userList = signalingSchedulingRequest.getUsers();
                             for (UserDto userDto : userList) {
                                 RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                                // 유저가 존재하면, redis에 유저의 시간 정보를 갱신함
                                 if (realTimeData != null) {
                                     realTimeData.setStudyTime(userDto.getStudyTime());
                                     redisService.saveRealTimeData(realTimeData);
+                                // 유저가 존재하지 않으면 redis에 상태 정보를 생성하여 저장
                                 } else {
                                     realTimeData = makeRealTimeData(userDto);
                                     redisService.saveRealTimeData(realTimeData);
@@ -260,27 +266,26 @@ public class MessageService {
     public void processAndSendBatch(List<RealTimeData> batch) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // Convert all RealTimeData objects to UserDto objects
+        // 모든 RealTimeData 객체를 UserDto 객체로 변환
         List<UserDto> userDtoBatch = batch.stream()
                 .map(realTimeData -> new UserDto(realTimeData.getUserId(), realTimeData.getStudyTime()))
                 .collect(Collectors.toList());
-        // Construct the data structure to be sent
         Map<String, Object> data = new HashMap<>();
         data.put("server", "state");
         data.put("type", "SCHEDULER");
         data.put("users", userDtoBatch);
 
-        // Convert the data structure to a JSON string and send it over TCP
+        // JSON 형태로 변환 후 TCP로 전송
         try {
             String dataAsString = objectMapper.writeValueAsString(data);
 
             log.debug(dataAsString);
 
             String response = tcpAuthClientGateway.send(dataAsString);
-
-            if (response.contains("SUCCESS")) {
-                redisService.deleteAllData();
-            }
+            redisService.deleteAllData();
+//            if (response.contains("SUCCESS")) {
+//                redisService.deleteAllData();
+//            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

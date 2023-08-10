@@ -48,6 +48,9 @@ public class RedisService {
         realTimeDataRedisTemplate.delete("realTimeData:" + userId);
         sessionRedisTemplate.delete("sessionIdIndex:" + sessionId);
     }
+    public void deleteSession(String userId) {
+        sessionRedisTemplate.delete("sessionIdIndex:" + findRealTimeData(userId).getSessionId());
+    }
 
     public List<RealTimeData> getAllRealTimeData() {
         //  "realTimeData:*"에 해당하는 모든 키를 가져옴
