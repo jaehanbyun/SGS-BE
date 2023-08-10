@@ -260,27 +260,26 @@ public class MessageService {
     public void processAndSendBatch(List<RealTimeData> batch) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // Convert all RealTimeData objects to UserDto objects
+        // 모든 RealTimeData 객체를 UserDto 객체로 변환
         List<UserDto> userDtoBatch = batch.stream()
                 .map(realTimeData -> new UserDto(realTimeData.getUserId(), realTimeData.getStudyTime()))
                 .collect(Collectors.toList());
-        // Construct the data structure to be sent
         Map<String, Object> data = new HashMap<>();
         data.put("server", "state");
         data.put("type", "SCHEDULER");
         data.put("users", userDtoBatch);
 
-        // Convert the data structure to a JSON string and send it over TCP
+        // JSON 형태로 변환 후 TCP로 전송
         try {
             String dataAsString = objectMapper.writeValueAsString(data);
 
             log.debug(dataAsString);
 
             String response = tcpAuthClientGateway.send(dataAsString);
-
-            if (response.contains("SUCCESS")) {
-                redisService.deleteAllData();
-            }
+            redisService.deleteAllData();
+//            if (response.contains("SUCCESS")) {
+//                redisService.deleteAllData();
+//            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
