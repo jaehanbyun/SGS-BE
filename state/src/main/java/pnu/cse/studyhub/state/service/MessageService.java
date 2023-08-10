@@ -62,7 +62,9 @@ public class MessageService {
                         String userId = redisService.findUserIdBySessionId(chatRequest.getSession());
 
                         if (userId  != null) {
-                            redisService.deleteRealTimeDataAndSession(userId, chatRequest.getSession());
+                            // RealTimeData, 즉 공부 시간 기록은 남기고, session 정보만 삭제
+                            redisService.deleteSession(userId);
+                            // redisService.deleteRealTimeDataAndSession(userId, chatRequest.getSession());
                             responseMessage = mapper.writeValueAsString(redisService.findRealTimeData(userId));
                         } else {
                             // 존재하지 않는 접속 이력에 대한 삭제 동작 , 예외처리
@@ -122,9 +124,11 @@ public class MessageService {
                             List<UserDto> userList = signalingSchedulingRequest.getUsers();
                             for (UserDto userDto : userList) {
                                 RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                                // 유저가 존재하면, redis에 유저의 시간 정보를 갱신함
                                 if (realTimeData != null) {
                                     realTimeData.setStudyTime(userDto.getStudyTime());
                                     redisService.saveRealTimeData(realTimeData);
+                                    // 유저가 존재하지 않으면 redis에 상태 정보를 생성하여 저장
                                 } else {
                                     realTimeData = makeRealTimeData(userDto);
                                     redisService.saveRealTimeData(realTimeData);
@@ -135,9 +139,11 @@ public class MessageService {
                             List<UserDto> userList = signalingSchedulingRequest.getUsers();
                             for (UserDto userDto : userList) {
                                 RealTimeData realTimeData = redisService.findRealTimeData(userDto.getUserId());
+                                // 유저가 존재하면, redis에 유저의 시간 정보를 갱신함
                                 if (realTimeData != null) {
                                     realTimeData.setStudyTime(userDto.getStudyTime());
                                     redisService.saveRealTimeData(realTimeData);
+                                // 유저가 존재하지 않으면 redis에 상태 정보를 생성하여 저장
                                 } else {
                                     realTimeData = makeRealTimeData(userDto);
                                     redisService.saveRealTimeData(realTimeData);
