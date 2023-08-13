@@ -37,7 +37,7 @@ public class S3Uploader {
     public String base64ImageUpload(String base64, String userId) throws IOException {
         // Extract actual Base64 string by splitting the original string
         String[] parts = base64.split(",");
-        String imageString = parts[1];
+        String imageString = parts[0];
 
         byte[] imageData = Base64.decodeBase64(imageString);
         String fileName = getCurrentTimeAsString() + "_" + userId;
