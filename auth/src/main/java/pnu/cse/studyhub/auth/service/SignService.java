@@ -337,9 +337,11 @@ public class SignService {
         }
         if (dto.getProfileImage() != null) {
             try {
+                log.info("Check for edit profile image(request) = {}",dto.getProfileImage());
                 String base64Profile = dto.getProfileImage();
                 String profileUri = s3Uploader.base64ImageUpload(base64Profile,dto.getId());
                 exist.editProfileImage(profileUri);
+                log.info("Check for edit profile image(base64) = {}",profileUri);
             } catch (IOException e) {
                 throw new CustomException(CustomExceptionStatus.INCORRECT_IMAGE_FORMAT,"AUTH-011", "프로필 이미지 형식이 올바르지 않습니다.");
             }
