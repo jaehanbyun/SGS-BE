@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.10'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'com.google.protobuf' version '0.8.18'
 }
 
 group = 'pnu.cse.studyhub'
@@ -15,6 +16,8 @@ repositories {
 ext {
     set('springCloudVersion', "2021.0.6")
 }
+def grpcVersion = "1.53.0"
+def protocVersion = "3.18.1"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-integration'
@@ -25,14 +28,45 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     //grpc
-    implementation 'io.grpc:grpc-protobuf:1.53.0'
-    implementation 'io.grpc:grpc-stub:1.53.0'
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
 
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.integration:spring-integration-test'
 
 }
+
+sourceSets {
+    main {
+        proto {
+            srcDirs 'src/main/resources/proto'
+        }
+        java {
+            srcDirs 'build/generated/sources/proto/main/grpc'
+            srcDirs 'build/generated/sources/proto/main/java'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protocVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
 
 dependencyManagement {
     imports {
