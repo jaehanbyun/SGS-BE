@@ -17,7 +17,7 @@ public class TCPSocketSessionRequest {
     @JsonProperty("user_id")
     private String userId;
     @JsonProperty("room_id")
-    private String roomId; // interceptor에서 가져오는 destination 값이 "/topic/0" 이런 식이기 때문
+    private Long roomId; // interceptor에서 가져오는 destination 값이 "/topic/0" 이런 식이기 때문
     @JsonProperty("session")
     private String session;
     @JsonProperty("type")
