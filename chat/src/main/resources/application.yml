@@ -63,7 +63,10 @@ tcp:
     port: 8099
     connection:
       poolSize: 30
-
+grpc:
+  server:
+    host: localhost
+    port: 8095
 
 logging:
   level:
