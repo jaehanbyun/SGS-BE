@@ -41,7 +41,7 @@ public class S3Uploader {
 
         byte[] imageData = Base64.decodeBase64(imageString);
         String fileName = getCurrentTimeAsString() + "_" + userId;
-
+        log.info("Check for imageData in base64ImageUpload = {}", imageData.toString());
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageData));
         if (image == null) {
             log.error("Could not decode image");
