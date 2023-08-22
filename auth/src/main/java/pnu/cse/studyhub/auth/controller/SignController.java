@@ -75,7 +75,7 @@ public class SignController {
 
     @PostMapping ("/refreshToken")
     public ResponseEntity<ResponseDataDto> checkRefresh(@RequestHeader(value = "refresh_token") String refreshToken) {
-
+        log.info("Check for refresh token in controller = {}", refreshToken);
         return responseService.successDataResponse(signService.checkRefresh(refreshToken));
     }
 

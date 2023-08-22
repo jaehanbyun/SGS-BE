@@ -391,9 +391,10 @@ public class SignService {
 
     @Transactional
     public ResponseEntity<ResponseDataDto> checkRefresh(String refreshToken) {
-
+        log.info("Check for refresh token in service = {}", refreshToken);
         if(!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new CustomException(CustomExceptionStatus.USERID_NOT_FOUND, "AUTH-002", "존재하지 않는 아이디 입니다.");
+            log.error("Invalid refresh token");
+            throw new CustomException(CustomExceptionStatus.INVALID_REFRESH_TOKEN, "AUTH-012", "유효하지 않은 refresh 토큰 입니다.");
         }
 
         String userid = jwtTokenProvider.getUserid(refreshToken);
