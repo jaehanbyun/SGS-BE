@@ -1,0 +1,25 @@
+syntax = "proto3"; //proto3를 사용
+
+option java_multiple_files = true; //java 파일을 여러 개 생성 가능
+option java_package = "pnu.cse.studyhub.state.service"; //java 파일의 패키지
+import "google/protobuf/empty.proto";
+
+service GrpcMessageService { // 서비스 이름 및 해당 서비스에서 제공하는 메서드 정의
+  rpc SubscribeChat (ChatSubscribeRequest) returns (ChatActionResponse); // rpc : 메서드 정의
+  rpc UnsubscribeChat (ChatUnsubscribeRequest) returns (ChatActionResponse);
+  //  rpc UnsubscribeChat (ChatUnsubscribeRequest) returns (google.protobuf.Empty);
+}
+
+message ChatSubscribeRequest {
+  string userId = 1;
+  int64 roomId = 2;
+  string session = 3;
+}
+
+message ChatActionResponse {
+  string userId = 1;
+}
+
+message ChatUnsubscribeRequest {
+  string session = 1;
+}
