@@ -1,6 +1,7 @@
 package pnu.cse.studyhub.chat.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -23,7 +24,7 @@ public class KafkaConsumer {
 
     @KafkaListener(topics = TOPICS, groupId = GROUPID)
     public void consume(String stringChat) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         Chat chat = objectMapper.readValue(stringChat, Chat.class);
         log.info("Consumed Message : " + stringChat);
         template.convertAndSend("/topic/"+chat.getRoomId(), stringChat);

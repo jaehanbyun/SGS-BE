@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pnu.cse.studyhub.chat.util.ByteArrayToStringConverter;
 
 
 @Service
@@ -11,11 +12,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TCPMessageService {
     private final TCPClientGateway tcpClientGateway;
+    private final ByteArrayToStringConverter converter;
 
     public void sendMessage(String message) {
-        String timestamp = LocalDateTime.now().toString();
-        log.info("Sending message: {}", message);
-        String response = tcpClientGateway.send(message);
-        log.info("Received response: {}", response);
+        log.debug("Sending message: {}", message);
+        String byteResponse = tcpClientGateway.send(message);
+        String strResponse = converter.convert(byteResponse);
+        log.debug("Received response: {}", strResponse);
     }
+
 }

@@ -2,11 +2,14 @@ package pnu.cse.studyhub.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor // same as autowired
@@ -15,15 +18,17 @@ public class KafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     public void send(String topic, Chat chat) {
-        log.info("topic : " + topic);
-        log.info("topic : " + chat.getContent());
-        ObjectMapper objectMapper = new ObjectMapper();
+        log.info("producer_topic : " + topic);
+        log.info("producer_content : " + chat.getContent());
+        String type = chat.getMessageType();
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try {
-            String stringChat = objectMapper.writeValueAsString(chat);
-            log.info(stringChat);
-            kafkaTemplate.send(topic, stringChat);
-        } catch (JsonProcessingException e) {
+            String content = objectMapper.writeValueAsString(chat);
+            kafkaTemplate.send(topic, content);
+        } catch (JsonProcessingException e) { //json 파싱 실패
             e.printStackTrace();
+        } catch (IOException e) { // 파일 변환 실패
+            throw new RuntimeException(e);
         }
     }
 }

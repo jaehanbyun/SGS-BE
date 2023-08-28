@@ -12,12 +12,12 @@ import java.util.Optional;
 //public interface ChatRepository extends MongoRepository<Chat,String> {
 
 public interface ChatRepository {
-    List<Chat> findByRoomId(String roomId);
+    List<Chat> findByRoomId(Long roomId);
     Chat save(Chat chat);
     List<Chat> deleteAll(List<Chat> chat);
 
-    Chat getLastMessage(String roomId);
+    Chat getLastMessage(Long roomId);
 
 
-    Page<Chat> findByRoomIdWithPagingAndFiltering(String roomId, int page, int size);
+    Page<Chat> findByRoomIdWithPagingAndFiltering(Long roomId, int page, int size);
 }
