@@ -1,11 +1,8 @@
-server:
-  port: 8091
-
 spring:
   application:
     name: state-service
   redis:
-    host: 127.0.0.1
+    host: redis-state
     port: 6379
 #  integration:
 #    tcp:
@@ -15,17 +12,17 @@ tcp:
   server:
     port : 8099
   room:
-    host : localhost
+    host : sgs-room
     port : 8089
     connection :
-      poolSize : 10
+      poolSize : 30
   signaling:
-    host : localhost
-    port : 8058
-    connection :
-      poolSize : 10
+    host: sgs-signaling
+    port: 8058
+    connection:
+      poolSize: 10
   auth:
-    host: localhost
+    host: sgs-auth
     port: 8019
     connection:
       poolSize: 10
