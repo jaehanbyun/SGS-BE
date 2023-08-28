@@ -19,8 +19,7 @@
 
 ### 채팅
 Kafka, pub/sub 구조를 활용하여 그룹 채팅을 구현한다.<br>
-#### 코드
-##### Kafka 설정
+#### Kafka 설정
 ```java
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
@@ -50,8 +49,9 @@ public class WebSocketMessageBrokerConfig implements WebSocketMessageBrokerConfi
     }
 }
 ```
----
-##### Kafka Producer & Consumer
+<br>
+
+#### Kafka Producer & Consumer
 ```java
 @Service
 @RequiredArgsConstructor // same as autowired
@@ -93,13 +93,13 @@ public class KafkaProducer {
     }
 }
 ```
+---
 
 ### TCP 통신
 서버 간 통신으로 TCP 통신을 활용한다. 이를 통해 실시간성을 높이고, 네트워크 부하를 일부 해소한다. <br>
 채팅 서버는 상태관리 서버와 TCP 통신을 하며, 이를 통해 세션을 통해 접속 상태 및 접속 위치를 관리한다. <br>
 접속 상태 ON은 소켓 구독 , 접속 상태 OFF는 소켓 구독 해제로 확인한다.<br>
-#### 코드
-##### TCP 서버 설정
+#### TCP 서버 설정
 ```java
 @Configuration
 @EnableScheduling
@@ -143,8 +143,9 @@ public class TCPClientConfig implements ApplicationEventPublisherAware {
     }
 }
 ```
----
-##### TCP 전송
+<br>
+
+#### TCP 전송
 ```java
 @Slf4j
 @RequiredArgsConstructor
@@ -230,13 +231,14 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
 
 }
 ```
+---
+
 ### 예외 처리
 socket, kafka, http 등 다양한 부분에서 예외가 발생할 수 있다. 이를 ErrorCode 형태로 정의한다. <br>
 HTTP의 경우 response를 해당 에러 코드에 적합하게 보낸다.<br>
 Socket의 경우도 동일하게 response를 사용자에게 보낸다.<br>
 Kafka의 경우 예외 발생 시 ELK와 같은 로그 시스템 연결 시, 로그로 남길 예졍이다.<br>
-#### 코드
-##### enum 예외코드 정리
+#### enum 예외코드 정리
 ```java
 @Getter
 public enum ErrorCode {
@@ -272,8 +274,9 @@ public enum ErrorCode {
 }
 
 ```
----
-##### HTTP 예외 처리
+<br>
+
+#### HTTP 예외 처리
 ```java
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -330,8 +333,9 @@ public class GlobalExceptionHandler {
 
 }
 ```
----
-##### Socket 예외 처리
+<br>
+
+####Socket 예외 처리
 ```java
 @Controller
 @RequiredArgsConstructor
@@ -407,6 +411,7 @@ public class SocketChatController {
     }
 }
 ```
+---
 ## 향 후 계획
 
 향 후  채팅서버 <-> 상태관리서버에 grpc를 구현할 예정이다. 
