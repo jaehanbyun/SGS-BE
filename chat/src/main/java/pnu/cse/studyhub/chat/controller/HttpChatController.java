@@ -18,22 +18,22 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
+import pnu.cse.studyhub.chat.dto.request.ChatFileRequest;
 import pnu.cse.studyhub.chat.service.KafkaProducer;
 import pnu.cse.studyhub.chat.dto.request.ChatRequest;
 import pnu.cse.studyhub.chat.dto.response.FailedResponse;
 import pnu.cse.studyhub.chat.dto.response.SuccessResponse;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 import pnu.cse.studyhub.chat.service.ChatService;
-import java.util.ArrayList;
 
 import java.util.List;
 
 @Tag(name = "chat", description = "채팅 API")
 @RestController
-@RequestMapping("/")
+@RequestMapping("/chat")
 @RequiredArgsConstructor
 @Slf4j
-public class ChatController {
+public class HttpChatController {
     private final KafkaProducer kafkaProducer;
     private final ChatService chatService;
 
@@ -53,10 +53,21 @@ public class ChatController {
             @Parameter(name = "messageType", description = "채팅 타입", example = "TEXT"),
             @Parameter(name = "content", description = "채팅 내용", example = "chat test"),
     })
-    @PostMapping("/send")
-    public ResponseEntity<SuccessResponse> sendMessage(@RequestBody ChatRequest chat) {
-        Chat savedChat = chatService.saveChat(chat);
-        log.info("Produce message : " + savedChat.toString());
+    @PostMapping(value = "/send", consumes = "application/json")
+    public ResponseEntity<SuccessResponse> sendMessage(@RequestHeader("Authorization") String authorization, @RequestBody ChatRequest chat) {
+        String accessToken = authorization.replace("Bearer ","");
+        Chat savedChat = chatService.saveChat(accessToken, chat );
+        try {
+            kafkaProducer.send(TOPIC,savedChat);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        SuccessResponse response = new SuccessResponse("SUCCESS", "send chat successfully", savedChat);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    @PostMapping(value = "/send", consumes = "multipart/form-data")
+    public ResponseEntity<SuccessResponse> sendFileMessage(ChatFileRequest chat) {
+        Chat savedChat = chatService.saveFileChat(chat);
         try {
             kafkaProducer.send(TOPIC,savedChat);
         } catch (Exception e) {
@@ -66,15 +77,8 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @MessageMapping("/send")
-    @SendTo("/topic/group")
-    public Chat broadcastMessage(@Payload Chat chat){
-        log.info("Consume message : " + chat.toString());
-        return chat;
-    }
-
     @GetMapping("/history/{roomId}")
-    public ResponseEntity<SuccessResponse> getChatListInRoom(@PathVariable("roomId") String roomId) {
+    public ResponseEntity<SuccessResponse> getChatListInRoom(@PathVariable("roomId") Long roomId) {
         List<Chat> chatList= chatService.getChatsInRoom(roomId);
         SuccessResponse response = new SuccessResponse("SUCCESS", "get chats in room successfully", chatList);
 
@@ -82,7 +86,7 @@ public class ChatController {
     }
     @GetMapping("/history")
     public ResponseEntity<SuccessResponse> getChatListInRoomWithPaging(
-            @RequestParam("roomId") String roomId,
+            @RequestParam("roomId") Long roomId,
             @RequestParam("page") int page,
             @RequestParam("size") int size)
     {

@@ -11,10 +11,7 @@ import pnu.cse.studyhub.chat.exception.ErrorCode;
 public class FailedResponse<D> {
    private final String result;
    private final String message;
-   private final D data;
+   private final String status;
+   private final String code;
+   private final String description;
 }
-//public class SuccessResponse<D> {
-//   private final String result;
-//   private final String message;
-//   private final D data;
-//}

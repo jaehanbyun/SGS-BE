@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Document("chat")
 public class Chat {
     private String _id;
-    private String roomId;
+    private Long roomId;
     private String senderId;
     private String messageType;
     private String content;

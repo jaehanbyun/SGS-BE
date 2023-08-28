@@ -1,7 +1,3 @@
-server:
-  port: 8031
-
-
 spring:
   application:
     name: chat-service
@@ -10,12 +6,12 @@ spring:
       uri: mongodb+srv://${STUDYHUB_DB_USER}:${STUDYHUB_DB_PWD}@studyhub.iyncwyz.mongodb.net/studyhub?retryWrites=true&w=majority
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: kafka:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 #      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: kafka:9092
       key-serializer: org.apache.kafka.common.serialization.StringDeserializer
       value-serializer: org.apache.kafka.common.serialization.StringDeserializer
 #      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -59,7 +55,7 @@ token:
 
 tcp:
   server:
-    host: localhost
+    host: sgs-state
     port: 8099
     connection:
       poolSize: 30

@@ -1,6 +1,5 @@
 package pnu.cse.studyhub.chat.mongo;
 
-import com.netflix.discovery.converters.Auto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ public class dbChatTest {
     public static void initTest(){
         //chat
         chatRequest = new ChatRequest();
-        chatRequest.setRoomId("test");
+        chatRequest.setRoomId(9999L);
         chatRequest.setSenderId("test-user1");
         chatRequest.setMessageType("TEXT");
         chatRequest.setContent("테스트 메시지 입니다.");
