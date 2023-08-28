@@ -20,6 +20,7 @@ public enum CustomExceptionStatus {
     ACCOUNT_NOT_FOUND( "Account Not Found"),
     EMAIL_NOT_FOUND( "Email Not Found"),
     INVALID_PARAM( "Invalid Type Parameter"),
+    INVALID_REFRESH_TOKEN( "Invalid Refresh Token"),
     WRONG_ID("Wrong ID"),
     INCORRECT_IMAGE_FORMAT("Incorrect Image Format");
 
