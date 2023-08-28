@@ -441,5 +441,5 @@ public class RedisService {
 - 상태관리서버 grpc server 개발
 - 통신을 위한 protocol buffer 파일 개발
   
-추 후 이를 통해 `1. TCP VS gRPC 송수신 성능 평가` , `2. 예외처리 코드 작성 및 직관성 개선 확인(지극히 개인적, 정성적.. 으로 평가할 예정)`, `3. Prometheus & Grafana를 통한 네트워크 부하(usage) 비교` 를 할 예졍이다.
+추 후 이를 통해 `1. TCP VS gRPC 송수신 성능 평가` , `2. 예외처리 코드 작성 및 직관성 개선 확인(지극히 개인적, 정성적.. 으로 평가할 예정)`, `3. Prometheus & Grafana를 통한 네트워크 부하(usage) 비교` 를 할 예정이다.
 
