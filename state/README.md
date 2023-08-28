@@ -427,51 +427,6 @@ public class RedisService {
 }
 ```
 ---
-
-### 예외 처리
-socket, kafka, http 등 다양한 부분에서 예외가 발생할 수 있다. 이를 ErrorCode 형태로 정의한다. <br>
-HTTP의 경우 response를 해당 에러 코드에 적합하게 보낸다.<br>
-Socket의 경우도 동일하게 response를 사용자에게 보낸다.<br>
-Kafka의 경우 예외 발생 시 ELK와 같은 로그 시스템 연결 시, 로그로 남길 예졍이다.<br>
-#### enum 예외코드 정리
-```java
-@Getter
-public enum ErrorCode {
-    //SERVER
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND.toString(),"CHAT-001", "해당 유저가 존재하지 않음"),
-    MESSAGE_NOT_DELIVERED(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "CHAT-002", "메시지 전송 실패"),
-    INVALID_MESSAGE_FORMAT(HttpStatus.BAD_REQUEST.toString(), "CHAT-003", "메시지 형식이 잘못됨"),
-    //SOCKET
-    KAFKA_CONNECTION_FAILED("INTERNAL_SOCKET_ERROR", "CHAT-011", "소켓-카프카 연결 실패"),
-    KAFKA_INTERRUPTTED("INTERNAL_SOCKET_ERROR", "CHAT-012", "카프카 인터럽트 발생"),
-    KAFKA_SERIALIZE_FAILED("INTERNAL_SOCKET_ERROR", "CHAT-013", "카프카 직렬화 실패"),
-    KAFKA_TIMEOUT("INTERNAL_SOCKET_ERROR", "CHAT-014", "카프카 연결 시간 초과"),
-    KAFKA_UNKNOWN_ERROR("INTERNAL_SOCKET_ERROR", "CHAT-015", "알 수 없는 카프카 오류"),
-    //TCP
-    TCP_CONNECTION_FAILED("TCP-ERROR", "CHAT-021", "TCP 연결 실패"),
-    TCP_BIND_FAILED("TCP-ERROR", "CHAT-022", "TCP 바인딩 실패"),
-    TCP_TIMEOUT("TCP-ERROR", "CHAT-023", "TCP 연결 시간 초과"),
-    //ETC
-    UNKNOWN_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "CHAT-031", "알 수 없는 서버 오류"),
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED.toString(), "CHAT-032", "토큰이 유효하지 않은 경우"),
-    FILE_CONVERSION_ERROR(HttpStatus.BAD_REQUEST.toString(), "CHAT-033", "파일 변환 실패"),;
-
-    private final String status;
-
-    private final String code;
-    private final String message;
-
-    ErrorCode(String status, String code, String message) {
-        this.status = status;
-        this.code = code;
-        this.message = message;
-    }
-}
-
-```
-<br>
-
----
 ## 향 후 계획
 
 향 후  채팅서버 <-> 상태관리서버에 grpc를 구현할 예정이다. 
