@@ -45,9 +45,9 @@
 <br>
 
 ## 상세 기능
-|유저 & 인증|푸시 알림|
+|채팅|상태관리|
 |---|---|
-|<img src=https://user-images.githubusercontent.com/78259314/230734067-6e7064d4-d020-4bb7-b68e-252a29aa1074.png>|<img src=https://user-images.githubusercontent.com/78259314/230734053-10f28313-71df-4aa5-a1d2-1054bada8622.png>
+|<img src=https://github.com/jaehanbyun/SGS-BE/assets/78259314/76a6324e-62cb-44cc-95e3-8d42310471e3>|<img src=https://github.com/jaehanbyun/SGS-BE/assets/78259314/585aadbb-02c3-492c-8329-551c845b4398>|
 <br>
 
 ## 서버별 주요 코드
