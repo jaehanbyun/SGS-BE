@@ -1,6 +1,6 @@
 # StudyHub - Backend Repo 
 ### WebRTC 기반 스터디 웹 애플리케이션
-#### 팀원 : [이제호(BE)](https://github.com/jhl8109)&ensp; [김돈우(BE)](https://github.com/kimdonwoo) [박재현(BE)](https://github.com/wogusqkr0515) [변재한(인프라)[https://github.com/jaehanbyun]
+#### 팀원 : [이제호(BE)](https://github.com/jhl8109)&ensp; [김돈우(BE)](https://github.com/kimdonwoo)&ensp; [박재현(BE)](https://github.com/wogusqkr0515)&ensp; [변재한(인프라)(https://github.com/jaehanbyun)
 
 ### 목차
 [1. 목표](#목표)<br>
