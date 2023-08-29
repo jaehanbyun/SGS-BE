@@ -49,14 +49,14 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
         String authorizationHeader = String.valueOf(accessor.getFirstNativeHeader("Authorization"));
         String sessionId = accessor.getSessionId();
         String userId = "";
-        long roomId = Long.valueOf(accessor.getDestination().substring(7));
         // jwt 토큰 검증, gateway에서 검증 되었기 때문에 userId를 쓰기만 하면됨.
 
         // 접속 상태 관리
         switch (accessor.getCommand()) {
             case SUBSCRIBE: // room ID에 들어갈 때(소켓 연결이 아니라 채팅방에 들어갈 때 )
                 userId = getUserId(authorizationHeader);
-
+                Long roomId = Long.valueOf(accessor.getDestination().substring(7));
+                log.info(roomId.toString());
                 TCPSocketSessionRequest subscribeRequest = TCPSocketSessionRequest.builder()
                         .type("SUBSCRIBE")
                         // "Timer ON TIMER OFF 프론트에서 보내는ㅅ거, USER_OUT, USER_IN 프론트에서 받는거
