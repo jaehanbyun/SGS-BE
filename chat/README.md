@@ -335,7 +335,7 @@ public class GlobalExceptionHandler {
 ```
 <br>
 
-####Socket 예외 처리
+#### Socket 예외 처리
 ```java
 @Controller
 @RequiredArgsConstructor
