@@ -60,6 +60,10 @@ tcp:
     connection:
       poolSize: 30
 
+grpc:
+  server:
+    host: sgs-state
+    port: 8095
 
 logging:
   level:
