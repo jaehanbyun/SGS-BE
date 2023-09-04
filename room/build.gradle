@@ -26,6 +26,14 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+	implementation 'org.springframework.boot:spring-boot-starter-integration'
+	implementation 'org.springframework.integration:spring-integration-ip'
+	//implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	runtimeOnly 'com.h2database:h2'
+
 }
 
 tasks.named('test') {

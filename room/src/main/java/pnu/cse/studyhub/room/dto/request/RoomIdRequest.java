@@ -1,17 +1,12 @@
-package pnu.cse.studyhub.room.model;
+package pnu.cse.studyhub.room.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRoomId implements Serializable {
-    private String userId;
+public class RoomIdRequest {
     private Long roomId;
 }
-
-
