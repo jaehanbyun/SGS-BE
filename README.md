@@ -37,7 +37,7 @@
 ## 아키텍처
 |전체 아키텍처|배포 아키텍처|
 |---|---|
-|<img alt="아키텍처" src="https://github.com/jaehanbyun/SGS-BE/assets/78259314/fa19a171-c150-410f-9815-84c43d241192">|<img alt="스크린샷 2023-04-09 오전 1 35 53" src="https://user-images.githubusercontent.com/78259314/230732608-1d69e8c8-2004-4750-8688-2c7278cfb779.png">|
+|<img alt="아키텍처" src="https://github.com/jaehanbyun/SGS-BE/assets/78259314/fa19a171-c150-410f-9815-84c43d241192" width=1000px>|<img alt="스크린샷 2023-04-09 오전 1 35 53" src="https://github.com/jaehanbyun/SGS-BE/assets/80397512/32a8ab52-ea58-4410-b546-7cfac1f9c1a2" height=550px width=1600px>|
 <br>
 
 ## DB 스키마
