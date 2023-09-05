@@ -1,0 +1,34 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: state-service
+  redis:
+    host: 127.0.0.1
+    port: 6379
+#  integration:
+#    tcp:
+#      port: ${server.port}
+
+tcp:
+  server:
+    port : 8099
+  room:
+    host : localhost
+    port : 8089
+    connection :
+      poolSize : 10
+  signaling:
+    host : localhost
+    port : 8058
+    connection :
+      poolSize : 10
+  auth:
+    host: localhost
+    port: 8019
+    connection:
+      poolSize: 10
+logging:
+  level:
+    pnu.cse.studyhub: DEBUG

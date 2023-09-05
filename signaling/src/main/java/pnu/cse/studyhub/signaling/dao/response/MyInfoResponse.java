@@ -13,3 +13,5 @@ public class MyInfoResponse {
     private String userId;
     private String studyTime;
 }
+
+
