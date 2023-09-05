@@ -101,7 +101,7 @@ public class Message {
         return jsonObject;
     }
 
-    // Res-10 : 강제퇴장, 경고 누적으로 퇴장, 방장위임 시 유저에게 보낼 메시지
+    // Res-10,11,12 : 강제퇴장, 경고 누적으로 퇴장, 방장위임 시 유저에게 보낼 메시지
     public static JsonObject userTypeMessage(String type, String userId) {
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id",type);
@@ -109,7 +109,7 @@ public class Message {
         return jsonObject;
     }
 
-    // Res-11 : 새벽 5시에 초기화 되었을 때, 현재 존재하는 유저들 한테 보낼 메시지
+    // Res-13 : 새벽 5시에 초기화 되었을 때, 현재 존재하는 유저들 한테 보낼 메시지
     public static JsonObject resetStudyTimeMessage(String userId) {
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("id","RESET");
