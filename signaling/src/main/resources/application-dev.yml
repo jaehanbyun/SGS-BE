@@ -1,0 +1,22 @@
+property :
+  ignoreNullWsContainer : true
+
+server:
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: sgs1234
+    key-store-type: PKCS12
+
+tcp:
+  server:
+    port: 8058
+  state:
+    host: sgs-state
+    port: 8099
+    connection:
+      poolSize: 30
+
+logging:
+  level:
+    pnu.cse.studyhub: DEBUG

@@ -1,0 +1,22 @@
+property :
+  ignoreNullWsContainer : true
+
+server:
+  ssl:
+    enabled : true
+    key-store: src/main/resources/donu-keystore.jks
+    key-store-password: test1234
+    key-store-type: PKCS12
+    key-alias: donu-keystore
+  port: 8059
+
+tcp:
+  # 해당 시그널링 서버의 TCPServer Port
+  server:
+    port: 8058
+  # 상태관리서버의 host, port
+  state:
+    host: localhost
+    port: 8099
+    connection:
+      poolSize: 30
