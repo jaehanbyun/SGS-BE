@@ -11,6 +11,7 @@
 - 서버 : Spring Boot
 - 데이터베이스 : MySQL
 
+<br>
 
 ## 주요 기능
 
@@ -18,6 +19,8 @@
 - 유저 경고/강퇴/방장위임 : 채팅 방 안에서 방장이 유저들에게 경고, 강퇴, 방장위임을 하면, websocket을 활용하여 실시간으로 유저들에게 전달할 수 있도록 구현하였다.
 - 공개방 관련 API 구현 : 공개방 생성 / 수정 / 정보 조회 / 입장 / 퇴장 API를 개발하였다.
 - 스터디 그룹 관련 API 구현 : 스터디 그룹 조회 / 생성 / 수정 / 정보 조회 / 가입 / 탈퇴 / 입장 / 퇴장 API를 개발하였다.
+
+<br>
 
 ## 상세 설명
 
@@ -78,9 +81,17 @@ public interface OpenRoomRepository extends JpaRepository<OpenRoomEntity, Long> 
 ```
 
 - 검색 키워드나 채널이 들어오면 해당 조건에 충족하는 방만 들고오도록 JPQL을 활용해서 No-Offset 방식의 무한스크롤 방식을 구현하였다.
-- 서비스 특성상 공개방 조회 API에서 부하가 심할 것으로 예상하고, ngrinder를 활용하여 부하테스트를 진행하였다.
+- 서비스 특성상 공개방 조회 API에서 부하가 심할 것으로 예상하고, ngrinder를 활용하여 스터디 방 100,000 개를 미리 생성해두고 부하테스트를 진행하였다.
 
-  +(그림 추가 예정)
+<br>
+
+  <Offset 방식>
+  ![offset](https://github.com/jaehanbyun/SGS-BE/assets/81402944/2aa5c953-b6c5-4a77-b231-539e114f171b)
+
+
+  <No-offset 방식>
+  ![No-offset](https://github.com/jaehanbyun/SGS-BE/assets/81402944/afacccc2-86fd-4af5-b54c-c4ba2e2ed089)
+
 
   Offset방식과 No-Offset방식의 무한 스크롤 조회 기능의 성능 테스트를 통해 TPS 기준 약 250%의 성능향상을 확인할 수 있었다.
 
