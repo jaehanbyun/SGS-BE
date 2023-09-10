@@ -67,7 +67,7 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
                         .build();
                 log.debug(accessor.getCommand() + " : " + subscribeRequest.toString());
                 tcpMessageService.sendMessage(subscribeRequest.toString());
-                grpcClientService.subscribeRoom(userId,roomId,sessionId);
+//                grpcClientService.subscribeRoom(userId,roomId,sessionId);
                 break;
             case DISCONNECT: // 채팅방 나갈 때
                 TCPSocketSessionRequest disconnectRequest = TCPSocketSessionRequest.builder()
@@ -79,7 +79,7 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
                         .build();
                 log.debug(accessor.getCommand() + " : " + disconnectRequest.toString());
                 tcpMessageService.sendMessage(disconnectRequest.toString());
-                grpcClientService.unsubscribeRoom(sessionId);
+//                grpcClientService.unsubscribeRoom(sessionId);
                 break;
             case UNSUBSCRIBE:
                 userId = getUserId(authorizationHeader);
@@ -92,7 +92,7 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
                         .build();
                 log.debug(accessor.getCommand() + " : " + unsubscribeRequest.toString());
                 tcpMessageService.sendMessage(unsubscribeRequest.toString());
-                grpcClientService.unsubscribeRoom(sessionId);
+//                grpcClientService.unsubscribeRoom(sessionId);
                 break;
         }
         ChannelInterceptor.super.postSend(message, channel, sent);
