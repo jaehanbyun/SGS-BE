@@ -49,6 +49,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 ```
 - 유저는 방에 입장하면 해당 시그널링 서버로 웹소켓 연결을 하게 되고, registry.addHandler를 통해 유저가 서버로 메시지를 보내면 MessageHandler.java에서 처리를 한다.
 - 유저와 시그널링 서버간에 주고받는 Request/Response 메시지의 구조는 [다음](https://www.notion.so/4d4987e3e9cf4076bcd2f533f916836e?pvs=4)과 같다.
+
 <br>
 
 #### MessageHandler.java
@@ -284,6 +285,8 @@ public class MessageHandler extends TextWebSocketHandler {
 
 <br>
 
+---
+
 ### 공부시간 공유 기능
 
 ```java
@@ -364,6 +367,8 @@ public class MessageHandler extends TextWebSocketHandler {
     ```
 
 <br>
+
+---
 
 ### 스케줄링 기능
 ```java
