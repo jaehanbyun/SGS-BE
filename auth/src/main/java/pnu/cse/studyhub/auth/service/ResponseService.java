@@ -3,10 +3,7 @@ package pnu.cse.studyhub.auth.service;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import pnu.cse.studyhub.auth.dto.ResponseCodeDto;
-import pnu.cse.studyhub.auth.dto.ResponseDataDto;
-import pnu.cse.studyhub.auth.dto.ResponseProfileDto;
-import pnu.cse.studyhub.auth.dto.ResponseStudyTimeDto;
+import pnu.cse.studyhub.auth.dto.*;
 
 @Service
 public class ResponseService {
@@ -27,6 +24,10 @@ public class ResponseService {
     }
 
     public ResponseStudyTimeDto successStudyTimeResponse(ResponseStudyTimeDto dto) {
+
+        return dto;
+    }
+    public ResponseStudyTimeListDto successStudyTimeListResponse(ResponseStudyTimeListDto dto) {
 
         return dto;
     }

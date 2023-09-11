@@ -28,10 +28,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -106,12 +103,12 @@ public class SignService {
 
         String refreshToken = jwtTokenProvider.CreateRefreshToken(account.getEmail(),account.getUserid());
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-        // expires in 1 day
-            .maxAge(24*60*60)
-            .secure(true)
-            .httpOnly(true)
-            .path("/")
-            .build();
+                // expires in 1 day
+                .maxAge(24*60*60)
+                .secure(true)
+                .httpOnly(true)
+                .path("/")
+                .build();
 
         ResponseDataDto<Object> response = new ResponseDataDto<>();
         HttpHeaders headers = new HttpHeaders();
@@ -280,6 +277,40 @@ public class SignService {
         response.setResult("SUCCESS");
         response.setMessage("Get StudyTime Successfully");
         response.setData(studyTime);
+        return response;
+    }
+
+    @Transactional
+    public ResponseStudyTimeListDto getStudyMonthEach(String id, String month) {
+        List<User> exist = studyTimeRepository.findByUseridAndMonth(id, month);
+
+        if (exist == null)
+            throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-008", "아이디를 찾을 수 없습니다.");
+
+        ResponseStudyTimeListDto response = new ResponseStudyTimeListDto();
+        List<StudyTimeDto> studyTimeList = new ArrayList<StudyTimeDto>();
+
+        for (int i=0; i<exist.size();i++) {
+            StudyTimeDto studyTime = new StudyTimeDto();
+
+            String temp = exist.get(i).getStudyTime();
+            String hour = temp.substring(0,3);
+            String minute = temp.substring(4,6);
+            String sec = temp.substring(6,8);
+            String studyTimeStr = hour + ":" + minute + ":" + sec;
+
+            studyTime.setUserid(exist.get(i).getUserid());
+            studyTime.setDate(studyTimeStr);
+            studyTime.setStudyTime(exist.get(i).getStudyTime());
+            studyTimeList.add(studyTime);
+        }
+
+
+
+
+        response.setResult("SUCCESS");
+        response.setMessage("Get StudyTime Successfully");
+        response.setData(studyTimeList);
         return response;
     }
 

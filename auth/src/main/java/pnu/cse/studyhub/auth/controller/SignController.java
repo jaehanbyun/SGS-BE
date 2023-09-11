@@ -63,6 +63,11 @@ public class SignController {
         return responseService.successStudyTimeResponse(signService.getStudyMonth(id, month));
     }
 
+    @GetMapping("/get-study-month-each")
+    public ResponseStudyTimeListDto getStudyMonthEach(@RequestHeader(value = "id") String id, @RequestParam(value = "month") String month) {
+        return responseService.successStudyTimeListResponse(signService.getStudyMonthEach(id, month));
+    }
+
     @GetMapping("/get-study-day")
     public ResponseStudyTimeDto getStudyDay(@RequestHeader(value = "id") String id, @RequestParam(value = "day") String day) {
         return responseService.successStudyTimeResponse(signService.getStudyDay(id, day));
