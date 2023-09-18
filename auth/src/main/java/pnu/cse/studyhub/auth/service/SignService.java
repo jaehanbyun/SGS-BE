@@ -465,6 +465,41 @@ public class SignService {
     }
 
     @Transactional
+    public ResponseEntity<ResponseDataDto> logout(SignInRequestDto request) {
+//        UserAccount account = accountRepository.findByUserid(request.getId());
+//
+//        if (account == null)
+//            throw new CustomException(CustomExceptionStatus.USERID_NOT_FOUND, "AUTH-002", "존재하지 않는 아이디 입니다.");
+//        if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
+//            throw new CustomException(CustomExceptionStatus.WRONG_PASSWORD, "AUTH-002", "잘못된 비밀번호 입니다.");
+//        }
+
+        String refreshToken = jwtTokenProvider.CreateLogoutRefreshToken("logout-email", "logout-id");
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                // expires in 1 day
+                .maxAge(24*60*60)
+                .secure(true)
+                .httpOnly(true)
+                .path("/")
+                .build();
+
+        ResponseDataDto<Object> response = new ResponseDataDto<>();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("refreshToken", cookie.toString());
+        response.setResult("SUCCESS");
+        response.setMessage("Logout Successfully");
+        SignInResponseDto res = SignInResponseDto.builder()
+                .id("logout-id")
+                .email("logout-email")
+                .accessToken(jwtTokenProvider.createLogoutToken("logout-email", "logout-id"))
+                .build();
+        response.setData(res);
+
+
+        return new ResponseEntity<ResponseDataDto>(response, headers, HttpStatus.valueOf(200));
+    }
+
+    @Transactional
     public String testSaveStudytime() {
         LocalDateTime localDateTime = LocalDateTime.now(); // Or any other LocalDateTime
         Date now = Date.from(localDateTime.atZone(ZoneId.of("Asia/Seoul")).toInstant());

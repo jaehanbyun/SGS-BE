@@ -84,6 +84,12 @@ public class SignController {
         return responseService.successDataResponse(signService.checkRefresh(refreshToken));
     }
 
+    @PostMapping ("/logout")
+    public ResponseEntity<ResponseDataDto> logout(@RequestBody @Valid SignInRequestDto request) {
+
+        return responseService.successDataResponse(signService.logout(request));
+    }
+
     @PostMapping ("/testTime")
     public String testSaveTime() {
 

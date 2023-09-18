@@ -26,6 +26,7 @@ public class JwtTokenProvider {
 
     private final static String EMAIL = "email";
     private final static String ID = "id";
+    private final static String LOGOUTSECRETKEY = "logoutSecretKey";
 
     @Value("${token.secret}")
     private String secretKey;
@@ -59,6 +60,29 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String createLogoutToken(String email, String userid) {
+        Claims claims = Jwts.claims();
+        claims.put(ID,userid);
+        claims.put(EMAIL,email);
+
+//        LocalDate date = LocalDate.now();
+//        Date now = java.sql.Date.valueOf(date);
+        LocalDateTime localDateTime = LocalDateTime.now(); // Or any other LocalDateTime
+
+        Date now = Date.from(localDateTime.atZone(ZoneId.of("Asia/Seoul")).toInstant());
+//        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        log.error("date check " + now);
+        log.error("date check " + now.getTime());
+
+        return Jwts.builder()
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime()+tokenTime))
+                .signWith(SignatureAlgorithm.HS256,LOGOUTSECRETKEY)
+                .compact();
+    }
+
     public String CreateRefreshToken(String email, String userid) {
         Claims claims = Jwts.claims();
         claims.put(ID,userid);
@@ -73,6 +97,23 @@ public class JwtTokenProvider {
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshTime))
                 .signWith(SignatureAlgorithm.HS256,secretKey)
+                .compact();
+    }
+
+    public String CreateLogoutRefreshToken(String email, String userid) {
+        Claims claims = Jwts.claims();
+        claims.put(ID,userid);
+        claims.put(EMAIL,email);
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date now = Date.from(localDateTime.atZone(ZoneId.of("Asia/Seoul")).toInstant());
+
+        return Jwts.builder()
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + refreshTime))
+                .signWith(SignatureAlgorithm.HS256,LOGOUTSECRETKEY)
                 .compact();
     }
 
