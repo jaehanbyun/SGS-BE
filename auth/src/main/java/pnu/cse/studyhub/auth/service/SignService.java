@@ -362,11 +362,12 @@ public class SignService {
 
         if (exist == null)
             throw new CustomException(CustomExceptionStatus.ACCOUNT_NOT_FOUND,"AUTH-009", "아이디를 찾을 수 없습니다.");
-        if (dto.getName() != null) {
+
+        if (dto.getName() != null && dto.getName() != exist.getName()) {
             exist.editName(dto.getName());
             msg += "name ";
         }
-        if (dto.getProfileImage() != null) {
+        if (dto.getProfileImage() != null && dto.getProfileImage() != exist.getProfileImage()) {
             try {
                 log.info("Check for edit profile image(request) = {}",dto.getProfileImage());
                 String base64Profile = dto.getProfileImage();
@@ -378,11 +379,11 @@ public class SignService {
             }
             msg += "profileImage ";
         }
-        if (dto.getDescription() != null) {
+        if (dto.getDescription() != null && dto.getDescription() != exist.getDescription()) {
             exist.editDescription(dto.getDescription());
             msg += "description ";
         }
-        if (dto.getUrl() != null) {
+        if (dto.getUrl() != null && dto.getUrl() != exist.getUrl()) {
             exist.editUrl(dto.getUrl());
             msg += "url ";
         }
