@@ -85,9 +85,9 @@ public class SignController {
     }
 
     @PostMapping ("/logout")
-    public ResponseEntity<ResponseDataDto> logout(@RequestBody @Valid SignInRequestDto request) {
+    public ResponseEntity<ResponseDataDto> logout() {
 
-        return responseService.successDataResponse(signService.logout(request));
+        return responseService.successDataResponse(signService.logout());
     }
 
     @PostMapping ("/testTime")

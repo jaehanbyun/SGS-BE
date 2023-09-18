@@ -465,15 +465,7 @@ public class SignService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseDataDto> logout(SignInRequestDto request) {
-//        UserAccount account = accountRepository.findByUserid(request.getId());
-//
-//        if (account == null)
-//            throw new CustomException(CustomExceptionStatus.USERID_NOT_FOUND, "AUTH-002", "존재하지 않는 아이디 입니다.");
-//        if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
-//            throw new CustomException(CustomExceptionStatus.WRONG_PASSWORD, "AUTH-002", "잘못된 비밀번호 입니다.");
-//        }
-
+    public ResponseEntity<ResponseDataDto> logout() {
         String refreshToken = jwtTokenProvider.CreateLogoutRefreshToken("logout-email", "logout-id");
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 // expires in 1 day
