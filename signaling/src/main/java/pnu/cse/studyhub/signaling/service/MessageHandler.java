@@ -69,9 +69,9 @@ public class MessageHandler extends TextWebSocketHandler {
             switch (jsonMessage.get(ID).getAsString()) {
                 // 방 접속
                 case "joinRoom":
-                    log.info("방접속");
                     JoinRequest joinRequest = mapper.readValue(message.getPayload(), JoinRequest.class);
                     join(joinRequest, session);
+                    log.info("User {} join {} Room ",joinRequest.getUserId(),joinRequest.getRoomId());
                     break;
 
                 // SDP 정보 전송
@@ -110,6 +110,7 @@ public class MessageHandler extends TextWebSocketHandler {
                     VideoRequest videoRequest
                             = mapper.readValue(message.getPayload(), VideoRequest.class);
                     updateVideo(videoRequest, user);
+                    log.info("User {} change videoState",videoRequest.getUserId());
                     break;
 
                 // 오디오 설정 변경
@@ -117,6 +118,7 @@ public class MessageHandler extends TextWebSocketHandler {
                     AudioRequest audioRequest
                             = mapper.readValue(message.getPayload(), AudioRequest.class);
                     updateAudio(audioRequest, user);
+                    log.info("User {} change videoState",audioRequest.getUserId());
                     break;
 
                 // 타이머 설정 변경
@@ -124,6 +126,7 @@ public class MessageHandler extends TextWebSocketHandler {
                     // id, userid, timerState / user : userSession type
                     TimerRequest timerRequest = mapper.readValue(message.getPayload(), TimerRequest.class);
                     updateTimer(timerRequest, user);
+                    log.info("User {} change timerState",user.getUserId());
                     break;
 
                 // 방 나가기 : 그냥 방나가면 웹소켓 끊어주면 됨
@@ -214,7 +217,6 @@ public class MessageHandler extends TextWebSocketHandler {
         final boolean video = request.isVideo();
         final boolean audio = request.isAudio();
 
-        // TODO : 테스트 지점
         //LocalTime studyTime = LocalTime.of(0,0,0);
         String userStudyTime = userStudyTimeFromTCP(userId);
 
