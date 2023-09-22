@@ -1,6 +1,7 @@
 package pnu.cse.studyhub.room.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import pnu.cse.studyhub.room.dto.request.*;
 import pnu.cse.studyhub.room.dto.response.*;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/room/group")
 @RequiredArgsConstructor
@@ -26,15 +28,16 @@ public class RoomController {
     @PostMapping
     public Response<RoomIdResponse> create(HttpServletRequest jwt, @RequestBody RoomCreateRequest request){
 
-
         String userId = (String) jwt.getAttribute("userId");
 
         Long roomId = roomService.create(request.isRoomType(), request.getRoomName(),
                 userId, request.getMaxUser(), request.getRoomChannel());
 
         if(request.isRoomType()) {
+            log.info("{} User Successfully Create {} Open Study Room ( channel : {}, name : {}, maxUser : {} )",userId,roomId,request.getRoomChannel(),request.getRoomName(),request.getMaxUser());
             return Response.success("Create Open Study Room Successfully", RoomIdResponse.fromRoomId(roomId));
         }else{
+            log.info("{} User Successfully Create {} Private Study Group ( name : {}, maxUser : {} ) ",userId,roomId,request.getRoomName(),request.getMaxUser());
             return Response.success("Create Private Study Group Successfully", RoomIdResponse.fromRoomId(roomId));
         }
     }
@@ -45,10 +48,16 @@ public class RoomController {
 
         String userId = (String) jwt.getAttribute("userId");
 
-        Long Id = roomService.modify(request.isRoomType(), request.getRoomId()
+        Long roomId = roomService.modify(request.isRoomType(), request.getRoomId()
                 , userId, request.getRoomName(),request.getMaxUser(), request.getRoomChannel(),request.getRoomNotice());
 
-        return Response.success("Modify Study Room Successfully",RoomIdResponse.fromRoomId(Id));
+        if(request.isRoomType()){
+            log.info("{} User Successfully Modify {} Open Study Room ( channel : {}, name : {}, notice : {} , maxUser : {} )",userId,roomId , request.getRoomChannel() , request.getRoomName(),request.getRoomNotice() , request.getMaxUser());
+        }else{
+            log.info("{} User Successfully Modify {} Private Study Group ( name : {}, notice : {} , maxUser : {} )",userId,roomId ,  request.getRoomName(),request.getRoomNotice() , request.getMaxUser());
+        }
+
+        return Response.success("Modify Study Room Successfully",RoomIdResponse.fromRoomId(roomId));
     }
 
 
@@ -61,7 +70,7 @@ public class RoomController {
 
         // size에 따라 가져오는 방의 갯수가 달라짐
         return Response.success("room list successfully",
-                roomService.roomList(lastRoomId, 15, title, channel ));
+                roomService.roomList(lastRoomId, 15, title, channel));
     }
 
 
@@ -76,9 +85,13 @@ public class RoomController {
 
         if(roomType){
             OpenDetailResponse info = (OpenDetailResponse) roomService.info(userId, roomId, roomType);
+            log.info("{} User Successfully Get {} Open Study Room Detail Info (name : {} , owner : {} , notice : {} , userCount : {}/{} , createdAt : {})",
+                    userId,roomId,info.getRoomName(), info.getRoomOwner() , info.getRoomNotice() , info.getCurUser() , info.getMaxUser() , info.getCreatedAt());
             return Response.success("Query info of the room Successfully",info);
         }else{
             PrivateDetailResponse info = (PrivateDetailResponse) roomService.info(userId, roomId, roomType);
+            log.info("{} User Successfully Get {} Private Study Group Detail Info (name : {} , owner : {} , notice : {} , userCount : {}/{} , createdAt : {})"
+                    ,userId,roomId,info.getRoomName(), info.getRoomOwner() , info.getRoomNotice() , info.getCurUser() , info.getMaxUser() , info.getCreatedAt());
             return Response.success("Query info of the room Successfully",info);
         }
 
@@ -92,6 +105,8 @@ public class RoomController {
         String userId = (String) jwt.getAttribute("userId");
 
         OpenDetailResponse info =roomService.in(request.getRoomId(),userId);
+
+        log.info("{} User Successfully Enter {} Open Study Room",userId,request.getRoomId());
 
         return Response.success("Enter Room Successfully",info);
     }
@@ -115,6 +130,8 @@ public class RoomController {
 
         AlertResponse alert = roomService.alert(request.getRoomType(), request.getRoomId(), userId, request.getTargetId());
 
+        log.info("{} Room Owner alert {} Room Member : {} ",userId,request.getRoomId() , request.getTargetId());
+
         return Response.success("Alert the user of the room Successfully",alert);
     }
 
@@ -127,10 +144,13 @@ public class RoomController {
 
         RoomTargetResponse kickOut = roomService.kickout(request.getRoomType(), request.getRoomId(), userId, request.getTargetId());
 
+        log.info("{} Room Owner Kick Out {} Room Member : {} ",userId,request.getRoomId() , request.getTargetId());
+
         return Response.success("Kick out the user of the room Successfully",kickOut);
     }
 
 
+    // 방장 위임 기능
     @PatchMapping("/delegate")
     public Response<RoomTargetResponse> delegate(HttpServletRequest jwt,@RequestBody TargetRequest request){
 
@@ -138,7 +158,9 @@ public class RoomController {
 
         RoomTargetResponse delegate = roomService.delegate(request.getRoomType(), request.getRoomId(), userId, request.getTargetId());
 
-        return Response.success("Delegate the chief of room Successfully",delegate);
+        log.info("{} Room Owner Delegate {} Room Member : {} ",userId,request.getRoomId() , request.getTargetId());
+
+        return Response.success("Delegate the owner of room Successfully",delegate);
 
     }
 
@@ -158,7 +180,9 @@ public class RoomController {
     public Response<Void> join(HttpServletRequest jwt,@RequestBody JoinRequest request){
         String userId = (String) jwt.getAttribute("userId");
 
-        roomService.join(userId,request.getRoomCode());
+        Long roomId = roomService.join(userId, request.getRoomCode());
+
+        log.info("{} User Successfully Join {} Study Group.",userId,roomId);
 
         return Response.success("Join Study Group Successfully");
     }
@@ -170,6 +194,8 @@ public class RoomController {
 
         roomService.withdraw(userId, roomId);
 
+        log.info("{} User Successfully withdraw {} Study Group.",userId,roomId);
+
         return Response.success("Withdraw Room Successfully");
     }
 
@@ -180,22 +206,22 @@ public class RoomController {
 
         PrivateDetailResponse info = roomService.privateIn(request.getRoomId(),userId);
 
+        log.info("{} User Successfully Enter {} Study Group.",userId,request.getRoomId());
+
         return Response.success("Enter Study Group Successfully", info);
     }
 
     // 코드 생성
-    // 일단은 저장되어 있는 UUID 불러오는 방식
-    // 이후에 새로운 거 generator
-    //
     @PatchMapping("/private")
     public Response<RoomCodeResponse> generateCode(HttpServletRequest jwt,@RequestBody RoomIdRequest request){
         String userId = (String) jwt.getAttribute("userId");
 
         UUID roomCode = roomService.generateCode(request.getRoomId(), userId);
 
+        log.info("{} Successfully Get {} Room's Code.",userId,request.getRoomId());
+
         return Response.success("Get RoomCode Successfully",new RoomCodeResponse(roomCode));
     }
-
 
 
 }

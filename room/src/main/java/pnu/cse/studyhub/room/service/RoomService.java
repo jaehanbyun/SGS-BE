@@ -95,13 +95,12 @@ public class RoomService {
     // roomID가 필요 없어야함
     // roomCode로만 roomID 방을 찾기
     @Transactional
-    public void join(String userId,UUID roomCode){
+    public Long join(String userId,UUID roomCode){
 
         // 요청한 userId가 속한 Private 스터디 그룹이 5개일 때 , Private 스터디 그룹 생성 불가능 (유저 권한)
         if(privateUserRoomRepository.findIsMemberByUserId(userId).size() >= 5){
             throw new ApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s user has already joined 5 study groups ",userId));
         }
-        System.out.println("UUID ROOM CODE : " + roomCode);
 
         // 해당 roomCode를 가진 방이 있는지 확인하고 없으면 exception
         PrivateRoomEntity studyGroup = privateRoomRepository.findByRoomCode(roomCode).orElseThrow(() ->
@@ -136,6 +135,8 @@ public class RoomService {
             PrivateUserRoomEntity newUserRoom = privateUserRoomRepository.save(PrivateUserRoomEntity.create(userId, studyGroup.getRoomId(), false));
             studyGroup.addUserRoom(newUserRoom);
         }
+
+        return studyGroup.getRoomId();
 
     }
 
@@ -371,8 +372,6 @@ public class RoomService {
                     privateUserRoomRepository.findRoomOwnerByRoomId(roomId).getUserId(),privateRoom.getCurUser(),privateRoom.getMaxUser(),privateRoom.getCreatedAt());
 
         }
-
-
     }
 
     // 일반 user의 공개방 입장
@@ -459,6 +458,7 @@ public class RoomService {
 
     @Transactional
     public Long create(Boolean roomType, String roomName, String userId, Integer maxUser, RoomChannel channel){
+
         if(roomType){ // 공개방 생성
 
             OpenRoomEntity saveRoom = openRoomRepository.save(OpenRoomEntity.create(roomName, channel, maxUser));

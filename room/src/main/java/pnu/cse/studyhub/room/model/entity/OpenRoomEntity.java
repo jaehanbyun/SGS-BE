@@ -24,14 +24,6 @@ import java.util.Objects;
 )
 public class OpenRoomEntity {
 
-/*
-        TODO : UUID로 roomID를 만들려니 userRoom에서 roomID를 FK로 사용하기 때문에 성능문제
-                생길수 있으니 custom generator를 만들 예정
- */
-
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long roomId;
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GENERATOR")
     private Long roomId;
