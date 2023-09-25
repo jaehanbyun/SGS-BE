@@ -27,11 +27,7 @@ public class dbChatTest {
     @BeforeAll
     public static void initTest(){
         //chat
-        chatRequest = new ChatRequest();
-        chatRequest.setRoomId(9999L);
-        chatRequest.setSenderId("test-user1");
-        chatRequest.setMessageType("TEXT");
-        chatRequest.setContent("테스트 메시지 입니다.");
+        chatRequest = new ChatRequest(999L, "test-user1", "TEXT", "테스트 메시지 입니다.");
     }
 
 //    @AfterAll
