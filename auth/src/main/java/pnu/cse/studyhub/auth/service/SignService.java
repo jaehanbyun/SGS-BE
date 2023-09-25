@@ -257,8 +257,8 @@ public class SignService {
 
         for (int i=0; i<exist.size();i++) {
             String temp = exist.get(i).getStudyTime();
-            hour += Integer.parseInt(temp.substring(0,3));
-            minute += Integer.parseInt(temp.substring(4,6));
+            hour += Integer.parseInt(temp.substring(0,2));
+            minute += Integer.parseInt(temp.substring(3,5));
             sec += Integer.parseInt(temp.substring(6,8));
         }
         if (sec > 59) {
@@ -294,9 +294,9 @@ public class SignService {
             StudyTimeDto studyTime = new StudyTimeDto();
 
             String temp = exist.get(i).getStudyTime();
-            Integer hour = Integer.parseInt(temp.substring(0,3));
-            Integer minute = Integer.parseInt(temp.substring(4,6));
-            Integer studyTimeInt = hour + minute*60;
+            Integer hour = Integer.parseInt(temp.substring(0,2));
+            Integer minute = Integer.parseInt(temp.substring(3,5));
+            Integer studyTimeInt = hour*60 + minute;
 
             studyTime.setUserid(exist.get(i).getUserid());
             studyTime.setDate(exist.get(i).getMonth()+"-"+exist.get(i).getDay());
@@ -331,8 +331,8 @@ public class SignService {
 
         for (int i=0; i<exist.size();i++) {
             String temp = exist.get(i).getStudyTime();
-            hour += Integer.parseInt(temp.substring(0,3));
-            minute += Integer.parseInt(temp.substring(4,6));
+            hour += Integer.parseInt(temp.substring(0,2));
+            minute += Integer.parseInt(temp.substring(3,5));
             sec += Integer.parseInt(temp.substring(6,8));
         }
         if (sec > 59) {
