@@ -1,0 +1,48 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.10'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group = 'pnu.cse.studyhub'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// kurento 관련
+	implementation 'org.kurento:kurento-client:6.18.0'
+	implementation 'org.kurento:kurento-utils-js:6.18.0'
+
+	// gson
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
+
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// spring-integration
+	implementation 'org.springframework.integration:spring-integration-ip'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

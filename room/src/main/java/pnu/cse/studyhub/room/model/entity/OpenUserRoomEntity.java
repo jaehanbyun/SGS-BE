@@ -16,7 +16,7 @@ import static javax.persistence.FetchType.LAZY;
 @Getter
 @Setter
 @IdClass(UserRoomId.class)
-public class OpenUserRoomEntity {
+public class OpenUserRoomEntity implements UserRoom{
 
     @Id
     private String userId;
@@ -30,19 +30,21 @@ public class OpenUserRoomEntity {
     private OpenRoomEntity openRoomEntity;
 
     private boolean roomOwner;
-    private Integer alert;
-    private Integer kick_out;
+    // 일단 3번의 경고로
+    private int alert;
+    private Boolean kick_out;
 
     // 최초 입장 시간
     private Timestamp createdAt;
+    private Timestamp accessedAt;
+
+    private Timestamp leftAt;
 
     @PrePersist
     void createdAt(){
         this.createdAt = Timestamp.from(Instant.now());
+        this.accessedAt = Timestamp.from(Instant.now());
     }
-
-    // TODO : 가장 최근 접근 시간
-    //private Timestamp accessedAt;
 
     public static OpenUserRoomEntity create(String userId,Long roomId,Boolean roomOwner){
         OpenUserRoomEntity userRoom = new OpenUserRoomEntity();
@@ -50,10 +52,34 @@ public class OpenUserRoomEntity {
         userRoom.setRoomId(roomId);
         userRoom.setRoomOwner(roomOwner);
         userRoom.setAlert(0);
-        userRoom.setKick_out(0);
+        userRoom.setKick_out(false);
 
         return userRoom;
     }
+
+    // 경고
+    @Override
+    public int addAlert()
+    {
+        this.alert++;
+        if(this.alert == 3) this.kickOut();
+
+        return alert;
+    }
+
+    // 퇴장
+    @Override
+    public void kickOut() {
+        this.kick_out = true;
+    }
+
+    //위임
+
+    public void delegate(OpenUserRoomEntity target){
+        this.roomOwner = false;
+        target.setRoomOwner(true);
+    }
+
 
 
 }

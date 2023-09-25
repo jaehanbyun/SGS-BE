@@ -11,18 +11,24 @@ spring:
 #    tcp:
 #      port: ${server.port}
 
-eureka:
-  instance:
-    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${server.port}}
-
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://127.0.0.1:8761/eureka
 tcp:
   server:
     port : 8099
+  room:
+    host : localhost
+    port : 8089
+    connection :
+      poolSize : 10
+  signaling:
+    host : localhost
+    port : 8058
+    connection :
+      poolSize : 10
+  auth:
+    host: localhost
+    port: 8019
+    connection:
+      poolSize: 10
 logging:
   level:
-    pnu.cse.studyhub: INFO
+    pnu.cse.studyhub: DEBUG

@@ -1,16 +1,13 @@
 package pnu.cse.studyhub.chat.repository;
 
-import com.mongodb.client.result.DeleteResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
-import pnu.cse.studyhub.chat.exception.ChatNotFoundException;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
 import java.util.List;
@@ -28,7 +25,7 @@ public class ChatRepositoryImpl implements ChatRepository{
 
 
     @Override
-    public List<Chat> findByRoomId(String roomId) {
+    public List<Chat> findByRoomId(Long roomId) {
         // 최신 메시지부터 순서대로
         Query query = Query.query(where("roomId").is(roomId)).with(Sort.by(Sort.Direction.DESC, "createdAt"));
         // 메시지 고유 ID는 보내지 않음
@@ -57,7 +54,7 @@ public class ChatRepositoryImpl implements ChatRepository{
     }
 
     @Override
-    public Chat getLastMessage(String roomId) {
+    public Chat getLastMessage(Long roomId) {
         Query query = Query.query(where("roomId").is(roomId)).with(Sort.by(Sort.Direction.DESC,"createdAt"));
 //        query.fields().exclude("_id");
 
@@ -66,7 +63,7 @@ public class ChatRepositoryImpl implements ChatRepository{
     }
 
     @Override
-    public Page<Chat> findByRoomIdWithPagingAndFiltering(String roomId, int page, int size) {
+    public Page<Chat> findByRoomIdWithPagingAndFiltering(Long roomId, int page, int size) {
         Pageable pageable = PageRequest.of(page,size,Sort.by("createdAt").descending());
 
         Query query = new Query()
