@@ -52,9 +52,11 @@ public class MessageService {
                 log.info("time test month ={} day = {}", formatedDate.substring(0, 7), formatedDate.substring(8, 10));
                 String month = formatedDate.substring(0, 7);
                 String day = formatedDate.substring(8, 10);
-                String studyTime = jo.getAsString("study_time");
-                if(studyTime.equals(null) || studyTime == null) {
+                String studyTime = "";
+                if(jo.get("study_time") == null) {
                     studyTime = "00:00:00";
+                } else {
+                    studyTime = jo.getAsString("study_time");
                 }
                 UserInfoDto userInfoDto = new UserInfoDto(jo.getAsString("user_id"), month, day, studyTime);
                 User user = User.createInfo(userInfoDto);
