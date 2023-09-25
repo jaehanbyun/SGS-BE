@@ -273,7 +273,7 @@ public class SignService {
 
         studyTime.setUserid(id);
         studyTime.setDate(month);
-        studyTime.setStudyTime(studyTimeStr);
+        studyTime.setStudyTimeStr(studyTimeStr);
         response.setResult("SUCCESS");
         response.setMessage("Get StudyTime Successfully");
         response.setData(studyTime);
@@ -294,14 +294,13 @@ public class SignService {
             StudyTimeDto studyTime = new StudyTimeDto();
 
             String temp = exist.get(i).getStudyTime();
-            String hour = temp.substring(0,3);
-            String minute = temp.substring(4,6);
-            String sec = temp.substring(6,8);
-            String studyTimeStr = hour + ":" + minute + ":" + sec;
+            Integer hour = Integer.parseInt(temp.substring(0,3));
+            Integer minute = Integer.parseInt(temp.substring(4,6));
+            Integer studyTimeInt = hour + minute*60;
 
             studyTime.setUserid(exist.get(i).getUserid());
-            studyTime.setDate(studyTimeStr);
-            studyTime.setStudyTime(exist.get(i).getStudyTime());
+            studyTime.setDate(exist.get(i).getMonth()+"-"+exist.get(i).getDay());
+            studyTime.setStudyTimeInt(studyTimeInt);
             studyTimeList.add(studyTime);
         }
 
@@ -348,7 +347,7 @@ public class SignService {
 
         studyTime.setUserid(id);
         studyTime.setDate(day);
-        studyTime.setStudyTime(studyTimeStr);
+        studyTime.setStudyTimeStr(studyTimeStr);
         response.setResult("SUCCESS");
         response.setMessage("Get StudyTime Successfully");
         response.setData(studyTime);

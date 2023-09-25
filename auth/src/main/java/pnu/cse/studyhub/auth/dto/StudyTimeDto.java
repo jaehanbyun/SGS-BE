@@ -12,5 +12,7 @@ public class StudyTimeDto {
 
     private String date;
 
-    private String studyTime;
+    private String studyTimeStr;
+
+    private Integer studyTimeInt;
 }
