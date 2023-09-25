@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
 class RoomControllerTest {
-    // TODO : 일단 경고, 강퇴, 방장 위임 등은 나중에
 
     @Autowired
     RoomService roomService;
@@ -408,15 +407,6 @@ class RoomControllerTest {
 
 
     }
-
-//    @Test
-//    public void 스터디그룹_입장() {
-//
-//
-//
-//
-//
-//    }
 
 
 }

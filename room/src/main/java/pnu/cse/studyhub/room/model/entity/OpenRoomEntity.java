@@ -99,4 +99,17 @@ public class OpenRoomEntity {
         return Objects.hash(roomId, openUserRoomEntities, roomName, channel, curUser, maxUser, roomNotice, createdAt, updatedAt);
     }
 
+    @Override
+    public String toString() {
+        return "OpenRoomEntity{" +
+                "roomId=" + roomId +
+                ", roomName='" + roomName + '\'' +
+                ", channel=" + channel +
+                ", curUser=" + curUser +
+                ", maxUser=" + maxUser +
+                ", roomNotice='" + roomNotice + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

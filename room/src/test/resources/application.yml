@@ -1,37 +1,27 @@
 jwt:
   secret-key: user_token
 
-tcp:
-  # TcpServerConfig에 TCP 받을 본인의 포트 설정
-  server:
-    port: 8089
-  # TcpClientConfig에 TCP를 보낼 상태관리서버의 url 설정
-  state:
-    host: localhost
-    port: 8099
-    connection:
-      poolSize: 30
-
-
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
 
-spring.jpa:
-  hibernate.format_sql: true
-  hibernate.show-sql: true
-  hibernate.ddl-auto: create
+spring:
+  datasource:
+    url: jdbc:h2:mem:test
+    username : sa
+    password :
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
 
 #spring:
 #  datasource:
-#    url: jdbc:h2:mem:test
-#    username : sa
-#    password :
-#    driver-class-name: org.h2.Driver
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/studyroom_test?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: 1234
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/studyroom_test?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#    username: root
+#    password: 1234
