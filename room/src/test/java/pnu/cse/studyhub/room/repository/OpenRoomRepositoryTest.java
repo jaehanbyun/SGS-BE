@@ -10,6 +10,8 @@ import pnu.cse.studyhub.room.model.entity.OpenRoomEntity;
 
 import javax.persistence.EntityManager;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -47,14 +49,14 @@ public class OpenRoomRepositoryTest {
 
     /*
         테스트 목록
-        1. 공개방 생성 테스트
-        2. 공개방 수정 테스트
+        1. 공개방 생성 테스트 ㅇ
+        2. 공개방 수정 테스트 ㅇ
         3. 공개방 전체 스크롤 조회
         4. 공개방 키워드 기반 검색 무한 스크롤 조회
         5. 공개방 채널별 조회
         6. 공개방 유저룸 생성
         7. roomId로 방Owner 찾기 테스트
-        8. 현재 방에 있는 유저들 중
+        8. 현재 방에 있는 유저들 중 가장 빨리 들어온 유저 찾기
      */
 
 
@@ -69,12 +71,46 @@ public class OpenRoomRepositoryTest {
 
         // when
         OpenRoomEntity newOpenRoom = OpenRoomEntity.create(roomName, channel, maxUser);
-        OpenRoomEntity savedRoom = openRoomRepository.save(newOpenRoom);
+        openRoomRepository.save(newOpenRoom);
+        em.flush();
 
         // then
-        assertEquals(newOpenRoom, savedRoom);
-        assertNotNull(savedRoom.getRoomId());
+        Optional<OpenRoomEntity> savedRoom = openRoomRepository.findById(1L);
+        assertEquals(newOpenRoom, savedRoom.get());
+        assertNotNull(savedRoom.get().getRoomId());
         System.out.println("확인 :" + savedRoom.toString());
+    }
+
+    @DisplayName("2. 공개방 수정 테스트")
+    @Test
+    public void modifyOpenRoom(){
+
+        // given
+        String roomName = "Test OpenRoom";
+        RoomChannel channel = RoomChannel.ELEMENTARY_SCHOOL;
+        int maxUser = 3;
+        OpenRoomEntity newRoom = openRoomRepository.save(OpenRoomEntity.create(roomName, channel, maxUser));
+        em.flush();
+
+        // when
+        Optional<OpenRoomEntity> savedRoom = openRoomRepository.findById(1L);
+        String newRoomName = "New Test OpenRoom";
+        RoomChannel newChannel = RoomChannel.HIGH_SCHOOL;
+        int newMaxUser = 5;
+
+        savedRoom.get().setRoomName(newRoomName);
+        savedRoom.get().setChannel(newChannel);
+        savedRoom.get().setMaxUser(newMaxUser); // 수정하고 flush 시점이 언제더라?
+        em.flush();
+
+        // then
+        Optional<OpenRoomEntity> modifiedRoom = openRoomRepository.findById(1L);
+        assertEquals(modifiedRoom.get().getRoomName() , newRoomName);
+        assertEquals(modifiedRoom.get().getChannel() , newChannel);
+        assertEquals(modifiedRoom.get().getMaxUser() , newMaxUser);
+        assertNotNull(modifiedRoom.get().getUpdatedAt());
+        System.out.println("확인 :" + modifiedRoom);
+
     }
 
 //    @DisplayName("공개방 수정 테스트")
