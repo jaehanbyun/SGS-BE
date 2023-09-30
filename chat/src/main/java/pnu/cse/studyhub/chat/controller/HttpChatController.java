@@ -54,9 +54,8 @@ public class HttpChatController {
             @Parameter(name = "content", description = "채팅 내용", example = "chat test"),
     })
     @PostMapping(value = "/send", consumes = "application/json")
-    public ResponseEntity<SuccessResponse> sendMessage(@RequestHeader("Authorization") String authorization, @RequestBody ChatRequest chat) {
-        String accessToken = authorization.replace("Bearer ","");
-        Chat savedChat = chatService.saveChat(accessToken, chat );
+    public ResponseEntity<SuccessResponse> sendMessage(@RequestBody ChatRequest chat) {
+        Chat savedChat = chatService.saveChat(chat );
         try {
             kafkaProducer.send(TOPIC,savedChat);
         } catch (Exception e) {
