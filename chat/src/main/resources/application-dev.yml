@@ -51,7 +51,7 @@ cloud:
       auto: false
 
 token:
-  secret: user_token
+  secret: ${SECRET_TOKEN}
 
 tcp:
   server:
