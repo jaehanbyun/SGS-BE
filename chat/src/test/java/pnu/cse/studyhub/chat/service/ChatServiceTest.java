@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +26,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ContextConfiguration(classes = {ChatService.class})
-@ExtendWith(MockitoExtension.class)
+@DisplayName("채팅 서비스 테스트")
 public class ChatServiceTest {
 
     @Mock
@@ -52,10 +52,10 @@ public class ChatServiceTest {
             ChatRequest chatRequest = new ChatRequest(1L, "user123", "TEXT", "test123");
             Chat chat = new Chat("1", 1L, "user123", "TEXT", "test123", LocalDateTime.now());
 
-            //when
+            // when
             when(chatRepository.save(any())).thenReturn(chat); // 반환할 적절한 Chat 객체 설정
 
-            // Assert
+            // then
             assertEquals(chat, chatService.saveChat(chatRequest));
             verify(chatRepository).save(any());
         }
