@@ -18,11 +18,13 @@ spring:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringDeserializer
       value-serializer: org.apache.kafka.common.serialization.StringDeserializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false
       group-id: pnu-cse
+    listener:
+      ack-mode: manual
+#      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
     topic : studyhub
-    pub-topic-name: send
-    sub-topic-name: receive
     servlet:
       multipart:
         max-file-size: 10MB
