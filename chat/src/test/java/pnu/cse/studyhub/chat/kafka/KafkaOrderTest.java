@@ -1,5 +1,6 @@
 package pnu.cse.studyhub.chat.kafka;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import pnu.cse.studyhub.chat.service.KafkaProducer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@DisplayName("카프카 순서 보장 테스트")
 @SpringBootTest
 @EmbeddedKafka(partitions = 3)
 public class KafkaOrderTest {
