@@ -57,7 +57,7 @@ cloud:
       auto: false
 
 token:
-  secret: user_token
+  secret: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
 
 tcp:
   server:

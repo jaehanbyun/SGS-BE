@@ -19,21 +19,27 @@ public class GrpcClientService {
     private final GrpcMessageServiceGrpc.GrpcMessageServiceBlockingStub grpcStub;
 
     public void subscribeRoom(String userId, long roomId, String session) {
-        ChatActionResponse response = grpcStub.subscribeChat(
-            ChatSubscribeRequest.newBuilder()
+        ChatSubscribeRequest request =  ChatSubscribeRequest.newBuilder()
                 .setUserId(userId)
                 .setRoomId(roomId)
                 .setSession(session)
-                .build()
+                .build();
+        ChatActionResponse response = grpcStub.subscribeChat(
+                request
         );
-        log.debug("grpc-subscribe: {}", response);
+        log.debug("grpc-subscribe request : {}", request);
+        log.debug("grpc-subscribe response : {}", response);
     };
     public void unsubscribeRoom(String session) {
+        ChatUnsubscribeRequest request =  ChatUnsubscribeRequest.newBuilder()
+                .setSession(session)
+                .build();
         ChatActionResponse response = grpcStub.unsubscribeChat(
             ChatUnsubscribeRequest.newBuilder()
                     .setSession(session)
                     .build()
         );
-        log.debug("grpc-unsubscribe: {}", response);
+        log.debug("grpc-unsubscribe request: {}", request);
+        log.debug("grpc-unsubscribe response : {}", response);
     };
 }
