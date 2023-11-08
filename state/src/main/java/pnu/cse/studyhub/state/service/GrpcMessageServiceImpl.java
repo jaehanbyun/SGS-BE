@@ -40,12 +40,12 @@ public class GrpcMessageServiceImpl extends GrpcMessageServiceGrpc.GrpcMessageSe
 
     @Override
     public void unsubscribeChat(ChatUnsubscribeRequest request, StreamObserver<ChatActionResponse> responseObserver) {
-        log.debug("UnsubscribeChat request: {}", request);
+        log.debug("UnsubscribeChat request: \n{}", request);
 
         String userId = redisService.findUserIdBySessionId(request.getSession());
         if (userId != null) {
             // 최신 버전으로 수정 요망
-            redisService.deleteRealTimeDataAndSession(userId, request.getSession());
+            redisService.deleteSession(userId);
         } else {
             // 미접속자의 접속 해제 -> 예외 처리
         }
