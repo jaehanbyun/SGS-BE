@@ -34,8 +34,8 @@ public class RedisService {
         return realTimeData;
     }
     public String findUserIdBySessionId(String sessionId) {
-        Object userIdObj = sessionRedisTemplate.opsForValue().get("sessionIdIndex:" + sessionId);
-        return userIdObj != null ? (String) userIdObj : null;
+        String userId = sessionRedisTemplate.opsForValue().get("sessionIdIndex:" + sessionId);
+        return userId;
     }
     public RealTimeData saveRealTimeDataAndSession(RealTimeData realTimeData) {
         HashOperations<String, Object, Object> hashOps = realTimeDataRedisTemplate.opsForHash();
