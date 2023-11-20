@@ -55,43 +55,13 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
         switch (accessor.getCommand()) {
             case SUBSCRIBE: // room ID에 들어갈 때(소켓 연결이 아니라 채팅방에 들어갈 때 )
                 userId = getUserId(authorizationHeader);
-                Long roomId = Long.valueOf(accessor.getDestination().substring(7));
-//                log.info(roomId.toString());
-//                TCPSocketSessionRequest subscribeRequest = TCPSocketSessionRequest.builder()
-//                        .type("SUBSCRIBE")
-//                        // "Timer ON TIMER OFF 프론트에서 보내는ㅅ거, USER_OUT, USER_IN 프론트에서 받는거
-//                        .userId(userId)
-//                        .server("chat")
-//                        .roomId(roomId) // 슬래쉬 ( '/topic/' ) 삭제
-//                        .session(sessionId)
-//                        .build();
-//                log.debug(accessor.getCommand() + " : " + subscribeRequest.toString());
-//                tcpMessageService.sendMessage(subscribeRequest.toString());
+                Long roomId = Long.valueOf(accessor.getDestination().substring(7)); // 슬래쉬 ( '/topic/' ) 삭제
+                tcpMessageService.subscribeRoom(roomId, userId, sessionId);
                 grpcClientService.subscribeRoom(userId,roomId,sessionId);
                 break;
-            case DISCONNECT: // 채팅방 나갈 때
-//                TCPSocketSessionRequest disconnectRequest = TCPSocketSessionRequest.builder()
-//                        .type("DISCONNECT")
-//                        .userId(userId)
-//                        .server("chat")
-//                        .roomId(null) // 슬래쉬 ( '/topic/' ) 삭제
-//                        .session(sessionId)
-//                        .build();
-//                log.debug(accessor.getCommand() + " : " + disconnectRequest.toString());
-//                tcpMessageService.sendMessage(disconnectRequest.toString());
-                grpcClientService.unsubscribeRoom(sessionId);
-                break;
-            case UNSUBSCRIBE:
-//                userId = getUserId(authorizationHeader);
-//                TCPSocketSessionRequest unsubscribeRequest = TCPSocketSessionRequest.builder()
-//                        .type("UNSUBSCRIBE")
-//                        .userId(userId)
-//                        .server("chat")
-//                        .roomId(null) // 슬래쉬 ( '/topic/' ) 삭제
-//                        .session(sessionId)
-//                        .build();
-//                log.debug(accessor.getCommand() + " : " + unsubscribeRequest.toString());
-//                tcpMessageService.sendMessage(unsubscribeRequest.toString());
+            case UNSUBSCRIBE: // 채팅방 나갈 때 (UNSUBSCRIBE || DISCONNECT)
+            case DISCONNECT:
+                tcpMessageService.unsubscribeRoom(userId,sessionId);
                 grpcClientService.unsubscribeRoom(sessionId);
                 break;
         }
@@ -111,7 +81,4 @@ public class MessageChannelInterceptor implements ChannelInterceptor {
     public void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
         ChannelInterceptor.super.afterReceiveCompletion(message, channel, ex);
     }
-
-
-
 }
