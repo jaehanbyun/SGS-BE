@@ -3,7 +3,7 @@
 #### 팀원 : [이제호(BE)](https://github.com/jhl8109)&ensp; [김돈우(BE)](https://github.com/kimdonwoo)&ensp; [박재현(BE)](https://github.com/wogusqkr0515)&ensp; [변재한(인프라)](https://github.com/jaehanbyun)
 
 ### 목차
-[1. 목표](#목표)<br>
+[1. 목표](#목표)<br> 
 [2. 주요 기능](#주요-기능)<br>
 [3. 사용 기술](#사용-기술)<br>
 [4. 아키텍처](#아키텍처)<br>
@@ -47,20 +47,26 @@
 
 ## 서버별 주요 코드
 - [채팅 서버](https://github.com/jaehanbyun/SGS-BE/tree/main/chat)
+- [시그널링 서버](https://github.com/kimdonwoo/SGS-BE/tree/main/signaling)
+- [그룹관리 서버](https://github.com/kimdonwoo/SGS-BE/tree/main/room)
 - [상태관리 서버](https://github.com/jaehanbyun/SGS-BE/tree/main/state)
 <br>
 
 ## 배포
-|서비스|URL|포트 풀|
-|---|---|---|
-|전체(Gateway)|http://${AWS-public-IP}|:8000|
-|채팅|http://${AWS-public-IP}|:8031~8039|
-|상태관리|http://${AWS-public-IP}|:8091~8099|
+| 서비스         | URL                    | 포트 풀       |
+|-------------|------------------------|------------|
+| 전체(Gateway) | http://${AWS-public-IP} | :8000      |
+| 유저          | http://${AWS-public-IP} | :8021~8029  |
+| 채팅          | http://${AWS-public-IP} | :8031~8039 |
+| 시그널링        | http://${AWS-public-IP} | :8051~8059 |
+| 그룹관리        | http://${AWS-public-IP} | :8061~8069 |
+| 상태관리        | http://${AWS-public-IP} | :8091~8099 |
+ 
 
 <br>
 
 ## 서버별 주요 고려사항
-### 게이트웨이
+
 ---
 ### 채팅 서버
 - Kafka는 메시지 큐와 같은 역할을 수행한다. 따라서, 채팅 서버가 여러 개 있는 경우 분산되어 요청되는 채팅에 대해서도 원활하게 처리한다.
