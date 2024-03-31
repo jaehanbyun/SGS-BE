@@ -1,0 +1,61 @@
+spring:
+  application.name: auth-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://sgs-room.cfgasjmoavxk.ap-northeast-2.rds.amazonaws.com:3306/spring?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${ROOM_DB_USER}
+    password: ${ROOM_DB_PASSWORD}
+  #  redis:
+  #    host: redis-auth
+  #    port: 6379
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate.ddl-auto: update
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    properties.hibernate:
+      show_sql: true
+      format_sql: true
+      use_sql_comments: true
+  mail:
+    host: smtp.naver.com
+    port: 587
+    username: sgsstudyhub@naver.com
+    password: 2023pnucse!
+    default-encoding: UTF-8
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: pnu-studyhub
+    credentials:
+      accessKey: ${STUDYHUB_S3_ACCESS_KEY}
+      secretKey: ${STUDYHUB_S3_SECRET_KEY}
+    stack:
+      auto: false
+tcp:
+  state:
+    host: sgs-state
+    port: 8099
+    connection:
+      poolSize: 30
+  server:
+    port: 8019
+
+logging:
+  level:
+    org.hibernate: DEBUG
+
+token:
+  secret: ${SECRET_TOKEN}
+  expiration_time: 86400000
