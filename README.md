@@ -47,8 +47,8 @@
 
 ## 서버별 주요 코드
 - [채팅 서버](https://github.com/jaehanbyun/SGS-BE/tree/main/chat)
-- [시그널링 서버](https://github.com/kimdonwoo/SGS-BE/tree/main/signaling)
-- [그룹관리 서버](https://github.com/kimdonwoo/SGS-BE/tree/main/room)
+- [시그널링 서버](https://github.com/jaehanbyun/SGS-BE/tree/main/signaling)
+- [그룹관리 서버](https://github.com/jaehanbyun/SGS-BE/tree/main/room)
 - [상태관리 서버](https://github.com/jaehanbyun/SGS-BE/tree/main/state)
 <br>
 
