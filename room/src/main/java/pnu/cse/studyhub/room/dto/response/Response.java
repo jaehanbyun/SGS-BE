@@ -19,6 +19,10 @@ public class Response<T> {
         return new Response<Void>("SUCCESS", "성공!!",null);
     }
 
+    public static Response<Void> success(String message){
+        return new Response<Void>("SUCCESS", message,null);
+    }
+
     public static <T> Response<T> success(String message,T data){
         return new Response<>("SUCCESS", message ,data);
     }

@@ -7,6 +7,7 @@ import pnu.cse.studyhub.room.model.RoomChannel;
 @Getter
 @AllArgsConstructor
 public class RoomCreateRequest {
+
     private boolean roomType;
 
     private String roomName;

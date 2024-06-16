@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+    redis:
+        image: redis:latest
+        container_name: redis
+        restart: always
+        ports:
+            - "6379:6379"
+        networks:
+            - my-network
+
+    kurento-media-server:
+        image: kurento/kurento-media-server:latest
+        container_name: kurento-media-server
+        restart: always
+        ports:
+            - "8888:8888"
+            - "5000-5050:5000-5050/udp"
+        networks:
+            - my-network
+
+    coturn-server:
+        image: coturn/coturn
+        container_name: coturn-server
+        restart: always
+        ports:
+            - "3478:3478/tcp"
+            - "3478:3478/udp"
+            - "5349:5349/tcp"
+            - "5349:5349/udp"
+        networks:
+            - my-network
+        environment:
+            - TURN_SECRET=turnpassword
+        command: ["--log-file=stdout", "-v", "-a", "-f", "--min-port=49152", "--max-port=65535", "--user=myusername:mypassword"]
+
+networks:
+    my-network:
+        driver: bridge
