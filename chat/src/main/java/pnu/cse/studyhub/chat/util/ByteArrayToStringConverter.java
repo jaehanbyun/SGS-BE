@@ -9,7 +9,10 @@ public class ByteArrayToStringConverter {
         String[] asciiStrs = asciiValues.split(",");
         byte[] bytes = new byte[asciiStrs.length];
         for (int i = 0; i < asciiStrs.length; i++) {
-            bytes[i] = (byte) Integer.parseInt(asciiStrs[i].trim());
+            String asciiStr = asciiStrs[i].trim(); // 공백 제거
+            if (!asciiStr.isEmpty()) { // 빈 문자열 체크
+                bytes[i] = (byte) Integer.parseInt(asciiStr);
+            }
         }
         return new String(bytes, StandardCharsets.UTF_8);
     }

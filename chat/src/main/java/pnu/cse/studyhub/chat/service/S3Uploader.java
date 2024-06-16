@@ -9,6 +9,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import pnu.cse.studyhub.chat.exception.FileConversionException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -50,7 +51,7 @@ public class S3Uploader {
     public String multipartFileUpload(MultipartFile multipartFile, Long roomId) throws IOException {
         String fileName = getCurrentTimeAsString() + "/" + multipartFile.getName();
         File uploadFile = convert(multipartFile)
-                .orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File로 전환이 실패했습니다."));
+                .orElseThrow(() -> new IOException("MultipartFile -> File로 전환이 실패했습니다."));
         return fileUpload(uploadFile, fileName);
     }
     private String fileUpload(File uploadFile, String dirName){
@@ -83,7 +84,8 @@ public class S3Uploader {
             }
             return Optional.of(convertFile);
         }
-        return Optional.empty();
+        throw new FileConversionException("MultipartFile -> File로 전환이 실패했습니다.");
+//        return Optional.empty();
     }
     private String getCurrentTimeAsString(){
         LocalDateTime now = LocalDateTime.now();

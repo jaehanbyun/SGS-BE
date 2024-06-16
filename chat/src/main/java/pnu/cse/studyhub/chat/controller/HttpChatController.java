@@ -42,7 +42,7 @@ public class HttpChatController {
 
     @Operation(summary = "채팅 보내기", description = "각 스터디 방에 채팅 보내기")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content( schema = @Schema(implementation = SuccessResponse.class))),
+            @ApiResponse(responseCode = "201", description = "CREATED", content = @Content( schema = @Schema(implementation = SuccessResponse.class))),
             @ApiResponse(responseCode = "400", description = "BAD REQUEST", content = @Content(schema = @Schema(implementation = FailedResponse.class))),
             @ApiResponse(responseCode = "404", description = "NOT FOUND", content = @Content(schema = @Schema(implementation = FailedResponse.class))),
             @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR", content = @Content(schema = @Schema(implementation = FailedResponse.class))),
@@ -54,9 +54,8 @@ public class HttpChatController {
             @Parameter(name = "content", description = "채팅 내용", example = "chat test"),
     })
     @PostMapping(value = "/send", consumes = "application/json")
-    public ResponseEntity<SuccessResponse> sendMessage(@RequestHeader("Authorization") String authorization, @RequestBody ChatRequest chat) {
-        String accessToken = authorization.replace("Bearer ","");
-        Chat savedChat = chatService.saveChat(accessToken, chat );
+    public ResponseEntity<SuccessResponse> sendMessage(@RequestBody ChatRequest chat) {
+        Chat savedChat = chatService.saveChat(chat );
         try {
             kafkaProducer.send(TOPIC,savedChat);
         } catch (Exception e) {

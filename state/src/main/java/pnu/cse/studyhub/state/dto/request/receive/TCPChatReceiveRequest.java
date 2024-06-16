@@ -1,12 +1,14 @@
 package pnu.cse.studyhub.state.dto.request.receive;
 
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +21,7 @@ public class TCPChatReceiveRequest extends TCPMessageReceiveRequest {
     private Long roomId;
     @JsonProperty("session")
     private String session;
+
     @Override
     public String toString(){
         ObjectMapper mapper = new ObjectMapper();

@@ -51,7 +51,7 @@ cloud:
       auto: false
 
 token:
-  secret: user_token
+  secret: ${SECRET_TOKEN}
 
 tcp:
   server:
@@ -60,6 +60,10 @@ tcp:
     connection:
       poolSize: 30
 
+grpc:
+  server:
+    host: sgs-state
+    port: 8095
 
 logging:
   level:

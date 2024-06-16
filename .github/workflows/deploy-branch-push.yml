@@ -2,10 +2,7 @@ name: 'deploy-branch-push'
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'develop/*'
-      
+
 permissions:
   contents: read
   
@@ -87,5 +84,5 @@ jobs:
               
             aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
             docker pull ${{ steps.login_ecr.outputs.registry }}/sgs-${{ steps.extract.outputs.branch }}:${{ steps.image.outputs.version }}
-            docker run -d --name sgs-${{ steps.extract.outputs.branch }} --network ${{ env.NETWORK_NAME }} -p ${PORT}:8080 ${{ steps.build_push_image.outputs.image }}
+            docker run -d --name sgs-${{ steps.extract.outputs.branch }} --network ${{ env.NETWORK_NAME }} -p ${PORT}:8080 -e SECRET_TOKEN=${{ secrets.SECRET_TOKEN }} -e STUDYHUB_DB_USER=${{ secrets.STUDYHUB_DB_USER }} -e STUDYHUB_DB_PWD=${{ secrets.STUDYHUB_DB_PWD }} -e STUDYHUB_S3_ACCESS_KEY=${{ secrets.STUDYHUB_S3_ACCESS_KEY }} -e STUDYHUB_S3_SECRET_KEY=${{ secrets.STUDYHUB_S3_SECRET_KEY }} ${{ steps.build_push_image.outputs.image }}
 

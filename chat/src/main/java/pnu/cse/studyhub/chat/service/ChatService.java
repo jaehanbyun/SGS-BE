@@ -21,12 +21,10 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final S3Uploader s3Uploader;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public Chat saveChat(String jwtToken, ChatRequest chatRequest){
+    public Chat saveChat(ChatRequest chatRequest){
         Chat chatEntity = chatRequest.toEntity();
-        String senderId = jwtTokenProvider.getUserInfo(jwtToken);
-        chatEntity.setSenderId(senderId);
+        chatEntity.setSenderId(chatRequest.getSenderId());
         Chat savedChat = chatRepository.save(chatEntity);
         return savedChat;
     }

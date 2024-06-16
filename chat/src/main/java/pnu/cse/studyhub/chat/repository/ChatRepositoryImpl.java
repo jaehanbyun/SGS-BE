@@ -10,6 +10,8 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import pnu.cse.studyhub.chat.repository.entity.Chat;
 
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -50,7 +52,7 @@ public class ChatRepositoryImpl implements ChatRepository{
         if (chatResult != chatList.size()) {
             throw new RuntimeException();
         }
-        return chatList;
+        return new ArrayList<>();
     }
 
     @Override
